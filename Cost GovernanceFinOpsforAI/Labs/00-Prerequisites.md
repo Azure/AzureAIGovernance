@@ -53,26 +53,25 @@ az group create --name $RESOURCE_GROUP --location $LOCATION
 ### Step 3.1 - Create the Azure OpenAI Resource
 
 ```powershell
-# Create Azure OpenAI resource
+# Create Azure OpenAI resource (custom domain is optional for labs)
 az cognitiveservices account create `
   --name "aoai-finops-lab" `
   --resource-group $RESOURCE_GROUP `
   --location $LOCATION `
   --kind "OpenAI" `
-  --sku "S0" `
-  --custom-domain "aoai-finops-lab-$(Get-Random -Maximum 9999)"
+  --sku "S0"
 ```
 
-### Step 3.2 - Deploy a GPT-4o-mini Model
+### Step 3.2 - Deploy a GPT-4o Model
 
 ```powershell
-# Deploy gpt-4o-mini (cost-efficient model for labs)
+# Deploy gpt-4o (latest, non-deprecated model for labs)
 az cognitiveservices account deployment create `
   --name "aoai-finops-lab" `
   --resource-group $RESOURCE_GROUP `
-  --deployment-name "gpt-4o-mini" `
-  --model-name "gpt-4o-mini" `
-  --model-version "2024-07-18" `
+  --deployment-name "gpt-4o" `
+  --model-name "gpt-4o" `
+  --model-version "2024-11-20" `
   --model-format "OpenAI" `
   --sku-capacity 30 `
   --sku-name "Standard"
@@ -114,7 +113,7 @@ $body = @{
 } | ConvertTo-Json
 
 $response = Invoke-RestMethod `
-  -Uri "$($AOAI_ENDPOINT)openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-21" `
+  -Uri "$($AOAI_ENDPOINT)openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21" `
   -Method POST `
   -Headers $headers `
   -Body $body
@@ -123,7 +122,7 @@ Write-Host "Response: $($response.choices[0].message.content)"
 Write-Host "Tokens used - Prompt: $($response.usage.prompt_tokens), Completion: $($response.usage.completion_tokens), Total: $($response.usage.total_tokens)"
 ```
 
-> **Checkpoint:** You should see a response and token count. If you get an error, verify your deployment name and API version.
+> **Checkpoint:** You should see a response and token count. If you get an error, verify your deployment name is `gpt-4o` and API version is correct.
 
 ---
 

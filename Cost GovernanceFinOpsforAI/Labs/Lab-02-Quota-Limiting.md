@@ -1,8 +1,8 @@
-# Lab 2 – Azure OpenAI Quota Limiting
+# Lab 2 - Azure OpenAI Quota Limiting
 
 > **Objective:** Configure and manage Azure OpenAI quota (TPM/RPM) at the subscription, model, and deployment level. Observe quota enforcement, test dynamic quota, and set up alerts for quota utilization.
 >
-> **Duration:** 45–60 minutes
+> **Duration:** 45-60 minutes
 >
 > **Prerequisites:** Complete [00-Prerequisites.md](00-Prerequisites.md)
 
@@ -21,36 +21,36 @@ $AOAI_KEY       = "<your-aoai-key>"
 
 ---
 
-## Part 1 – Understand Azure OpenAI Quota Architecture
+## Part 1 - Understand Azure OpenAI Quota Architecture
 
-### Step 1.1 – Review the Quota Hierarchy
+### Step 1.1 - Review the Quota Hierarchy
 
 Azure OpenAI enforces quota at multiple levels:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                  Azure Subscription                      │
-│  ┌───────────────────────────────────────────────────┐   │
-│  │     Region Quota (e.g., East US)                  │   │
-│  │  ┌──────────────────────────────────────────────┐ │   │
-│  │  │   Model Quota (e.g., gpt-4o-mini)            │ │   │
-│  │  │  ┌────────────────┐  ┌────────────────────┐  │ │   │
-│  │  │  │ Deployment A   │  │ Deployment B       │  │ │   │
-│  │  │  │ (30K TPM)      │  │ (20K TPM)          │  │ │   │
-│  │  │  └────────────────┘  └────────────────────┘  │ │   │
-│  │  │      Total ≤ Model Quota                     │ │   │
-│  │  └──────────────────────────────────────────────┘ │   │
-│  └───────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────┘
+-----------------------------------------------------------
+-                  Azure Subscription                      -
+-  -----------------------------------------------------   -
+-  -     Region Quota (e.g., East US)                  -   -
+-  -  ------------------------------------------------ -   -
+-  -  -   Model Quota (e.g., gpt-4o-mini)            - -   -
+-  -  -  ------------------  ----------------------  - -   -
+-  -  -  - Deployment A   -  - Deployment B       -  - -   -
+-  -  -  - (30K TPM)      -  - (20K TPM)          -  - -   -
+-  -  -  ------------------  ----------------------  - -   -
+-  -  -      Total - Model Quota                     - -   -
+-  -  ------------------------------------------------ -   -
+-  -----------------------------------------------------   -
+-----------------------------------------------------------
 ```
 
 **Key concepts:**
-- **TPM** (Tokens Per Minute): Primary quota unit — how many tokens a deployment can process per minute
-- **RPM** (Requests Per Minute): Secondary limit — auto-calculated from TPM (typically TPM ÷ 6)
+- **TPM** (Tokens Per Minute): Primary quota unit - how many tokens a deployment can process per minute
+- **RPM** (Requests Per Minute): Secondary limit - auto-calculated from TPM (typically TPM - 6)
 - **Deployment quota**: Allocated from the model's regional quota pool
 - **Dynamic quota**: Allows temporary bursts above allocation when capacity is available
 
-### Step 1.2 – View Your Current Quota
+### Step 1.2 - View Your Current Quota
 
 ```powershell
 # View current model quota usage for the subscription
@@ -62,7 +62,7 @@ az cognitiveservices usage list `
 
 > **Expected Result:** A table showing each model's current quota usage and limits for your subscription in East US.
 
-### Step 1.3 – View Deployment Quota Allocation
+### Step 1.3 - View Deployment Quota Allocation
 
 ```powershell
 # List deployments and their quota allocations
@@ -77,9 +77,9 @@ az cognitiveservices account deployment list `
 
 ---
 
-## Part 2 – Test Quota Enforcement
+## Part 2 - Test Quota Enforcement
 
-### Step 2.1 – Understand Quota vs Rate Limiting
+### Step 2.1 - Understand Quota vs Rate Limiting
 
 | Aspect | Azure OpenAI Quota | APIM Token Limit (Lab 1) |
 |--------|-------------------|--------------------------|
@@ -89,7 +89,7 @@ az cognitiveservices account deployment list `
 | **Error code** | HTTP 429 with `quota` reason | HTTP 429 with custom message |
 | **Purpose** | Protects Azure's shared infrastructure | Governs your internal teams |
 
-### Step 2.2 – Create a Helper Function
+### Step 2.2 - Create a Helper Function
 
 ```powershell
 function Invoke-AOAIRequest {
@@ -112,7 +112,7 @@ function Invoke-AOAIRequest {
 
     try {
         $response = Invoke-WebRequest `
-            -Uri "$($AOAI_ENDPOINT)openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-21" `
+            -Uri "$($AOAI_ENDPOINT)openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21" `
             -Method POST `
             -Headers $headers `
             -Body $body
@@ -135,7 +135,7 @@ function Invoke-AOAIRequest {
 }
 ```
 
-### Step 2.3 – Send Requests and Observe Quota Headers
+### Step 2.3 - Send Requests and Observe Quota Headers
 
 ```powershell
 # Send a single request and examine the rate limit headers
@@ -168,7 +168,7 @@ $response.Headers.GetEnumerator() | Where-Object { $_.Key -like "*ratelimit*" -o
 > - `x-ratelimit-remaining-requests`: Requests remaining in current window
 > These reflect your deployment's 30K TPM allocation.
 
-### Step 2.4 – Stress Test the Quota
+### Step 2.4 - Stress Test the Quota
 
 ```powershell
 # Send rapid requests to approach the quota limit
@@ -186,9 +186,9 @@ for ($i = 1; $i -le 20; $i++) {
 
 ---
 
-## Part 3 – Modify Deployment Quota
+## Part 3 - Modify Deployment Quota
 
-### Step 3.1 – Reduce Quota to Observe Limiting Faster
+### Step 3.1 - Reduce Quota to Observe Limiting Faster
 
 Lower the deployment quota to make rate limiting more visible in the lab:
 
@@ -197,9 +197,9 @@ Lower the deployment quota to make rate limiting more visible in the lab:
 az cognitiveservices account deployment create `
     --name $AOAI_NAME `
     --resource-group $RESOURCE_GROUP `
-    --deployment-name "gpt-4o-mini" `
-    --model-name "gpt-4o-mini" `
-    --model-version "2024-07-18" `
+    --deployment-name "gpt-4o" `
+    --model-name "gpt-4o" `
+    --model-version "2024-11-20" `
     --model-format "OpenAI" `
     --sku-capacity 10 `
     --sku-name "Standard"
@@ -207,7 +207,7 @@ az cognitiveservices account deployment create `
 
 > **Note:** This updates the existing deployment in-place. The `--sku-capacity 10` means 10K TPM.
 
-### Step 3.2 – Verify the New Quota
+### Step 3.2 - Verify the New Quota
 
 ```powershell
 # Confirm the new capacity
@@ -220,10 +220,10 @@ az cognitiveservices account deployment list `
 
 > **Expected Result:** The `gpt-4o-mini` deployment should now show capacity of `10`.
 
-### Step 3.3 – Test With Reduced Quota
+### Step 3.3 - Test With Reduced Quota
 
 ```powershell
-# Repeat the stress test — should hit limits faster
+# Repeat the stress test - should hit limits faster
 Write-Host "=== Testing with reduced 10K TPM quota ==="
 for ($i = 1; $i -le 15; $i++) {
     Invoke-AOAIRequest `
@@ -237,9 +237,9 @@ for ($i = 1; $i -le 15; $i++) {
 
 ---
 
-## Part 4 – Create Multiple Deployments with Quota Allocation
+## Part 4 - Create Multiple Deployments with Quota Allocation
 
-### Step 4.1 – Create a Second Deployment (Team-Specific)
+### Step 4.1 - Create a Second Deployment (Team-Specific)
 
 Simulate per-team quota by creating separate deployments:
 
@@ -248,15 +248,15 @@ Simulate per-team quota by creating separate deployments:
 az cognitiveservices account deployment create `
     --name $AOAI_NAME `
     --resource-group $RESOURCE_GROUP `
-    --deployment-name "gpt-4o-mini-research" `
-    --model-name "gpt-4o-mini" `
-    --model-version "2024-07-18" `
+    --deployment-name "gpt-4o-research" `
+    --model-name "gpt-4o" `
+    --model-version "2024-11-20" `
     --model-format "OpenAI" `
     --sku-capacity 5 `
     --sku-name "Standard"
 ```
 
-### Step 4.2 – View Total Quota Distribution
+### Step 4.2 - View Total Quota Distribution
 
 ```powershell
 # Show how quota is distributed across deployments
@@ -275,9 +275,9 @@ $totalTPM = ($deployments | Measure-Object -Property { $_.sku.capacity } -Sum).S
 Write-Host "`nTotal TPM allocated: $($totalTPM)K out of your subscription quota"
 ```
 
-> **Expected Result:** Two deployments visible — `gpt-4o-mini` at 10K TPM and `gpt-4o-mini-research` at 5K TPM. Total: 15K TPM.
+> **Expected Result:** Two deployments visible - `gpt-4o-mini` at 10K TPM and `gpt-4o-mini-research` at 5K TPM. Total: 15K TPM.
 
-### Step 4.3 – Compare Quota Between Deployments
+### Step 4.3 - Compare Quota Between Deployments
 
 ```powershell
 # Test the main deployment
@@ -310,12 +310,12 @@ Write-Host "[Research] Status: 200 | Remaining TPM: $remaining" -ForegroundColor
 
 ---
 
-## Part 5 – Monitor Quota Utilization
+## Part 5 - Monitor Quota Utilization
 
-### Step 5.1 – View Quota Metrics in Azure Portal
+### Step 5.1 - View Quota Metrics in Azure Portal
 
-1. Go to **Azure Portal** → your Azure OpenAI resource (`aoai-finops-lab`)
-2. Navigate to **Monitoring** → **Metrics**
+1. Go to **Azure Portal** - your Azure OpenAI resource (`aoai-finops-lab`)
+2. Navigate to **Monitoring** - **Metrics**
 3. Add these metrics:
 
 | Metric | Aggregation | Purpose |
@@ -326,11 +326,11 @@ Write-Host "[Research] Status: 200 | Remaining TPM: $remaining" -ForegroundColor
 | `Token Transaction` | Sum | Total token throughput |
 
 4. Set the time range to **Last 1 hour**
-5. Click **Apply splitting** → Split by **ModelDeploymentName**
+5. Click **Apply splitting** - Split by **ModelDeploymentName**
 
-> **Take a screenshot** — this shows per-deployment token consumption.
+> **Take a screenshot** - this shows per-deployment token consumption.
 
-### Step 5.2 – Check Quota Utilization via Azure Monitor
+### Step 5.2 - Check Quota Utilization via Azure Monitor
 
 ```powershell
 # View Azure OpenAI metrics via CLI
@@ -344,11 +344,11 @@ az monitor metrics list `
     --output table
 ```
 
-### Step 5.3 – Create a Quota Utilization Alert
+### Step 5.3 - Create a Quota Utilization Alert
 
 Set up an alert that fires when quota utilization exceeds 80%:
 
-1. Go to **Azure OpenAI resource** → **Alerts** → **+ Create alert rule**
+1. Go to **Azure OpenAI resource** - **Alerts** - **+ Create alert rule**
 2. **Condition:**
    - Signal: `Azure OpenAI Requests`
    - Filter: Status = `429` (rate limited)
@@ -365,7 +365,7 @@ Set up an alert that fires when quota utilization exceeds 80%:
    - Severity: **Warning (Sev 2)**
 5. Click **Create**
 
-### Step 5.4 – Trigger the Alert (Verification)
+### Step 5.4 - Trigger the Alert (Verification)
 
 ```powershell
 # Generate enough 429s to trigger the alert
@@ -380,16 +380,16 @@ for ($i = 1; $i -le 25; $i++) {
 }
 
 Write-Host "`nAlert should fire within 5 minutes if enough 429s were generated."
-Write-Host "Check Azure Portal → Alerts to verify."
+Write-Host "Check Azure Portal - Alerts to verify."
 ```
 
 > **Expected Result:** After 5+ 429 responses within 5 minutes, the alert triggers and sends an email notification.
 
 ---
 
-## Part 6 – Quota Management Best Practices
+## Part 6 - Quota Management Best Practices
 
-### Step 6.1 – Restore Quota for Production
+### Step 6.1 - Restore Quota for Production
 
 ```powershell
 # Restore the main deployment to 30K TPM
@@ -406,7 +406,7 @@ az cognitiveservices account deployment create `
 Write-Host "Main deployment restored to 30K TPM."
 ```
 
-### Step 6.2 – Review Quota Allocation Strategy
+### Step 6.2 - Review Quota Allocation Strategy
 
 Document the quota distribution for your organization:
 
@@ -417,23 +417,23 @@ Document the quota distribution for your organization:
 | *Future* | gpt-4o | 50K | Premium scenarios | CustomerAI |
 | *Future* | gpt-4o-mini | 10K | Internal tools | InternalOps |
 
-### Step 6.3 – Enable Dynamic Quota (Optional)
+### Step 6.3 - Enable Dynamic Quota (Optional)
 
 Dynamic Quota lets deployments temporarily burst above their allocated TPM when regional capacity is available.
 
-1. Go to **Azure Portal** → **Azure OpenAI** → **Deployments**
+1. Go to **Azure Portal** - **Azure OpenAI** - **Deployments**
 2. Click on `gpt-4o-mini` deployment
 3. Under **Advanced options**, enable **Dynamic Quota**
 4. Click **Save**
 
-> **Note:** Dynamic Quota is charged at standard PAYG rates — no premium for burst capacity.
+> **Note:** Dynamic Quota is charged at standard PAYG rates - no premium for burst capacity.
 
 ---
 
-## Part 7 – Clean Up Research Deployment
+## Part 7 - Clean Up Research Deployment
 
 ```powershell
-# Delete the research deployment (optional — keep if proceeding to Lab 3)
+# Delete the research deployment (optional - keep if proceeding to Lab 3)
 # az cognitiveservices account deployment delete `
 #     --name $AOAI_NAME `
 #     --resource-group $RESOURCE_GROUP `
@@ -448,7 +448,7 @@ In this lab you:
 
 | Step | What You Did |
 |------|--------------|
-| Part 1 | Explored the Azure OpenAI quota hierarchy (subscription → region → model → deployment) |
+| Part 1 | Explored the Azure OpenAI quota hierarchy (subscription - region - model - deployment) |
 | Part 2 | Tested quota enforcement and observed 429 responses with rate-limit headers |
 | Part 3 | Modified deployment quota to control per-deployment TPM allocation |
 | Part 4 | Created multiple deployments to simulate per-team quota distribution |
@@ -457,13 +457,14 @@ In this lab you:
 
 ### Key Takeaways
 
-- **Quota operates at the deployment level** — each deployment gets its own TPM allocation from the model's regional pool
-- **429 headers are your friends** — `x-ratelimit-remaining-tokens` tells you exactly where you stand
-- **Multiple deployments = per-team quota** — use separate deployments to enforce team-level limits at the Azure OpenAI layer
+- **Quota operates at the deployment level** - each deployment gets its own TPM allocation from the model's regional pool
+- **429 headers are your friends** - `x-ratelimit-remaining-tokens` tells you exactly where you stand
+- **Multiple deployments = per-team quota** - use separate deployments to enforce team-level limits at the Azure OpenAI layer
 - **Dynamic Quota** provides burst capacity at no extra cost when available
-- **Monitor and alert** — set up alerts on 429 count to detect quota pressure before users complain
-- **Quota + APIM = defense in depth** — Lab 1's APIM token limits + Lab 2's Azure OpenAI quota = two layers of protection
+- **Monitor and alert** - set up alerts on 429 count to detect quota pressure before users complain
+- **Quota + APIM = defense in depth** - Lab 1's APIM token limits + Lab 2's Azure OpenAI quota = two layers of protection
 
 ---
 
-> **Next:** Proceed to [Lab 3 – Chargeback Model](Lab-03-Chargeback-Model.md)
+> **Next:** Proceed to [Lab 3 - Chargeback Model](Lab-03-Chargeback-Model.md)
+

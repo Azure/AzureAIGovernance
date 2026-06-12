@@ -1,8 +1,8 @@
-# Lab 3 – Chargeback Model for Azure AI
+# Lab 3 - Chargeback Model for Azure AI
 
-> **Objective:** Build an end-to-end chargeback/showback model that tracks AI costs by team, project, and model — from tagging resources, to emitting usage metrics, to generating chargeback reports.
+> **Objective:** Build an end-to-end chargeback/showback model that tracks AI costs by team, project, and model - from tagging resources, to emitting usage metrics, to generating chargeback reports.
 >
-> **Duration:** 60–75 minutes
+> **Duration:** 60-75 minutes
 >
 > **Prerequisites:** Complete [00-Prerequisites.md](00-Prerequisites.md). Labs 1 and 2 are recommended but not required.
 
@@ -26,45 +26,45 @@ $KEY_RESEARCH    = "<subscription-key-for-Research>"
 
 ---
 
-## Part 1 – Understand the Chargeback Architecture
+## Part 1 - Understand the Chargeback Architecture
 
-### Step 1.1 – Review the End-to-End Chargeback Flow
+### Step 1.1 - Review the End-to-End Chargeback Flow
 
 ```
-                                       ┌────────────────┐
-                                       │  Cost Reports   │
-                                       │  (Power BI /    │
-                                       │   Excel)        │
-                                       └───────▲─────────┘
-                                               │
-                                        ┌──────┴───────┐
-                                        │ Cost Mgmt    │
-                                        │ Exports      │
-                                        │ (Daily CSV)  │
-                                        └──────▲───────┘
-                                               │
-  ┌──────────────────────────────────────────────────────────────────┐
-  │                    Azure Cost Management                         │
-  │  ┌──────────────┐  ┌────────────────┐  ┌───────────────────┐    │
-  │  │ Resource Tags │  │ Cost Allocation│  │ Budget Alerts     │    │
-  │  │ (Team, CC)   │  │ Rules          │  │ (per cost center) │    │
-  │  └──────────────┘  └────────────────┘  └───────────────────┘    │
-  └──────────────────────────────────────────────────────────────────┘
-                                               ▲
-                                               │ Tags flow to billing
-  ┌──────────────┐    ┌─────────────────┐    ┌─┴──────────────┐
-  │ CustomerAI   │───▶│  APIM Gateway   │───▶│ Azure OpenAI   │
-  │ Team         │    │  (token metrics) │    │ (tagged with   │
-  ├──────────────┤    │                  │    │  CostCenter,   │
-  │ InternalOps  │───▶│  Emits metrics   │    │  Team, etc.)   │
-  │ Team         │    │  per team        │    └────────────────┘
-  ├──────────────┤    │                  │
-  │ Research     │───▶│  App Insights    │
-  │ Team         │    │  logs per call   │
-  └──────────────┘    └─────────────────┘
+                                       ------------------
+                                       -  Cost Reports   -
+                                       -  (Power BI /    -
+                                       -   Excel)        -
+                                       -------------------
+                                               -
+                                        ----------------
+                                        - Cost Mgmt    -
+                                        - Exports      -
+                                        - (Daily CSV)  -
+                                        ----------------
+                                               -
+  --------------------------------------------------------------------
+  -                    Azure Cost Management                         -
+  -  ----------------  ------------------  ---------------------    -
+  -  - Resource Tags -  - Cost Allocation-  - Budget Alerts     -    -
+  -  - (Team, CC)   -  - Rules          -  - (per cost center) -    -
+  -  ----------------  ------------------  ---------------------    -
+  --------------------------------------------------------------------
+                                               -
+                                               - Tags flow to billing
+  ----------------    -------------------    ------------------
+  - CustomerAI   ------  APIM Gateway   ------ Azure OpenAI   -
+  - Team         -    -  (token metrics) -    - (tagged with   -
+  ----------------    -                  -    -  CostCenter,   -
+  - InternalOps  ------  Emits metrics   -    -  Team, etc.)   -
+  - Team         -    -  per team        -    ------------------
+  ----------------    -                  -
+  - Research     ------  App Insights    -
+  - Team         -    -  logs per call   -
+  ----------------    -------------------
 ```
 
-### Step 1.2 – Review Chargeback vs Showback
+### Step 1.2 - Review Chargeback vs Showback
 
 | Model | Description | When to Use |
 |-------|-------------|-------------|
@@ -75,9 +75,9 @@ In this lab, we'll build the infrastructure for both. You can decide which model
 
 ---
 
-## Part 2 – Resource Tagging Strategy
+## Part 2 - Resource Tagging Strategy
 
-### Step 2.1 – Define the Tagging Standard
+### Step 2.1 - Define the Tagging Standard
 
 A solid chargeback model starts with consistent tags.
 
@@ -89,7 +89,7 @@ A solid chargeback model starts with consistent tags.
 | `Owner` | Responsible person/group | `ai-platform@contoso.com` |
 | `Project` | Project or product name | `Copilot-V2`, `InternalBot`, `AIResearch` |
 
-### Step 2.2 – Apply Tags to Azure OpenAI Resource
+### Step 2.2 - Apply Tags to Azure OpenAI Resource
 
 ```powershell
 # Apply the full tagging standard
@@ -107,7 +107,7 @@ az resource tag `
 Write-Host "Tags applied successfully."
 ```
 
-### Step 2.3 – Apply Tags to APIM Resource
+### Step 2.3 - Apply Tags to APIM Resource
 
 ```powershell
 az resource tag `
@@ -124,7 +124,7 @@ az resource tag `
 Write-Host "APIM tags applied successfully."
 ```
 
-### Step 2.4 – Verify Tags
+### Step 2.4 - Verify Tags
 
 ```powershell
 # Verify tags on both resources
@@ -147,9 +147,9 @@ az resource show `
 
 ---
 
-## Part 3 – Enforce Tags with Azure Policy
+## Part 3 - Enforce Tags with Azure Policy
 
-### Step 3.1 – Create a Tag Enforcement Policy (Audit Mode)
+### Step 3.1 - Create a Tag Enforcement Policy (Audit Mode)
 
 Start with **Audit** mode to detect untagged resources without blocking deployments:
 
@@ -171,7 +171,7 @@ Write-Host "Policy assignment created in Audit mode."
 
 > **Note:** `DoNotEnforce` means the policy will flag non-compliant resources but won't block creation.
 
-### Step 3.2 – Check Policy Compliance
+### Step 3.2 - Check Policy Compliance
 
 ```powershell
 # Trigger a compliance scan
@@ -180,12 +180,12 @@ az policy state trigger-scan `
     --no-wait
 
 Write-Host "Compliance scan triggered. Results available in 5-10 minutes."
-Write-Host "Check: Azure Portal → Policy → Compliance"
+Write-Host "Check: Azure Portal - Policy - Compliance"
 ```
 
-### Step 3.3 – View Compliance Results (Portal)
+### Step 3.3 - View Compliance Results (Portal)
 
-1. Go to **Azure Portal** → **Policy** → **Compliance**
+1. Go to **Azure Portal** - **Policy** - **Compliance**
 2. Filter by **Resource Group:** `rg-ai-finops-labs`
 3. Click on `Audit: Require CostCenter tag on resources`
 4. View which resources are compliant vs non-compliant
@@ -194,9 +194,9 @@ Write-Host "Check: Azure Portal → Policy → Compliance"
 
 ---
 
-## Part 4 – Track Per-Team Usage with APIM + Application Insights
+## Part 4 - Track Per-Team Usage with APIM + Application Insights
 
-### Step 4.1 – Configure APIM to Log Team and Token Data
+### Step 4.1 - Configure APIM to Log Team and Token Data
 
 Update the APIM policy to log detailed chargeback data. Go to the APIM policy editor for the **Azure OpenAI** API:
 
@@ -257,7 +257,7 @@ Update the APIM policy to log detailed chargeback data. Go to the APIM policy ed
 
 Click **Save**.
 
-### Step 4.2 – Generate Chargeback Traffic
+### Step 4.2 - Generate Chargeback Traffic
 
 Send traffic from all three teams to build up usage data:
 
@@ -268,7 +268,7 @@ function Send-ChargebackRequest {
 
     $headers = @{
         "Content-Type"       = "application/json"
-        "Ocp-Apim-Subscription-Key" = $TeamKey
+            "api-key"            = $TeamKey
     }
     $body = @{
         messages = @(
@@ -279,7 +279,7 @@ function Send-ChargebackRequest {
 
     try {
         $response = Invoke-WebRequest `
-            -Uri "$APIM_GATEWAY/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-21" `
+            -Uri "$APIM_GATEWAY/aoai-finops-lab/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-21" `
             -Method POST `
             -Headers $headers `
             -Body $body
@@ -335,7 +335,7 @@ foreach ($prompt in $researchPrompts) {
 Write-Host "`nTraffic generation complete."
 ```
 
-### Step 4.3 – Calculate Cost Per Team
+### Step 4.3 - Calculate Cost Per Team
 
 ```powershell
 # Define Azure OpenAI pricing (gpt-4o-mini)
@@ -371,14 +371,14 @@ Write-Host ("TOTAL COST: {0:C6}" -f $totalCost)
 
 ---
 
-## Part 5 – Query Usage Data from Application Insights
+## Part 5 - Query Usage Data from Application Insights
 
-### Step 5.1 – Open Application Insights Logs
+### Step 5.1 - Open Application Insights Logs
 
-1. Go to **Azure Portal** → **Application Insights** (linked to APIM)
+1. Go to **Azure Portal** - **Application Insights** (linked to APIM)
 2. Navigate to **Logs** (Log Analytics)
 
-### Step 5.2 – Run the Chargeback Query
+### Step 5.2 - Run the Chargeback Query
 
 Paste this KQL query to extract per-team usage:
 
@@ -412,7 +412,7 @@ traces
 
 > **Expected Result:** A table showing each team's total requests, tokens, and calculated cost.
 
-### Step 5.3 – Run the Daily Trend Query
+### Step 5.3 - Run the Daily Trend Query
 
 ```kql
 // Daily chargeback trend
@@ -427,7 +427,7 @@ traces
 | order by timestamp desc, Team
 ```
 
-### Step 5.4 – Run the Cost Breakdown by Operation
+### Step 5.4 - Run the Cost Breakdown by Operation
 
 ```kql
 // Token usage by team and operation type
@@ -446,13 +446,13 @@ customMetrics
 
 ---
 
-## Part 6 – Set Up Azure Cost Management for AI Chargeback
+## Part 6 - Set Up Azure Cost Management for AI Chargeback
 
-### Step 6.1 – Create Cost Allocation Rules
+### Step 6.1 - Create Cost Allocation Rules
 
 Cost Allocation Rules redistribute shared resource costs to specific cost centers.
 
-1. Go to **Azure Portal** → **Cost Management** → **Cost allocation (Preview)**
+1. Go to **Azure Portal** - **Cost Management** - **Cost allocation (Preview)**
 2. Click **+ Add** to create a new rule
 3. Configure:
    - **Name:** `AI-Platform-Allocation`
@@ -469,15 +469,15 @@ Cost Allocation Rules redistribute shared resource costs to specific cost center
 
 > **Note:** Cost allocation rules take up to **24 hours** to appear in Cost Analysis views.
 
-### Step 6.2 – Create a Cost Management View by Tag
+### Step 6.2 - Create a Cost Management View by Tag
 
-1. Go to **Cost Management** → **Cost analysis**
+1. Go to **Cost Management** - **Cost analysis**
 2. Set the scope to your **resource group** (`rg-ai-finops-labs`)
-3. Click **Group by** → **Tag** → `CostCenter`
+3. Click **Group by** - **Tag** - `CostCenter`
 4. Set the date range to include today
 5. **Save** as a custom view: `AI Chargeback by Cost Center`
 
-### Step 6.3 – Create Per-Team Budgets
+### Step 6.3 - Create Per-Team Budgets
 
 ```powershell
 # Get the resource group ID
@@ -519,7 +519,7 @@ az consumption budget create `
 Write-Host "Team budgets created successfully."
 ```
 
-### Step 6.4 – Verify Budgets
+### Step 6.4 - Verify Budgets
 
 ```powershell
 az consumption budget list `
@@ -537,9 +537,9 @@ az consumption budget list `
 
 ---
 
-## Part 7 – Export Cost Data for Reporting
+## Part 7 - Export Cost Data for Reporting
 
-### Step 7.1 – Create a Cost Management Export
+### Step 7.1 - Create a Cost Management Export
 
 ```powershell
 # Create a storage account for cost exports
@@ -557,9 +557,9 @@ az storage container create `
     --account-name $STORAGE_NAME
 ```
 
-### Step 7.2 – Configure the Export (Portal)
+### Step 7.2 - Configure the Export (Portal)
 
-1. Go to **Cost Management** → **Exports**
+1. Go to **Cost Management** - **Exports**
 2. Click **+ Add**
 3. Configure:
    - **Name:** `AI-Daily-Chargeback-Export`
@@ -570,13 +570,13 @@ az storage container create `
    - **File format:** CSV
 4. Click **Create**
 
-### Step 7.3 – Run an Immediate Export
+### Step 7.3 - Run an Immediate Export
 
 1. In the **Exports** page, find your export
 2. Click **Run now**
 3. Wait 1-2 minutes for the export to complete
 
-### Step 7.4 – Download and Review the Export
+### Step 7.4 - Download and Review the Export
 
 ```powershell
 # List exported files
@@ -605,9 +605,9 @@ Get-Content "chargeback-export.csv" | Select-Object -First 10
 
 ---
 
-## Part 8 – Build a Chargeback Summary Report
+## Part 8 - Build a Chargeback Summary Report
 
-### Step 8.1 – Create a PowerShell Chargeback Report
+### Step 8.1 - Create a PowerShell Chargeback Report
 
 ```powershell
 # Generate a formatted chargeback report from the export
@@ -620,10 +620,10 @@ $aiCosts = $exportData | Where-Object {
 }
 
 Write-Host "`n" -NoNewline
-Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║          AI COST CHARGEBACK REPORT                      ║" -ForegroundColor Cyan
-Write-Host "║          Period: $(Get-Date -Format 'MMMM yyyy')                         ║" -ForegroundColor Cyan
-Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+Write-Host "------------------------------------------------------------" -ForegroundColor Cyan
+Write-Host "-          AI COST CHARGEBACK REPORT                      -" -ForegroundColor Cyan
+Write-Host "-          Period: $(Get-Date -Format 'MMMM yyyy')                         -" -ForegroundColor Cyan
+Write-Host "------------------------------------------------------------" -ForegroundColor Cyan
 
 if ($aiCosts) {
     Write-Host "`n--- Cost by Resource ---"
@@ -654,26 +654,26 @@ Write-Host "  CustomerAI  (CC-5001): 50% of shared AI platform cost"
 Write-Host "  InternalOps (CC-5002): 30% of shared AI platform cost"
 Write-Host "  Research    (CC-5003): 20% of shared AI platform cost"
 Write-Host "`n  Allocation based on actual token consumption via APIM metrics."
-Write-Host "  See Application Insights → AIChargeback metrics for real-time data."
+Write-Host "  See Application Insights - AIChargeback metrics for real-time data."
 ```
 
 ---
 
-## Part 9 – Automate Monthly Chargeback with Logic Apps (Optional)
+## Part 9 - Automate Monthly Chargeback with Logic Apps (Optional)
 
-### Step 9.1 – Architecture Overview
+### Step 9.1 - Architecture Overview
 
 For production chargeback automation:
 
 ```
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│ Cost Mgmt    │───▶│ Logic App    │───▶│ Process &    │───▶│ Email Report │
-│ Daily Export │    │ (Monthly     │    │ Calculate    │    │ to Finance + │
-│ (CSV to Blob)│    │  Trigger)    │    │ Per-Team $   │    │ Team Leads   │
-└──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
+----------------    ----------------    ----------------    ----------------
+- Cost Mgmt    ------ Logic App    ------ Process &    ------ Email Report -
+- Daily Export -    - (Monthly     -    - Calculate    -    - to Finance + -
+- (CSV to Blob)-    -  Trigger)    -    - Per-Team $   -    - Team Leads   -
+----------------    ----------------    ----------------    ----------------
 ```
 
-### Step 9.2 – Logic App Workflow (Description)
+### Step 9.2 - Logic App Workflow (Description)
 
 1. **Trigger:** Monthly recurrence (1st of each month)
 2. **Action 1:** Read latest cost export CSV from Storage
@@ -725,21 +725,21 @@ In this lab you:
 
 ### Key Takeaways
 
-- **Tags are the foundation** — without consistent tagging, chargeback is impossible
-- **Azure Policy enforces compliance** — start with audit mode, graduate to deny mode
-- **APIM metrics bridge the gap** — Azure Cost Management shows resource cost, APIM metrics show per-team consumption
-- **Cost allocation rules** handle shared resources — split shared AI platform costs to consuming teams
-- **Exports enable automation** — daily CSV exports + Logic Apps = monthly chargeback reports
-- **Two layers of cost data** — Azure Cost Management (billing data, 24-48h delay) + Application Insights (real-time token metrics)
+- **Tags are the foundation** - without consistent tagging, chargeback is impossible
+- **Azure Policy enforces compliance** - start with audit mode, graduate to deny mode
+- **APIM metrics bridge the gap** - Azure Cost Management shows resource cost, APIM metrics show per-team consumption
+- **Cost allocation rules** handle shared resources - split shared AI platform costs to consuming teams
+- **Exports enable automation** - daily CSV exports + Logic Apps = monthly chargeback reports
+- **Two layers of cost data** - Azure Cost Management (billing data, 24-48h delay) + Application Insights (real-time token metrics)
 
 ### Chargeback Maturity Model
 
 | Level | Capability | You Built This |
 |-------|-----------|----------------|
-| 1 - Visibility | See total AI spend | ✅ Part 6 |
-| 2 - Allocation | Attribute costs to teams | ✅ Parts 2, 4, 5 |
-| 3 - Showback | Teams can see their own costs | ✅ Parts 5, 6 |
-| 4 - Chargeback | Costs flow to team P&Ls | ✅ Parts 6, 7, 8 |
+| 1 - Visibility | See total AI spend | - Part 6 |
+| 2 - Allocation | Attribute costs to teams | - Parts 2, 4, 5 |
+| 3 - Showback | Teams can see their own costs | - Parts 5, 6 |
+| 4 - Chargeback | Costs flow to team P&Ls | - Parts 6, 7, 8 |
 | 5 - Optimization | Teams actively reduce costs | Requires ongoing FinOps practice |
 
 ---
@@ -748,3 +748,4 @@ In this lab you:
 > - **Lab 1:** Token rate limiting at the API gateway layer
 > - **Lab 2:** Quota management at the Azure OpenAI service layer  
 > - **Lab 3:** End-to-end chargeback/showback for AI costs
+
