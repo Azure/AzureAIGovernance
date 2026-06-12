@@ -19,6 +19,7 @@
 $RESOURCE_GROUP  = "rg-ai-finops-labs"
 $APIM_NAME       = az apim list --resource-group $RESOURCE_GROUP --query "[0].name" --output tsv
 $APIM_GATEWAY    = az apim show --name $APIM_NAME --resource-group $RESOURCE_GROUP --query "gatewayUrl" --output tsv
+$DEPLOYMENT      = "gpt-4o"   # model DEPLOYMENT name (change if you reuse an existing deployment, e.g. "gpt-4.1")
 
 # === RETRIEVE KEYS FROM APIM (exact subscription names: lowercase with hyphen) ===
 $SUBSCRIPTION_ID = az account show --query id --output tsv
@@ -147,7 +148,7 @@ $body = @{
 } | ConvertTo-Json
 
 $response = Invoke-WebRequest `
-    -Uri "$APIM_GATEWAY/aoai-finops-lab/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21" `
+    -Uri "$APIM_GATEWAY/aoai-finops-lab/openai/deployments/$DEPLOYMENT/chat/completions?api-version=2024-10-21" `
     -Method POST `
     -Headers $headers `
     -Body $body
@@ -187,7 +188,7 @@ function Send-AIRequest {
 
     try {
         $response = Invoke-WebRequest `
-            -Uri "$APIM_GATEWAY/aoai-finops-lab/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21" `
+            -Uri "$APIM_GATEWAY/aoai-finops-lab/openai/deployments/$DEPLOYMENT/chat/completions?api-version=2024-10-21" `
             -Method POST `
             -Headers $headers `
             -Body $body
@@ -211,16 +212,21 @@ function Send-AIRequest {
     }
 }
 
-# Send 15 requests rapidly for CustomerAI team to exhaust 5,000 TPM
-$longPrompt = "Explain the complete architecture of Azure Kubernetes Service including networking, storage, identity, monitoring, scaling, security, and disaster recovery. Be thorough and detailed."
+# Send requests rapidly for CustomerAI team to exhaust 5,000 TPM.
+# IMPORTANT: use a LARGE prompt. With a tiny prompt the sliding window refills
+# (~83 tokens/sec) faster than the prompt consumes, so you may never see a 429.
+# A large prompt makes the estimated prompt tokens exceed the remaining budget,
+# which triggers a deterministic 429.
+$base = "Explain the complete architecture of Azure Kubernetes Service including networking, storage, identity, monitoring, scaling, security, and disaster recovery. Be thorough and detailed. "
+$longPrompt = $base * 30   # ~2,000+ tokens per request
 
-for ($i = 1; $i -le 15; $i++) {
+for ($i = 1; $i -le 8; $i++) {
     Write-Host "`n--- Request $i ---"
     Send-AIRequest -TeamKey $KEY_CUSTOMERAI -TeamName "CustomerAI" -Prompt $longPrompt
 }
 ```
 
-> **Expected Result:** After several requests, you should see `429 RATE LIMITED` responses. The exact number depends on how many tokens each response uses.
+> **Expected Result:** The first request or two return HTTP 200, then you see `429 RATE LIMITED` responses with a `Retry-After` countdown as the 5,000-token budget is exhausted.
 
 ### Step 3.3 - Verify Other Teams Are NOT Affected
 
@@ -309,7 +315,7 @@ Different teams have different usage patterns. Let's assign differentiated limit
 
 ### Step 4.2 - Update the Policy with Conditional Limits
 
-Go back to the APIM policy editor and replace the `<inbound>` section:
+Go back to the APIM policy editor and replace the `<inbound>` section (and add the `<outbound>` block shown afterward):
 
 ```xml
 <inbound>
@@ -355,12 +361,16 @@ Go back to the APIM policy editor and replace the `<inbound>` section:
                 remaining-tokens-header-name="x-tokens-remaining" />
         </otherwise>
     </choose>
-
-    <!-- Add team name to response header for visibility -->
+</inbound>
+<outbound>
+    <base />
+    <!-- Add team name to the RESPONSE so clients can see which team APIM detected.
+         This must be in <outbound> to appear in the response sent back to the client;
+         placing it in <inbound> only adds it to the request forwarded to the backend. -->
     <set-header name="x-team-name" exists-action="override">
         <value>@(context.Variables.GetValueOrDefault<string>("teamName"))</value>
     </set-header>
-</inbound>
+</outbound>
 ```
 
 Click **Save**.
