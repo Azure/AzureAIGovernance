@@ -20,6 +20,7 @@ $RESOURCE_GROUP  = "rg-ai-finops-labs"
 $AOAI_NAME       = "aoai-finops-lab"
 $APIM_NAME       = az apim list --resource-group $RESOURCE_GROUP --query "[0].name" --output tsv
 $APIM_GATEWAY    = az apim show --name $APIM_NAME --resource-group $RESOURCE_GROUP --query "gatewayUrl" --output tsv
+$DEPLOYMENT      = "gpt-4o"   # model DEPLOYMENT name (change if you reuse an existing deployment, e.g. "gpt-4.1")
 
 # === RETRIEVE KEYS FROM APIM (exact subscription names: lowercase with hyphen) ===
 $SUBSCRIPTION_ID = az account show --query id --output tsv
@@ -161,7 +162,7 @@ Start with **Audit** mode to detect untagged resources without blocking deployme
 
 ```powershell
 # Create a policy assignment that audits resources missing the CostCenter tag
-$policyDefinitionId = "/providers/Microsoft.Authorization/policyDefinitions/871b6d14-10aa-478d-b466-cc659e4a0ae5"
+$policyDefinitionId = "/providers/Microsoft.Authorization/policyDefinitions/871b6d14-10aa-478d-b590-94f262ecfa99"
 
 # This is the built-in "Require a tag on resources" policy
 az policy assignment create `
@@ -243,7 +244,7 @@ function Send-TestRequest {
 
         try {
             $response = Invoke-WebRequest `
-                -Uri "$APIM_GATEWAY/aoai-finops-lab/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21" `
+                -Uri "$APIM_GATEWAY/aoai-finops-lab/openai/deployments/$DEPLOYMENT/chat/completions?api-version=2024-10-21" `
                 -Method POST `
                 -Headers $headers `
                 -Body $body
@@ -272,20 +273,26 @@ Write-Host "`nUsage data generated. Check APIM Logs Analytics in 2-3 minutes."
 
 In Azure Portal - your APIM instance - **Logs** (Analytics):
 
+> **Table name depends on the diagnostic setting's destination table mode:**
+> - **Resource-specific** (modern default): the table is **`ApiManagementGatewayLogs`** with columns like `ApimSubscriptionId`, `OperationId`, `BackendTime`.
+> - **Azure diagnostics** (legacy): logs land in the generic `AzureDiagnostics` table under the `GatewayLogs` category.
+>
+> Use the query that matches your setup. The resource-specific version is shown below (most common).
+
 ```kusto
-// Query APIM logs for per-team usage
-GatewayLogs
+// Query APIM logs for per-team usage (resource-specific table)
+ApiManagementGatewayLogs
 | where TimeGenerated > ago(1h)
-| where isnotempty(SubscriptionId)
-| summarize 
+| where isnotempty(ApimSubscriptionId)
+| summarize
     RequestCount = count(),
-    AvgResponseTime = avg(ResponseTime),
-    MaxResponseTime = max(ResponseTime)
-    by SubscriptionName, OperationId
+    AvgBackendMs = avg(BackendTime),
+    MaxBackendMs = max(BackendTime)
+    by ApimSubscriptionId, OperationId
 | sort by RequestCount desc
 ```
 
-> **Expected Result:** Table showing requests grouped by subscription (team) and operation.
+> **Expected Result:** Table showing requests grouped by APIM subscription (team) and operation, e.g. `customerai-team`, `internalops-team`, `research-team`.
 
 ---
 
@@ -356,10 +363,13 @@ $RESOURCE_ID = az cognitiveservices account show `
     --query id --output tsv
 
 # Get total tokens processed in the last 7 days
+# NOTE: the output-token metric is "GeneratedTokens" (input tokens = "ProcessedPromptTokens").
+# There is no "GeneratedCompletionTokens" metric on Microsoft.CognitiveServices accounts.
 az monitor metrics list `
     --resource $RESOURCE_ID `
-    --metric "GeneratedCompletionTokens" `
+    --metric "GeneratedTokens" `
     --interval PT1H `
+    --aggregation Total `
     --start-time (Get-Date).AddDays(-7).ToString("yyyy-MM-ddTHH:mm:ssZ") `
     --end-time (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ") `
     --query "value[0].timeseries[0].data[*].{Time:timeStamp, Tokens:total}" `
