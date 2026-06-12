@@ -27,6 +27,7 @@
 $RESOURCE_GROUP  = "rg-ai-finops-labs"
 $LOCATION        = "eastus"
 $SUBSCRIPTION_ID = az account show --query id --output tsv
+$DEPLOYMENT      = "gpt-4o"   # model DEPLOYMENT name in your Azure OpenAI resource. Change this if you reuse an existing deployment (e.g. "gpt-4.1").
 
 # Set your actual APIM name (created in Step 4.1, or look it up below)
 if (-not $APIM_NAME) {
@@ -413,7 +414,7 @@ $headers = @{
   "Content-Type" = "application/json"
   "api-key"      = $KEY_CUSTOMERAI
 }
-$uri = "$APIM_GATEWAY/aoai-finops-lab/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21"
+$uri = "$APIM_GATEWAY/aoai-finops-lab/openai/deployments/$DEPLOYMENT/chat/completions?api-version=2024-10-21"
 
 try {
     $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $body
@@ -479,7 +480,7 @@ Write-Host "KEY length    =[$($KEY_CUSTOMERAI.Length)]"  # must be 32
   ```powershell
   az apim api list --resource-group $RESOURCE_GROUP --service-name $APIM_NAME --query "[].{Name:name,Path:path}" -o table
   ```
-  Then build the URL as: `$APIM_GATEWAY/<path-from-above>/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21`
+  Then build the URL as: `$APIM_GATEWAY/<path-from-above>/openai/deployments/$DEPLOYMENT/chat/completions?api-version=2024-10-21`
 
 ### Issue: "401 missing subscription key" (even when header is set)
 
