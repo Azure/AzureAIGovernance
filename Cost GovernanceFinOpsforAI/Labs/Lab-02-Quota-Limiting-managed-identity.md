@@ -20,6 +20,7 @@ $RESOURCE_GROUP = "rg-ai-finops-labs"
 $AOAI_NAME      = "aoai-finops-lab"
 $APIM_NAME      = az apim list --resource-group $RESOURCE_GROUP --query "[0].name" --output tsv
 $APIM_GATEWAY   = az apim show --name $APIM_NAME --resource-group $RESOURCE_GROUP --query "gatewayUrl" --output tsv
+$DEPLOYMENT     = "gpt-4o"   # model DEPLOYMENT name (change if you reuse an existing deployment, e.g. "gpt-4.1")
 
 # === RETRIEVE KEYS FROM APIM (exact subscription names: lowercase with hyphen) ===
 $SUBSCRIPTION_ID = az account show --query id --output tsv
@@ -121,7 +122,7 @@ function Invoke-AOAIViaAPIM {
     else {
         $gateway = $APIM_GATEWAY.TrimEnd('/')
     }
-    $uri = "$gateway/aoai-finops-lab/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21"
+    $uri = "$gateway/aoai-finops-lab/openai/deployments/$DEPLOYMENT/chat/completions?api-version=2024-10-21"
 
     $headers = @{
         "Content-Type"                   = "application/json"
@@ -186,7 +187,8 @@ $baseMgmt = "https://management.azure.com/subscriptions/$subscriptionId/resource
 $KEY_CUSTOMERAI = az rest --method POST --uri "$baseMgmt/subscriptions/customerai-team/listSecrets?api-version=2022-08-01" --query primaryKey -o tsv
 
 $gateway = $apimGateway.TrimEnd('/')
-$uri = "$gateway/aoai-finops-lab/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21"
+if (-not $DEPLOYMENT) { $DEPLOYMENT = "gpt-4o" }   # default; set to your deployment name (e.g. "gpt-4.1")
+$uri = "$gateway/aoai-finops-lab/openai/deployments/$DEPLOYMENT/chat/completions?api-version=2024-10-21"
 
 Write-Host "Using APIM_GATEWAY: $apimGateway"
 Write-Host "Request URI: $uri"
@@ -249,7 +251,8 @@ $apimGateway = "https://$apimName.azure-api.net"
 $baseMgmt = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.ApiManagement/service/$apimName"
 $keyCustomerAI = az rest --method POST --uri "$baseMgmt/subscriptions/customerai-team/listSecrets?api-version=2022-08-01" --query primaryKey -o tsv
 
-$uri = "$($apimGateway.TrimEnd('/'))/aoai-finops-lab/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21"
+if (-not $DEPLOYMENT) { $DEPLOYMENT = "gpt-4o" }   # default; set to your deployment name (e.g. "gpt-4.1")
+$uri = "$($apimGateway.TrimEnd('/'))/aoai-finops-lab/openai/deployments/$DEPLOYMENT/chat/completions?api-version=2024-10-21"
 
 for ($i = 1; $i -le 20; $i++) {
     $headers = @{ "Content-Type" = "application/json"; "api-key" = $keyCustomerAI }
@@ -334,41 +337,38 @@ $apimGateway = "https://$apimName.azure-api.net"
 $baseMgmt = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.ApiManagement/service/$apimName"
 $keyCustomerAI = az rest --method POST --uri "$baseMgmt/subscriptions/customerai-team/listSecrets?api-version=2022-08-01" --query primaryKey -o tsv
 
-$uri = "$($apimGateway.TrimEnd('/'))/aoai-finops-lab/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21"
+if (-not $DEPLOYMENT) { $DEPLOYMENT = "gpt-4o" }   # default; set to your deployment name (e.g. "gpt-4.1")
+$uri = "$($apimGateway.TrimEnd('/'))/aoai-finops-lab/openai/deployments/$DEPLOYMENT/chat/completions?api-version=2024-10-21"
 
-Write-Host "=== Testing with reduced 10K TPM quota ==="
-for ($i = 1; $i -le 15; $i++) {
-    $headers = @{ "Content-Type" = "application/json"; "api-key" = $keyCustomerAI }
-    $body = (@{
-        messages = @(
-            @{ role = "user"; content = "Explain in detail the architecture of a distributed microservices system for e-commerce, including all components." }
-        )
-        max_tokens = 500
-    } | ConvertTo-Json -Depth 5)
+# IMPORTANT: A *sequential* loop usually will NOT trigger a quota 429. Each call takes
+# a second or two, so by the time you send the next request the per-minute window has
+# already refilled. To exceed the 10K TPM window you must send many LARGE requests
+# CONCURRENTLY so the in-flight tokens pile up inside the same minute.
+$bigPrompt = ("Provide an exhaustive technical deep-dive. " + ("Discuss distributed systems, consensus, sharding, replication, caching, and observability in depth. " * 250))
 
-    $response = $null
-    for ($attempt = 1; $attempt -le 3; $attempt++) {
-        $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $body -SkipHttpErrorCheck
-        if ($response.StatusCode -ne 404) { break }
+Write-Host "=== Testing with reduced 10K TPM quota (concurrent burst) ==="
+$results = 1..12 | ForEach-Object -Parallel {
+    $headers = @{ "Content-Type" = "application/json"; "api-key" = $using:keyCustomerAI }
+    $body = @{ messages = @(@{ role = "user"; content = $using:bigPrompt }); max_tokens = 800 } | ConvertTo-Json
+    $r = Invoke-WebRequest -Uri $using:uri -Method POST -Headers $headers -Body $body -SkipHttpErrorCheck
+    [pscustomobject]@{
+        Index      = $_
+        Status     = $r.StatusCode
+        Remaining  = $r.Headers['x-ratelimit-remaining-tokens']
+        RetryAfter = $r.Headers['Retry-After']
     }
+} -ThrottleLimit 12
 
-    if ($response.StatusCode -eq 200) {
-        $result = $response.Content | ConvertFrom-Json
-        $remaining = $response.Headers['x-ratelimit-remaining-tokens']
-        Write-Host "[Reduced-$i] Status: 200 | Tokens: $($result.usage.total_tokens) | Remaining TPM: $remaining" -ForegroundColor Green
-    }
-    elseif ($response.StatusCode -eq 429) {
-        $retryAfter = $response.Headers['Retry-After']
-        Write-Host "[Reduced-$i] Status: 429 QUOTA EXCEEDED | Retry-After: $retryAfter" -ForegroundColor Yellow
-    }
-    else {
-        $apimRequestId = $response.Headers['apim-request-id']
-        Write-Host "[Reduced-$i] Status: $($response.StatusCode) | APIM Request ID: $apimRequestId | Body: $($response.Content)" -ForegroundColor Red
-    }
+$results | Sort-Object Index | ForEach-Object {
+    if ($_.Status -eq 200)     { Write-Host "[Reduced-$($_.Index)] Status: 200 | Remaining TPM: $($_.Remaining)" -ForegroundColor Green }
+    elseif ($_.Status -eq 429) { Write-Host "[Reduced-$($_.Index)] Status: 429 QUOTA EXCEEDED | Retry-After: $($_.RetryAfter)" -ForegroundColor Yellow }
+    else                       { Write-Host "[Reduced-$($_.Index)] Status: $($_.Status)" -ForegroundColor Red }
 }
+$throttled = ($results | Where-Object Status -eq 429).Count
+Write-Host "`nSummary: $(($results | Where-Object Status -eq 200).Count) x 200, $throttled x 429"
 ```
 
-> **Expected Result:** You should hit 429 errors sooner than before since the quota is now 10K TPM instead of 30K TPM.
+> **Expected Result:** Several requests return 429 QUOTA EXCEEDED with `Retry-After: 30`, because the concurrent burst pushes total in-flight tokens past the 10K TPM window. (A sequential loop typically returns all 200s and never throttles.)
 
 ---
 
@@ -424,7 +424,8 @@ $baseMgmt = "https://management.azure.com/subscriptions/$subscriptionId/resource
 $keyCustomerAI = az rest --method POST --uri "$baseMgmt/subscriptions/customerai-team/listSecrets?api-version=2022-08-01" --query primaryKey -o tsv
 
 Write-Host "=== Main deployment (10K TPM) via APIM ==="
-$uri = "$($apimGateway.TrimEnd('/'))/aoai-finops-lab/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21"
+if (-not $DEPLOYMENT) { $DEPLOYMENT = "gpt-4o" }   # default; set to your deployment name (e.g. "gpt-4.1")
+$uri = "$($apimGateway.TrimEnd('/'))/aoai-finops-lab/openai/deployments/$DEPLOYMENT/chat/completions?api-version=2024-10-21"
 $headers = @{ "Content-Type" = "application/json"; "api-key" = $keyCustomerAI }
 $body = (@{ messages = @(@{ role = "user"; content = "Hello" }); max_tokens = 50 } | ConvertTo-Json -Depth 5)
 $resp = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $body -SkipHttpErrorCheck
@@ -529,44 +530,37 @@ $apimGateway = "https://$apimName.azure-api.net"
 $baseMgmt = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.ApiManagement/service/$apimName"
 $keyCustomerAI = az rest --method POST --uri "$baseMgmt/subscriptions/customerai-team/listSecrets?api-version=2022-08-01" --query primaryKey -o tsv
 
-$uri = "$($apimGateway.TrimEnd('/'))/aoai-finops-lab/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21"
+if (-not $DEPLOYMENT) { $DEPLOYMENT = "gpt-4o" }   # default; set to your deployment name (e.g. "gpt-4.1")
+$uri = "$($apimGateway.TrimEnd('/'))/aoai-finops-lab/openai/deployments/$DEPLOYMENT/chat/completions?api-version=2024-10-21"
 
-Write-Host "=== Generating 429 errors to trigger alert ==="
-for ($i = 1; $i -le 25; $i++) {
-    $headers = @{ "Content-Type" = "application/json"; "api-key" = $keyCustomerAI }
-    $body = (@{
-        messages = @(
-            @{ role = "user"; content = "Write an extremely detailed 2000-word essay about distributed computing including all subtopics, frameworks, and implementation patterns." }
-        )
-        max_tokens = 800
-    } | ConvertTo-Json -Depth 5)
+# Use a concurrent burst of LARGE prompts so total in-flight tokens exceed the 10K TPM
+# window within a single minute. A sequential loop refills faster than it consumes and
+# may never produce the 429s the alert needs.
+$bigPrompt = ("Write an extremely detailed essay about distributed computing. " + ("Cover subtopics, frameworks, consensus, sharding, and implementation patterns in depth. " * 250))
 
-    $response = $null
-    for ($attempt = 1; $attempt -le 3; $attempt++) {
-        $response = Invoke-WebRequest -Uri $uri -Method POST -Headers $headers -Body $body -SkipHttpErrorCheck
-        if ($response.StatusCode -ne 404) { break }
-    }
+Write-Host "=== Generating 429 errors to trigger alert (concurrent burst x2) ==="
+foreach ($round in 1..2) {
+    Write-Host "`n-- Burst round $round --"
+    $results = 1..12 | ForEach-Object -Parallel {
+        $headers = @{ "Content-Type" = "application/json"; "api-key" = $using:keyCustomerAI }
+        $body = @{ messages = @(@{ role = "user"; content = $using:bigPrompt }); max_tokens = 800 } | ConvertTo-Json
+        $r = Invoke-WebRequest -Uri $using:uri -Method POST -Headers $headers -Body $body -SkipHttpErrorCheck
+        [pscustomobject]@{ Index = $_; Status = $r.StatusCode; RetryAfter = $r.Headers['Retry-After'] }
+    } -ThrottleLimit 12
 
-    if ($response.StatusCode -eq 200) {
-        $result = $response.Content | ConvertFrom-Json
-        $remaining = $response.Headers['x-ratelimit-remaining-tokens']
-        Write-Host "[Alert-Test-$i] Status: 200 | Tokens: $($result.usage.total_tokens) | Remaining TPM: $remaining" -ForegroundColor Green
+    $results | Sort-Object Index | ForEach-Object {
+        if ($_.Status -eq 200)     { Write-Host "[Alert-Test-$($_.Index)] Status: 200" -ForegroundColor Green }
+        elseif ($_.Status -eq 429) { Write-Host "[Alert-Test-$($_.Index)] Status: 429 QUOTA EXCEEDED | Retry-After: $($_.RetryAfter)" -ForegroundColor Yellow }
+        else                       { Write-Host "[Alert-Test-$($_.Index)] Status: $($_.Status)" -ForegroundColor Red }
     }
-    elseif ($response.StatusCode -eq 429) {
-        $retryAfter = $response.Headers['Retry-After']
-        Write-Host "[Alert-Test-$i] Status: 429 QUOTA EXCEEDED | Retry-After: $retryAfter" -ForegroundColor Yellow
-    }
-    else {
-        $apimRequestId = $response.Headers['apim-request-id']
-        Write-Host "[Alert-Test-$i] Status: $($response.StatusCode) | APIM Request ID: $apimRequestId | Body: $($response.Content)" -ForegroundColor Red
-    }
+    Write-Host "Round $round summary: $(($results | Where-Object Status -eq 429).Count) x 429"
 }
 
 Write-Host "`nAlert should fire within 5 minutes if enough 429s were generated."
 Write-Host "Check Azure Portal - Alerts to verify."
 ```
 
-> **Expected Result:** After 5+ 429 responses within 5 minutes, the alert triggers and sends an email notification.
+> **Expected Result:** Each burst produces several 429 responses. Once more than 5 occur within the 5-minute window, the alert fires (and sends an email if you configured an action group).
 
 ---
 
