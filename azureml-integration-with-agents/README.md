@@ -9,11 +9,11 @@ authors: ["jonesethan"]
 
 # Azure ML integration with AI Agents
 
-## [Azure ML Model as MCP Server lab](azureml-model.ipynb)
+## [Azure ML Model as MCP Server lab](azure-ml-models.ipynb)
 
 Playground to deploy a trained ML model to an Azure ML online endpoint and expose it as an MCP server through Azure API Management for cloud-based agents in Foundry.
 
-![flow](/azureml-integration-with-agents/images/azure-ml-models.gif)
+![flow](images/azure-ml-models.gif)
 
 ### Key Features
 
@@ -24,7 +24,7 @@ Playground to deploy a trained ML model to an Azure ML online endpoint and expos
 | **MCP Server** | Wrap the ML prediction API as an MCP tool (`predict-forecast`) for agent consumption |
 | **Built-in LLM Logging** | Track token usage with `llm-emit-token-metric` policy and dimensions (Subscription ID, Client IP, API ID) |
 | **Retry Policy** | Automatic retries on 429 (throttled) and 503 (unavailable) errors in the backend section |
-| **Managed Identity Auth** | APIM authenticates to Azure ML using its system-assigned managed identity — no API keys needed |
+| **Managed Identity Auth** | APIM authenticates to Azure ML using its system-assigned managed identity - no API keys needed |
 
 ### Prerequisites
 
@@ -34,11 +34,12 @@ Playground to deploy a trained ML model to an Azure ML online endpoint and expos
 - [An Azure Subscription](https://azure.microsoft.com/free/) with [Contributor](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/privileged#contributor) + [RBAC Administrator](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/privileged#role-based-access-control-administrator) or [Owner](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/privileged#owner) roles
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) installed and [Signed into your Azure subscription](https://learn.microsoft.com/cli/azure/authenticate-azure-cli-interactively)
 
-### 🚀 Get started
+### -- Get started
 
-Proceed by opening the [Jupyter notebook](azureml-model.ipynb), and follow the steps provided.
+Proceed by opening the [Jupyter notebook](azure-ml-models.ipynb), and follow the steps provided.
 
-### 🗑️ Clean up resources
+### --- Clean up resources
 
 When you're finished with the lab, you should remove all your deployed resources from Azure to avoid extra charges and keep your Azure subscription uncluttered.
 Use the [clean-up-resources notebook](clean-up-resources.ipynb) for that.
+
