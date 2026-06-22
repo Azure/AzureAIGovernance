@@ -1,4 +1,4 @@
-# AzureAIAgentsGovernance
+# AzureAIGovernance
 
 ## Available Solution Accelerators
 
