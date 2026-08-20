@@ -9,6 +9,13 @@ The following solution accelerators are currently available in this repository.
 | [Azure ML Integration with Agents](azureml-integration-with-agents/) | Demonstrates integrating Azure Machine Learning models with AI agents, including Bicep templates, API definitions, policies, and deployment assets. |
 | [Cost Governance and FinOps for AI](Cost%20GovernanceFinOpsforAI/) | Provides hands-on governance and FinOps labs for AI workloads, covering prerequisites and scenarios such as token rate limiting, quota limiting, and chargeback modeling. |
 
+## In Development
+
+The following solution accelerator is currently in active development:
+
+| Solution Accelerator | Description |
+| --- | --- |
+| [AgentOps Solution Accelerator](https://aka.ms/agentops-accelerator) | Provides a production-ready foundation for taking Microsoft Foundry agents from prototype to production, with standardized evaluations, CI/CD release gates, observability, safety and governance checks, release evidence, and continuous improvement workflows. |
 ## Coming Soon
 
 The following solution accelerators are being considered for development:
