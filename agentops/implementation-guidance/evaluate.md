@@ -10,35 +10,35 @@ evaluation approach to preparing test data, interpreting results, and
 establishing operational ownership.
 
 > Throughout this guide, a help desk agent is used as an end-to-end example. The
-> walkthrough uses Microsoft Foundry to build an evaluation suite with the right
-> metrics, rubric and policy evaluators where needed, red teaming, tracing, and
-> continuous evaluation.
-
-For a bounded learning exercise, use the [Evaluate workshop
-lab](../workshop/labs/01-evaluate/lab.md). Its main path is the released Accelerator
-0.15.0 public CLI: initialize/review a workspace, configure the live hosted
-target and dataset, run `agentops eval run`, inspect its report and baseline
-comparison, and record the decision. Native Foundry rubric, safety,
-conversation and red-team activities provide separate supplementary evidence.
-Its [tooling decision](../workshop/labs/01-evaluate/TOOLING.md) defines the narrow
-coherence/similarity CLI gate and manual completeness, critical-case and
-regression review. No internal-module integration or unpublished extension is
-required. Local synthetic knowledge and simulated tickets are teaching
-substitutes, not a production knowledge or ticketing architecture.
+> implementation uses Microsoft Foundry to establish quality and safety
+> measures, governed test data, repeatable evaluation runs, release evidence,
+> tracing, and ongoing evaluation.
 
 **On this page**
 
-- [Implementation outcomes](#implementation-outcomes)
-- [Implementation outline](#implementation-outline)
-- [Phase 1 - Discover what to evaluate based on the use case](#phase-1---discover-what-to-evaluate-based-on-the-use-case)
-- [Phase 2 - Select the tooling to be used](#phase-2---select-the-tooling-to-be-used)
-- [Phase 3 - Prepare the dataset and execute evaluation](#phase-3---prepare-the-dataset-and-execute-evaluation)
-- [Phase 4 - Configure ongoing evaluation](#phase-4---configure-ongoing-evaluation)
-- [Phase 5 - Project ending and knowledge transfer](#phase-5---project-ending-and-knowledge-transfer)
-- [Roles and responsibilities](#roles-and-responsibilities)
-- [Completion criteria](#completion-criteria)
-- [Knowledge transfer and handoff checklist](#knowledge-transfer-and-handoff-checklist)
-- [References](#references)
+1. [Implementation outcomes](#implementation-outcomes): Capabilities and
+   evidence established by the workstream.
+2. [Implementation outline](#implementation-outline): Six-phase workflow from
+   discovery through ownership transfer.
+3. [Phase 1 - Discover evaluation outcomes and risks](#phase-1---discover-evaluation-outcomes-and-risks):
+   Define success, critical journeys, risks, and decision rules.
+4. [Phase 2 - Select evaluation methods and tooling](#phase-2---select-evaluation-methods-and-tooling):
+   Choose supported Foundry capabilities and required controls.
+5. [Phase 3 - Prepare evaluation data and controls](#phase-3---prepare-evaluation-data-and-controls):
+   Build governed test sets, mappings, thresholds, and run configuration.
+6. [Phase 4 - Execute evaluation and release gates](#phase-4---execute-evaluation-and-release-gates):
+   Run the identified candidate, analyze failures, and record a decision.
+7. [Phase 5 - Operationalize ongoing evaluation](#phase-5---operationalize-ongoing-evaluation):
+   Establish recurring triggers, triage, and production feedback.
+8. [Phase 6 - End the project and transfer knowledge](#phase-6---end-the-project-and-transfer-knowledge):
+   Rehearse the process and transfer ownership.
+9. [Roles and responsibilities](#roles-and-responsibilities): Accountabilities
+   for evaluation design, operation, and acceptance.
+10. [Completion criteria](#completion-criteria): Conditions for accepting the
+    workstream.
+11. [Knowledge transfer and handoff checklist](#knowledge-transfer-and-handoff-checklist):
+    Evidence required for operational handoff.
+12. [References](#references): First-party Foundry and AgentOps resources.
 
 ## Implementation outcomes
 
@@ -56,13 +56,14 @@ By the end of the workstream, the following outcomes should be in place:
 
 | Phase | Implementation question | Expected evidence |
 | --- | --- | --- |
-| 1. Plan the evaluation | What should be tested, and how will success be measured? | Evaluation plan, selected metrics, and test types |
-| 2. Set up the tools | What tools, access, and permissions are needed? | Configured tools, connections, roles, and permissions |
-| 3. Prepare and run the evaluation | Which scenarios will be tested, and what does the baseline show? | Versioned test set, repeatable workflow, baseline, and improvement actions |
-| 4. Configure ongoing evaluation | When should evaluations run again, and what happens when they fail? | Triggers, schedules, thresholds, and ownership |
-| 5. Transfer ownership | Can the designated owners run and maintain the evaluation process? | Walkthrough, documentation, and owner acceptance |
+| 1. Discover outcomes and risks | What should be evaluated, and which results affect release or risk decisions? | Evaluation charter, scenario inventory, measure contracts |
+| 2. Select methods and tooling | Which supported methods provide trustworthy, maintainable evidence? | Tooling decision record, Foundry architecture, prerequisites |
+| 3. Prepare data and controls | Are the test sets, mappings, thresholds, identities, and environments ready? | Approved datasets, coverage summary, run configuration, readiness record |
+| 4. Execute evaluation and gates | Did the identified candidate meet the approved criteria? | Run record, row-level evidence, findings, release decision |
+| 5. Operationalize evaluation | When will evaluation run again, and what happens when evidence is missing or fails? | Trigger matrix, triage workflow, production feedback process |
+| 6. End the project and transfer knowledge | Can designated owners maintain and operate the evaluation practice? | Handoff pack, rehearsal, owner acceptance |
 
-## Phase 1 - Discover what to evaluate based on the use case
+## Phase 1 - Discover evaluation outcomes and risks
 
 ![A cartoon robot uses a ruler and clipboard to plan what good looks like before testing.](assets/evaluation-phase-1-plan.svg)
 
@@ -133,7 +134,7 @@ affect those outcomes.
 - Initial pass, fail, and escalation rules
 - Assumptions and unresolved decisions log
 
-## Phase 2 - Select the tooling to be used
+## Phase 2 - Select evaluation methods and tooling
 
 ### Objective
 
@@ -155,8 +156,9 @@ evidence and can be maintained by the designated owners.
 ### Microsoft Foundry implementation path
 
 1. Select built-in evaluators that match the scenario and available inputs.
-   Consider general quality, RAG, agent behavior, safety, and operational
-   measures only when their required data is available.
+   Consider general quality, retrieval-augmented generation (RAG), agent
+   behavior, safety, and operational measures only when their required data is
+   available.
 2. Use custom evaluators for domain-specific expectations that built-in measures
    cannot represent. Define a clear rubric and calibrate it with human-reviewed
    examples.
@@ -178,12 +180,12 @@ evidence and can be maintained by the designated owners.
 - Data handling and result retention decision
 - Automation and release integration decision
 
-## Phase 3 - Prepare the dataset and execute evaluation
+## Phase 3 - Prepare evaluation data and controls
 
 ### Objective
 
-Create representative, governed test evidence and establish a reproducible
-baseline.
+Create representative, governed test evidence and prepare a reproducible run
+before applying release criteria.
 
 ### Dataset and test-set preparation
 
@@ -208,20 +210,51 @@ baseline.
    where the preview capability is available. Review, redact, label, and approve
    the generated cases before adding them to a maintained test set.
 
+### Run and gate preparation
+
+1. Map dataset fields to the selected evaluator and target inputs.
+2. Identify the exact agent version, environment, model, tools, knowledge
+   configuration, and source revision under evaluation.
+3. Configure organization-managed identities, connections, roles, and result
+   storage.
+4. Define thresholds, critical-case rules, human-review rules, and the authority
+   that can approve an exception.
+5. Define invalid-run behavior. Missing scores, unavailable dependencies,
+   incomplete outputs, or mapping errors must block the affected decision rather
+   than appear as a pass.
+6. Run a small readiness sample to validate mappings, permissions, evaluator
+   behavior, result retention, and trace correlation.
+
+### Expected outputs and evidence
+
+- Approved evaluation dataset and data dictionary
+- Scenario coverage and risk mapping
+- Evaluator and target configuration
+- Threshold, critical-case, and human-review rules
+- Identity, connection, and result-retention record
+- Readiness sample and resolved preparation findings
+
+## Phase 4 - Execute evaluation and release gates
+
+### Objective
+
+Execute the approved evaluation against an identified candidate, interpret the
+evidence, and record the decision supported by the run.
+
 ### Execution activities
 
-1. Run a pilot subset to verify mappings, permissions, judge behavior, and
-   result interpretation.
-2. Calibrate AI-assisted measures against human-reviewed examples. Investigate
+1. Calibrate AI-assisted measures against human-reviewed examples. Investigate
    systematic disagreement before using a score as a gate.
-3. Run the approved baseline against an identified agent version and
+2. Run the approved baseline against the identified agent version and
    environment.
-4. Review aggregate scores and row-level evidence. Cluster failures by likely
+3. Review aggregate scores and row-level evidence. Cluster failures by likely
    cause, such as instructions, retrieval, tool use, knowledge, safety controls,
    permissions, or test design.
-5. Distinguish agent defects from evaluator, dataset, environment, or dependency
+4. Distinguish agent defects from evaluator, dataset, environment, or dependency
    failures.
-6. Agree on remediation priority and rerun the same versioned set after changes.
+5. Apply aggregate thresholds, critical-case rules, required human review, and
+   exception policy.
+6. Assign remediation owners and rerun the same versioned set after changes.
 7. Preserve the run identity, agent identity, dataset/test-set version, methods,
    thresholds, results, exceptions, and approval decision.
 
@@ -236,14 +269,13 @@ baseline.
 
 ### Expected outputs and evidence
 
-- Approved evaluation dataset
-- Data dictionary and scenario coverage summary
 - Reproducible baseline run
-- Calibrated thresholds or human review rules
+- Aggregate and row-level evidence
 - Failure analysis and prioritized remediation backlog
-- Recorded ship, no-ship, or conditional decision when evaluation gates a release
+- Recorded ship, no-ship, or conditional decision
+- Approved exception record with owner and expiry when applicable
 
-## Phase 4 - Configure ongoing evaluation
+## Phase 5 - Operationalize ongoing evaluation
 
 ### Objective
 
@@ -294,7 +326,7 @@ feedback loop.
 - Regression-set promotion process
 - Trend review and threshold governance schedule
 
-## Phase 5 - Project ending and knowledge transfer
+## Phase 6 - End the project and transfer knowledge
 
 ### Objective
 
@@ -327,7 +359,7 @@ evaluation system.
 | Security, privacy, and compliance | Approves data use, retention, access, and regulated controls |
 | Platform administrator | Provides environments, roles, connections, APIs, and operational prerequisites |
 | Operations owner | Triages recurring failures and feeds production evidence into regression coverage |
-| Evaluation facilitator or implementation lead | Facilitates the method, demonstrates supported paths, and coordinates knowledge transfer |
+| Implementation lead | Coordinates the workflow, demonstrates supported paths, manages dependencies, and transfers knowledge |
 
 Use a RACI or equivalent ownership record when one person holds multiple roles.
 Release acceptance and risk acceptance remain with the accountable
@@ -345,6 +377,8 @@ The evaluation workstream is complete when:
 - The baseline run is reproducible and tied to an identified agent version.
 - Thresholds, review rules, and handling of missing or invalid results are
   documented.
+- Release decisions apply aggregate thresholds, critical-case rules, required
+  human review, and authorized exceptions.
 - Findings have owners and agreed next actions.
 - Recurring evaluation triggers, ownership, and production feedback are defined.
 - Designated owners have demonstrated that they can run and interpret the
@@ -371,8 +405,6 @@ The evaluation workstream is complete when:
 - [AgentOps Accelerator](https://aka.ms/agentops-accelerator) - Foundry-specific
   reference implementation
 - [AgentOps Accelerator: Evaluation](https://azure.github.io/agentops/evaluation/)
-- [AgentOps Workshop](https://aka.ms/agentops-workshop) - Foundry-based workshop
-  that demonstrates the Evaluate, Ship, Observe, Operate loop
 
 ### Microsoft Foundry
 

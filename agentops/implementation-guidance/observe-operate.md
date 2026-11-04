@@ -2,7 +2,7 @@
 
 ## Purpose and intended audience
 
-This implementation guide helps Microsoft field teams establish post-deployment
+This implementation guide helps implementation teams establish post-deployment
 observability and operations for Microsoft Foundry agents. It is intended for
 architects, agent engineers, site reliability and operations teams, service
 owners, security teams, Responsible AI practitioners, support teams, and
@@ -23,19 +23,32 @@ commercial scope, a Definition of Use, or a detailed product runbook.
 
 **On this page**
 
-- [Microsoft Foundry observability boundary](#microsoft-foundry-observability-boundary)
-- [Implementation outcomes](#implementation-outcomes)
-- [Implementation outline](#implementation-outline)
-- [Phase 1 - Discover operational outcomes and signals](#phase-1---discover-operational-outcomes-and-signals)
-- [Phase 2 - Select observability and operations tooling](#phase-2---select-observability-and-operations-tooling)
-- [Phase 3 - Prepare telemetry, alerts, and runbooks](#phase-3---prepare-telemetry-alerts-and-runbooks)
-- [Phase 4 - Execute observability and operational readiness](#phase-4---execute-observability-and-operational-readiness)
-- [Phase 5 - Continuously improve after execution](#phase-5---continuously-improve-after-execution)
-- [Phase 6 - Project ending and knowledge transfer](#phase-6---project-ending-and-knowledge-transfer)
-- [Roles and responsibilities](#roles-and-responsibilities)
-- [Completion criteria](#completion-criteria)
-- [Knowledge transfer and handoff checklist](#knowledge-transfer-and-handoff-checklist)
-- [References](#references)
+1. [Microsoft Foundry observability boundary](#microsoft-foundry-observability-boundary):
+   Native and extended signals, quality evidence, and incident learning.
+2. [Implementation outcomes](#implementation-outcomes): Capabilities and
+   evidence established by the workstream.
+3. [Implementation outline](#implementation-outline): Six-phase workflow from
+   discovery through ownership transfer.
+4. [Phase 1 - Discover operational outcomes and signals](#phase-1---discover-operational-outcomes-and-signals):
+   Define service expectations, dependencies, risks, and operator decisions.
+5. [Phase 2 - Select observability and operations tooling](#phase-2---select-observability-and-operations-tooling):
+   Choose supported Foundry and Azure Monitor evidence paths.
+6. [Phase 3 - Prepare telemetry, alerts, and runbooks](#phase-3---prepare-telemetry-alerts-and-runbooks):
+   Instrument critical paths and prepare actionable response guidance.
+7. [Phase 4 - Execute observability and operational readiness](#phase-4---execute-observability-and-operational-readiness):
+   Test signal correlation, alerting, access, and response.
+8. [Phase 5 - Operationalize continuous improvement](#phase-5---operationalize-continuous-improvement):
+   Convert production evidence into evaluation and release improvements.
+9. [Phase 6 - End the project and transfer knowledge](#phase-6---end-the-project-and-transfer-knowledge):
+   Rehearse operations and transfer ownership.
+10. [Roles and responsibilities](#roles-and-responsibilities): Accountabilities
+    for service health, quality, safety, and response.
+11. [Completion criteria](#completion-criteria): Conditions for accepting the
+    workstream.
+12. [Knowledge transfer and handoff checklist](#knowledge-transfer-and-handoff-checklist):
+    Evidence required for operational handoff.
+13. [References](#references): First-party Foundry, Azure Monitor, and AgentOps
+    resources.
 
 ## Microsoft Foundry observability boundary
 
@@ -73,7 +86,7 @@ By the end of the workstream, the organization should have:
 | 2. Select tooling | Which native and extended telemetry surfaces provide trustworthy, supportable evidence? | Tooling decision record, data-flow and access design |
 | 3. Prepare telemetry, alerts, and runbooks | Is the agent diagnosable and are responders ready before production? | Instrumentation plan, dashboards, alert design, runbook outlines |
 | 4. Execute observability and operations | Do signals arrive, alerts work, and responders resolve realistic failures? | Verification record, alert tests, incident rehearsal |
-| 5. Continuously improve | How will production learning change tests, controls, and releases? | Review cadence, feedback loop, prioritized improvements |
+| 5. Operationalize continuous improvement | How will production learning change tests, controls, and releases? | Review cadence, feedback loop, prioritized improvements |
 | 6. End the project and transfer knowledge | Can the designated teams operate the service without the implementation team? | Handoff pack, operator rehearsal, owner acceptance |
 
 ## Phase 1 - Discover operational outcomes and signals
@@ -317,7 +330,7 @@ diagnose realistic failures.
 - Updated runbook outlines
 - Operational readiness decision
 
-## Phase 5 - Continuously improve after execution
+## Phase 5 - Operationalize continuous improvement
 
 ### Objective
 
@@ -359,7 +372,7 @@ release gates.
 - Updated quality, safety, and operational thresholds
 - Retired or remediated blind spots
 
-## Phase 6 - Project ending and knowledge transfer
+## Phase 6 - End the project and transfer knowledge
 
 ### Objective
 
@@ -391,7 +404,7 @@ Ensure designated teams can monitor, diagnose, respond, and improve independentl
 | Responsible AI and safety lead | Reviews safety signals, harmful-output escalations, and adversarial learning |
 | Security, privacy, and compliance | Approves data collection, access, retention, export, and incident evidence |
 | Business owner | Reviews adoption, outcomes, satisfaction, and value indicators |
-| Microsoft implementation team | Facilitates the method, demonstrates supported paths, and transfers knowledge |
+| Implementation lead | Coordinates the workflow, demonstrates supported paths, manages dependencies, and transfers knowledge |
 
 Incident command, production changes, and risk acceptance remain organizational
 responsibilities.
@@ -433,10 +446,8 @@ The Observe and Operate workstream is complete when:
 
 - [AgentOps Accelerator](https://aka.ms/agentops-accelerator) - Foundry-specific
   reference implementation
-- [AgentOps Accelerator: Observe](https://azure.github.io/agentops/observe/)
+- [AgentOps Accelerator: Foundry operations workbook](https://azure.github.io/agentops/foundry-ops-workbook/)
 - [AgentOps Accelerator: Operate](https://azure.github.io/agentops/operate/)
-- [AgentOps Workshop](https://aka.ms/agentops-workshop) - Foundry-based workshop
-  that demonstrates the complete operating loop
 
 ### Microsoft Foundry and Azure Monitor
 

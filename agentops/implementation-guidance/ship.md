@@ -2,10 +2,10 @@
 
 ## Purpose and intended audience
 
-This implementation guide helps Microsoft field teams establish a controlled, repeatable release
-path for Microsoft Foundry agents. It is intended for architects, agent
-engineers, platform engineers, release managers, security teams, testers,
-operations teams, and implementation leads.
+This implementation guide helps implementation teams establish a controlled,
+repeatable release path for Microsoft Foundry agents. It is intended for
+architects, agent engineers, platform engineers, release managers, security
+teams, testers, operations teams, and implementation leads.
 
 Use it to discover the release topology and controls, select supported platform
 and automation tools, prepare source and environments, execute release gates and
@@ -16,19 +16,31 @@ commercial scope, a Definition of Use, or a step-by-step product runbook.
 
 **On this page**
 
-- [Microsoft Foundry release boundary](#microsoft-foundry-release-boundary)
-- [Implementation outcomes](#implementation-outcomes)
-- [Implementation outline](#implementation-outline)
-- [Phase 1 - Discover release topology and controls](#phase-1---discover-release-topology-and-controls)
-- [Phase 2 - Select tools and the platform path](#phase-2---select-tools-and-the-platform-path)
-- [Phase 3 - Prepare source, versioning, and environments](#phase-3---prepare-source-versioning-and-environments)
-- [Phase 4 - Execute the pipeline and release gates](#phase-4---execute-the-pipeline-and-release-gates)
-- [Phase 5 - Operationalize release management after execution](#phase-5---operationalize-release-management-after-execution)
-- [Phase 6 - Project ending and knowledge transfer](#phase-6---project-ending-and-knowledge-transfer)
-- [Roles and responsibilities](#roles-and-responsibilities)
-- [Completion criteria](#completion-criteria)
-- [Knowledge transfer and handoff checklist](#knowledge-transfer-and-handoff-checklist)
-- [References](#references)
+1. [Microsoft Foundry release boundary](#microsoft-foundry-release-boundary):
+   Release units, environments, automation, and native evidence.
+2. [Implementation outcomes](#implementation-outcomes): Capabilities and
+   evidence established by the workstream.
+3. [Implementation outline](#implementation-outline): Six-phase workflow from
+   discovery through ownership transfer.
+4. [Phase 1 - Discover release topology and controls](#phase-1---discover-release-topology-and-controls):
+   Define the release unit, environments, controls, and decisions.
+5. [Phase 2 - Select tools and the platform path](#phase-2---select-tools-and-the-platform-path):
+   Choose supported Foundry deployment and automation mechanisms.
+6. [Phase 3 - Prepare source, versioning, and environments](#phase-3---prepare-source-versioning-and-environments):
+   Establish reproducibility, identities, dependencies, and readiness.
+7. [Phase 4 - Execute the pipeline and release gates](#phase-4---execute-the-pipeline-and-release-gates):
+   Promote the identified candidate through required controls.
+8. [Phase 5 - Operationalize release management](#phase-5---operationalize-release-management):
+   Establish observation windows, recovery, and release learning.
+9. [Phase 6 - End the project and transfer knowledge](#phase-6---end-the-project-and-transfer-knowledge):
+   Rehearse the release path and transfer ownership.
+10. [Roles and responsibilities](#roles-and-responsibilities): Accountabilities
+    for engineering, approval, release, and operation.
+11. [Completion criteria](#completion-criteria): Conditions for accepting the
+    workstream.
+12. [Knowledge transfer and handoff checklist](#knowledge-transfer-and-handoff-checklist):
+    Evidence required for operational handoff.
+13. [References](#references): First-party Foundry and AgentOps resources.
 
 ## Microsoft Foundry release boundary
 
@@ -66,7 +78,7 @@ By the end of the workstream, the organization should have:
 | 2. Select tools and platform path | Which supported tools fit the agent type, engineering model, and governance needs? | Tooling decision record, architecture, prerequisites |
 | 3. Prepare source, versioning, and environments | Can the candidate and its dependencies be reproduced and promoted safely? | Source baseline, version contract, environment readiness report |
 | 4. Execute pipeline and gates | Did the identified candidate pass required checks and reach the intended target? | Pipeline record, gate evidence, approval, deployment verification |
-| 5. Operationalize releases | Can designated teams detect, reverse, and learn from release outcomes? | Runbook outline, rollback test, release metrics and ownership |
+| 5. Operationalize release management | Can designated teams detect, reverse, and learn from release outcomes? | Runbook outline, rollback test, release metrics and ownership |
 | 6. End the project and transfer knowledge | Can designated teams operate the release path independently? | Handoff pack, rehearsal, owner acceptance |
 
 ## Phase 1 - Discover release topology and controls
@@ -294,7 +306,7 @@ candidate promoted to the target environment.
 - Deployment and post-deployment verification evidence
 - Rollback point and decision log
 
-## Phase 5 - Operationalize release management after execution
+## Phase 5 - Operationalize release management
 
 ### Objective
 
@@ -325,7 +337,7 @@ Make release outcomes visible, reversible, and continuously improvable.
 - Release metrics and review cadence
 - Production-to-evaluation feedback process
 
-## Phase 6 - Project ending and knowledge transfer
+## Phase 6 - End the project and transfer knowledge
 
 ### Objective
 
@@ -356,7 +368,7 @@ Ensure designated teams can operate, troubleshoot, and evolve the release path.
 | Evaluation and Responsible AI leads | Define and review quality, safety, and regression gates |
 | Security and compliance | Approve identity, secrets, supply-chain, data, audit, and policy controls |
 | Operations or service owner | Owns post-release verification, incidents, rollback, and release health |
-| Microsoft implementation team | Facilitates design, demonstrates supported implementation paths, and transfers knowledge |
+| Implementation lead | Coordinates the workflow, demonstrates supported paths, manages dependencies, and transfers knowledge |
 
 The organization retains authority for production approval, policy exceptions,
 and risk acceptance.
@@ -400,8 +412,6 @@ The Ship workstream is complete when:
   reference implementation
 - [AgentOps Accelerator: Ship](https://azure.github.io/agentops/ship/)
 - [AgentOps Accelerator: Operate](https://azure.github.io/agentops/operate/)
-- [AgentOps Workshop](https://aka.ms/agentops-workshop) - Foundry-based workshop
-  that demonstrates the complete operating loop
 
 ### Microsoft Foundry
 
