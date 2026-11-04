@@ -72,7 +72,7 @@ By the end of the workstream, the organization should have:
    adoption, and business outcomes.
 3. Telemetry, dashboards, alerts, and privacy controls appropriate to the
    selected platform.
-4. Incident triage and runbook outlines linked to agent evidence.
+4. Incident investigation and response runbook outlines linked to agent evidence.
 5. A production-readiness and operational rehearsal record.
 6. A process for turning production learning into evaluation and release
    improvements.
@@ -302,10 +302,10 @@ Prepare concise decision guidance for:
 - telemetry silence or analytics delay;
 - privacy, security, or harmful-output escalation.
 
-Each outline should identify detection evidence, first checks, containment,
-escalation, rollback or disablement options, communications, and the evidence to
-preserve. Link to product runbooks rather than duplicating every product step in
-this field guide.
+Each outline should identify detection evidence, first checks, escalation,
+rollback or disablement options, recovery verification, communications, and the
+evidence to preserve. Link to product runbooks rather than duplicating every
+product step in this field guide.
 
 **Implementation resources**
 
@@ -350,12 +350,14 @@ diagnose realistic failures.
    states.
 4. Trigger alerts in a controlled environment and confirm routing, deduplication,
    acknowledgement, and context.
-5. Run operational game days covering at least:
+5. Run operational rehearsals covering at least:
    - a release regression;
    - a dependency or permission failure;
    - a quality or safety concern;
    - telemetry silence.
-6. Measure detection, triage, containment, and recovery time.
+6. Record the time required to detect the scenario, locate the relevant traces
+   and dependency evidence, apply the documented response, and restore the
+   expected agent behavior.
 7. Confirm that responders can access necessary evidence without overbroad
    permissions.
 8. Record gaps and repeat the rehearsal after remediation.
@@ -468,8 +470,8 @@ Ensure designated teams can monitor, diagnose, respond, and improve independentl
 | Product or service owner | Defines service outcomes, priorities, and operational acceptance |
 | Agent engineer | Maintains instrumentation context, diagnoses behavior, and implements fixes |
 | Platform/observability engineer | Owns telemetry resources, dashboards, alerts, access, retention, and cost controls |
-| Operations or SRE lead | Owns on-call, incident process, game days, reliability reviews, and runbooks |
-| Support lead | Triage user reports, collect evidence, and escalate with session/release context |
+| Operations or SRE lead | Owns on-call, incident process, operational rehearsals, reliability reviews, and runbooks |
+| Support lead | Reviews user reports, collects evidence, and escalates with session/release context |
 | Evaluation and quality lead | Maintains production quality measures and regression coverage |
 | Responsible AI and safety lead | Reviews safety signals, harmful-output escalations, and adversarial learning |
 | Security, privacy, and compliance | Approves data collection, access, retention, export, and incident evidence |
@@ -504,7 +506,7 @@ The Observe and Operate workstream is complete when:
 - [ ] Analytics, transcript, Application Insights, and Log Analytics roles reviewed
 - [ ] Sensitive-data, sampling, retention, and export controls documented
 - [ ] Alert delivery and escalation paths tested with approved operator identities
-- [ ] Runbook outlines and rollback/containment paths rehearsed
+- [ ] Runbook outlines and rollback, disablement, and recovery paths rehearsed
 - [ ] Quality and safety escalation procedures accepted
 - [ ] Production-to-regression feedback loop demonstrated
 - [ ] Service review cadence and named owners recorded

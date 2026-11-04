@@ -29,7 +29,7 @@ establishing operational ownership.
 6. [Phase 4 - Execute evaluation and release gates](#phase-4---execute-evaluation-and-release-gates):
    Run the identified candidate, analyze failures, and record a decision.
 7. [Phase 5 - Operationalize ongoing evaluation](#phase-5---operationalize-ongoing-evaluation):
-   Establish recurring triggers, triage, and production feedback.
+   Establish recurring triggers, failed-result review, and production feedback.
 8. [Phase 6 - End the project and transfer knowledge](#phase-6---end-the-project-and-transfer-knowledge):
    Rehearse the process and transfer ownership.
 9. [Roles and responsibilities](#roles-and-responsibilities): Accountabilities
@@ -60,7 +60,7 @@ By the end of the workstream, the following outcomes should be in place:
 | 2. Select methods and tooling | Which supported methods provide trustworthy, maintainable evidence? | Tooling decision record, Foundry architecture, prerequisites |
 | 3. Prepare data and controls | Are the test sets, mappings, thresholds, identities, and environments ready? | Approved datasets, coverage summary, run configuration, readiness record |
 | 4. Execute evaluation and gates | Did the identified candidate meet the approved criteria? | Run record, row-level evidence, findings, release decision |
-| 5. Operationalize evaluation | When will evaluation run again, and what happens when evidence is missing or fails? | Trigger matrix, triage workflow, production feedback process |
+| 5. Operationalize evaluation | When will evaluation run again, and what happens when evidence is missing or fails? | Trigger matrix, failed-result review workflow, production feedback process |
 | 6. End the project and transfer knowledge | Can designated owners maintain and operate the evaluation practice? | Handoff pack, rehearsal, owner acceptance |
 
 ## Phase 1 - Discover evaluation outcomes and risks
@@ -322,8 +322,8 @@ feedback loop.
    - incident, complaint, escalation, or new misuse pattern.
 2. Define the production sampling and review policy. Include privacy, consent,
    data minimization, retention, and human-review requirements.
-3. Assign owners for test-set curation, evaluator maintenance, failed-run triage,
-   safety review, and release decisions.
+3. Assign owners for test-set curation, evaluator maintenance, failed-run
+   investigation, safety review, and release decisions.
 4. Establish a controlled process for promoting reviewed production cases into
    the regression set.
 5. Track score trends by agent version and investigate changes in both aggregate
@@ -360,7 +360,7 @@ feedback loop.
 - Evaluation cadence and trigger matrix
 - Automation or recurring-run design
 - Production sampling and privacy rules
-- Triage workflow and service-level expectations
+- Failed-result review workflow and service-level expectations
 - Regression-set promotion process
 - Trend review and threshold governance schedule
 
@@ -376,7 +376,7 @@ evaluation system.
 1. Walk through the evaluation plan, measure rationale, Foundry path, and
    known limitations.
 2. Demonstrate one complete run from data selection through decision and defect
-   triage.
+   review.
 3. Have the designated owners execute a run and explain the result
    independently.
 4. Review how to add, approve, retire, and version test cases.
@@ -401,7 +401,7 @@ evaluation system.
 | Responsible AI or safety lead | Owns harm analysis, safety test strategy, exceptions, and escalation |
 | Security, privacy, and compliance | Approves data use, retention, access, and regulated controls |
 | Platform administrator | Provides environments, roles, connections, APIs, and operational prerequisites |
-| Operations owner | Triages recurring failures and feeds production evidence into regression coverage |
+| Operations owner | Investigates recurring failures and feeds production evidence into regression coverage |
 | Implementation lead | Coordinates the workflow, demonstrates supported paths, manages dependencies, and transfers knowledge |
 
 Use a RACI or equivalent ownership record when one person holds multiple roles.
@@ -436,7 +436,7 @@ The evaluation workstream is complete when:
 - [ ] Evaluator/test-method rationale and limitations documented
 - [ ] Safety and Responsible AI review path documented
 - [ ] Automation identities, permissions, and connections assigned to designated owners
-- [ ] Failed-run and regression triage process rehearsed
+- [ ] Failed-run and regression review process rehearsed
 - [ ] Production-to-regression promotion process documented
 - [ ] Named operational owner and next review date recorded
 - [ ] Open decisions, technical debt, and backlog items accepted
