@@ -106,14 +106,16 @@ affect those outcomes.
 
 ### Activities
 
-1. Map priority user journeys to desired outcomes, expected agent behavior, and
-   failure impact.
-2. Review available traces to identify common paths, failures, edge cases, and
-   missing coverage.
-3. Separate quality dimensions from operational service measures and compliance
-   controls.
-4. Classify scenarios into smoke, regression, coverage, adversarial, and
-   production-derived groups.
+1. For each priority user journey, record the user goal, expected agent answer
+   or action, required tool or knowledge dependency, and the impact of failure.
+2. Review available traces and record the trace or response IDs that represent
+   common paths, known failures, edge cases, and missing coverage.
+3. Place each proposed measure in one category: response or action quality,
+   operational service health, or mandatory policy and compliance behavior.
+   Record which decision each category supports.
+4. Label each scenario as smoke, regression, coverage, adversarial, or
+   production-derived. Record when that group runs and whether a failure blocks
+   release.
 5. Define a measure contract for each selected signal:
    - purpose and decision supported;
    - required inputs;
@@ -167,9 +169,11 @@ evidence and can be maintained by the designated owners.
 2. Use custom evaluators for domain-specific expectations that built-in measures
    cannot represent. Define a clear rubric and calibrate it with human-reviewed
    examples.
-3. Choose portal or SDK execution based on scale, repeatability, and integration
-   needs. Cloud evaluation is the preferred path for scalable preproduction and
-   CI/CD scenarios.
+3. Choose portal or SDK execution and record the reason. Use the portal for
+   exploratory or manually reviewed runs. Use the SDK when the same dataset,
+   evaluators, and thresholds must run repeatedly or inside CI/CD. Cloud
+   evaluation is the preferred path for scalable preproduction and CI/CD
+   scenarios.
 4. Connect tracing and Application Insights when production traces will inform
    evaluation or root-cause analysis.
 5. Treat the [AgentOps Accelerator](https://aka.ms/agentops-accelerator) as an
@@ -215,8 +219,9 @@ before applying release criteria.
    - expected tools or actions;
    - persona, language, channel, and risk tags;
    - reviewer decision and rationale.
-4. Remove or protect secrets, credentials, personal data, and production content
-   that is not approved for evaluation.
+4. Redact secrets, credentials, personal data, and unapproved production
+   content before ingestion. Record the approved storage location, access group,
+   and retention period for the remaining data.
 5. Version the data and record provenance, approvals, known limitations, and the
    agent version or configuration it validates.
 6. Keep a small smoke set for fast feedback and a broader regression set for
@@ -237,7 +242,8 @@ before applying release criteria.
 2. Identify the exact agent version, environment, model, tools, knowledge
    configuration, and source revision under evaluation.
 3. Configure organization-managed identities, connections, roles, and result
-   storage.
+   storage. Use the evaluation identity to read the target and dataset, invoke
+   required evaluators, and write the result before declaring readiness.
 4. Define thresholds, critical-case rules, human-review rules, and the authority
    that can approve an exception.
 5. Define invalid-run behavior. Missing scores, unavailable dependencies,
@@ -324,13 +330,16 @@ feedback loop.
    data minimization, retention, and human-review requirements.
 3. Assign owners for test-set curation, evaluator maintenance, failed-run
    investigation, safety review, and release decisions.
-4. Establish a controlled process for promoting reviewed production cases into
-   the regression set.
+4. Before adding a production case to the regression set, record its trace or
+   response ID, remove unapproved data, add the expected result and risk tags,
+   obtain the required review, and create a new dataset version.
 5. Track score trends by agent version and investigate changes in both aggregate
    and critical-scenario results.
 6. Define failure behavior for automation. A missing score, inaccessible
    dependency, or incomplete run must not appear as a passing evaluation.
-7. Review thresholds periodically as coverage, usage patterns, and risk evolve.
+7. At each threshold review, compare false passes, false failures, critical-case
+   misses, and score trends. Record whether each threshold stays, changes, or
+   requires additional human review.
 
 **Implementation resources**
 
@@ -379,8 +388,11 @@ evaluation system.
    review.
 3. Have the designated owners execute a run and explain the result
    independently.
-4. Review how to add, approve, retire, and version test cases.
-5. Review safety escalation, privacy, and human-review procedures.
+4. Have the designated dataset owner add one case, approve it, create a new
+   dataset version, and show how an obsolete case is retired without deleting
+   prior evidence.
+5. Have the designated safety or privacy owner locate the escalation procedure,
+   explain its trigger, and identify where the review decision is recorded.
 6. Assign access through managed groups and workload identities rather than
    personal accounts.
 7. Record the next evaluation review date and the backlog owner.

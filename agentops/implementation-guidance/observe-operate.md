@@ -143,7 +143,9 @@ not from the list of available dashboards.
 
 ### Activities
 
-1. Map critical journeys to service objectives and operator decisions.
+1. For each critical journey, record the expected user outcome, visible failure,
+   affected dependency, signal that reveals the failure, and the decision an
+   operator must make.
 2. Build a signal catalog across:
    - service health and availability;
    - latency and throughput;
@@ -152,11 +154,13 @@ not from the list of available dashboards.
    - user outcomes, adoption, and feedback;
    - consumption and cost;
    - release and version identity.
-3. Classify each signal as symptom, cause, diagnostic context, or business
-   outcome.
+3. Classify each signal as symptom, likely cause, diagnostic context, or
+   business outcome. Record whether it drives an alert, supports investigation,
+   or appears only in a review dashboard.
 4. Define a target, warning level, critical condition, owner, review cadence, and
    response for each actionable signal.
-5. Identify blind spots and unsupported expectations before implementation.
+5. List each required condition that the selected telemetry cannot detect.
+   Record the resulting risk, compensating check, owner, and planned resolution.
 
 **Implementation resources**
 
@@ -236,15 +240,23 @@ arrives.
 
 ### Telemetry preparation
 
-1. Define stable service, agent, version, environment, conversation/session, and
-   release identifiers.
-2. Instrument the critical path across agent invocation, model calls, tool/action
-   use, retrieval, connectors, and downstream dependencies where supported.
+1. Define the attribute name and source for service, agent, version,
+   environment, conversation or session, response or trace, and release
+   identity. Use the same values in deployment records, traces, and evaluation
+   evidence.
+2. Enable Foundry server-side tracing for hosted execution. Add client-side
+   OpenTelemetry only for custom application steps that the platform trace does
+   not capture, such as pre-processing, post-processing, or external
+   dependencies.
 3. Capture status, duration, dependency outcome, usage, and safe business context.
 4. Avoid placing secrets, access tokens, unnecessary prompts/responses, personal
    data, or sensitive tool payloads in telemetry.
-5. Configure redaction, sampling, retention, access, and export controls.
-6. Generate controlled traffic and verify end-to-end correlation before release.
+5. Record the redaction rules, sampling rate, retention period, access group,
+   and permitted export destination. Test one sensitive field and confirm that
+   it is removed or protected as designed.
+6. Generate one controlled request and confirm that the same agent version,
+   response or trace ID, tool calls, dependency results, and release identity
+   can be followed from Foundry to Application Insights.
 
 **Implementation resources**
 
@@ -254,7 +266,9 @@ arrives.
 
 ### Dashboard preparation
 
-Build role-oriented views rather than one universal dashboard:
+Build role-oriented views rather than one universal dashboard. For each view,
+record its audience, questions answered, source queries, filters, refresh
+expectation, and owner:
 
 - **Service owner:** availability, success, latency, volume, cost, and releases.
 - **Agent engineer or maker:** failed sessions/runs, model and tool behavior,
@@ -273,14 +287,17 @@ Build role-oriented views rather than one universal dashboard:
 
 ### Alert preparation
 
-1. Alert only on conditions that require action.
+1. Create an alert only when a named owner has a documented action for the
+   condition.
 2. Combine symptom and diagnostic context where possible.
-3. Define severity, threshold, evaluation window, suppression, owner, and
-   escalation.
+3. Record severity, threshold, evaluation window, no-data behavior,
+   suppression, owner, and escalation for each alert.
 4. Include links to the relevant dashboard, query, session/trace search, recent
    release, and runbook.
 5. Distinguish no-traffic/no-data from healthy behavior.
-6. Test access from the on-call identity, not only the implementer's account.
+6. Sign in with a representative on-call identity and confirm that it can open
+   the alert, linked dashboard or query, trace evidence, and runbook without
+   receiving broader data access than required.
 
 **Implementation resources**
 
@@ -313,11 +330,20 @@ product step in this field guide.
 
 ### Microsoft Foundry preparation
 
-- Connect Application Insights to the Foundry project.
-- Verify server-side traces and Agent Monitoring Dashboard data.
-- Confirm Application Insights and Log Analytics access.
-- Add client-side OpenTelemetry instrumentation for custom logic where needed.
-- Define scheduled or continuous evaluation where supported and appropriate.
+- Connect Application Insights to the Foundry project and record the connected
+  resource.
+- Run one agent request and confirm that a server-side trace appears with its
+  response or trace ID, duration, status, and agent version.
+- Open the Agent Monitoring Dashboard and confirm that the request contributes
+  to the expected operational view.
+- Use the designated operator identity to query the connected Application
+  Insights and Log Analytics data.
+- Add client-side OpenTelemetry instrumentation only for a custom application
+  step that is missing from the server-side trace. Generate another request and
+  confirm that the new span appears under the same trace.
+- Select scheduled evaluation for a fixed review cadence or continuous
+  evaluation for sampled live traffic where supported. Record the evaluation
+  type, data source, evaluators, schedule or sampling rule, and owner.
 
 **Implementation resources**
 
@@ -381,7 +407,7 @@ diagnose realistic failures.
 - End-to-end telemetry verification record
 - Dashboard and query validation
 - Alert delivery and actionability results
-- Game-day timeline and findings
+- Operational rehearsal timeline and findings
 - Updated runbook outlines
 - Operational readiness decision
 
@@ -394,23 +420,27 @@ controls, and operating practice.
 
 ### Activities
 
-1. Establish daily, weekly, monthly, and release-based review cadences according
-   to signal urgency.
+1. For each daily, weekly, monthly, or release-based review, record the owner,
+   inputs, questions to answer, decisions that can be made, output location, and
+   next scheduled date.
 2. Review trends by agent and release version, channel, user journey, language,
    tool, and dependency.
-3. Sample and human-review quality or safety cases according to approved privacy
-   rules.
+3. Select quality or safety cases using the approved sampling rule. Record the
+   reviewer, evidence viewed, decision, rationale, and required follow-up without
+   copying unapproved sensitive content.
 4. Promote reviewed incidents, failed traces, user feedback, and edge cases into
    maintained evaluation datasets.
 5. Link improvements to the originating evidence and verify them with the same
    regression case.
 6. Tune alerts when they are noisy, late, unactionable, or blind to meaningful
    failures.
-7. Review telemetry cost, sampling, retention, and access.
-8. Review platform changes, preview status, deprecations, model changes,
-   connector changes, and policy updates.
-9. Conduct periodic service reviews across product, engineering, operations,
-   quality, safety, and business stakeholders.
+7. Compare telemetry ingestion, retention, and query cost with the approved
+   limits. Record any sampling, retention, or access change and its expected
+   diagnostic impact.
+8. For each platform, preview, model, connector, or policy change, record the
+   affected agent capability, required test, owner, and target date.
+9. In each service review, record decisions, accepted risks, owners, due dates,
+   and the evidence that triggered each improvement.
 
 **Implementation resources**
 
@@ -450,10 +480,16 @@ Ensure designated teams can monitor, diagnose, respond, and improve independentl
    boundaries.
 2. Demonstrate trace/session lookup from an alert through likely root cause and
    release identity.
-3. Have designated operators run a game-day scenario using
-   organization-managed access.
-4. Review privacy, transcript, trace, and sensitive-data handling.
-5. Review recurring service, quality, safety, cost, and access reviews.
+3. Have designated operators run one operational rehearsal using
+   organization-managed access. Require them to locate the alert, trace,
+   dependency evidence, response procedure, and recovery verification without
+   implementation-team assistance.
+4. Have the privacy owner locate one transcript or trace, verify the applicable
+   access and retention controls, and explain how sensitive content is redacted
+   or restricted.
+5. Have each review owner open the recurring service, quality, safety, cost, or
+   access review record and identify its inputs, decisions, next date, and
+   unresolved actions.
 6. Transfer dashboards, queries, alerts, runbook outlines, and evaluation links.
 7. Record ownership, support paths, escalation contacts, and next review dates.
 

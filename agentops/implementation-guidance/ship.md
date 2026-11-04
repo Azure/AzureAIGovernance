@@ -150,16 +150,23 @@ environments, evidence, approvals, and failure behavior explicit.
 
 ### Activities
 
-1. Map source change through build, evaluation, approval, deployment,
-   verification, and rollback.
-2. Define the release unit and exact version identity carried through every stage.
-3. Identify all environment-specific values and post-deployment actions.
+1. Draw the release path from source change through build, evaluation,
+   approval, deployment, verification, and rollback. For each stage, name its
+   input, output, owner, and blocking failure.
+2. Record the fields that identify one release unit at every stage, including
+   repository commit, agent name and version, deployment artifact,
+   infrastructure version, and target environment.
+3. Create an environment mapping for connections, endpoints, model
+   deployments, knowledge sources, identities, configuration values, and
+   post-deployment actions.
 4. Create a control matrix with required evidence, gate behavior, owner, and
    exception authority.
-5. Identify compliance, network, data residency, identity, and change-management
-   constraints.
-6. Define the minimum viable release path before adding advanced rings,
-   schedules, or orchestration.
+5. For each compliance, network, data residency, identity, or change-management
+   constraint, record the affected stage, required evidence, owner, and behavior
+   when the requirement is not met.
+6. Select one minimum release path and name its required stages, gates, approval,
+   production target, verification check, and rollback point before adding
+   rings, schedules, or additional orchestration.
 
 **Implementation resources**
 
@@ -261,19 +268,23 @@ first pipeline execution.
 
 ### Source and version preparation
 
-1. Inventory all source-controlled and externally managed agent components.
+1. Inventory each source-controlled and externally managed agent component.
+   Record its source, owner, version or revision, deployment method, and how the
+   pipeline verifies it.
 2. Define the canonical version identity:
    - repository commit;
    - agent name and version;
    - deployment artifact identity; and
    - infrastructure and configuration version.
-3. Protect main and release branches according to organizational policy.
+3. Protect main and release branches according to organizational policy. Verify
+   that a direct push is rejected and that a failed required check blocks merge.
 4. Require review for instructions, prompts, tools, knowledge configuration,
    safety controls, and infrastructure changes.
 5. Keep evaluation data, gate configuration, and release evidence versioned or
    linked to an immutable storage record.
-6. Define dependency pinning and provenance for packages, images, models, custom
-   connectors, and external APIs where supported.
+6. For packages, images, models, custom connectors, and external APIs, record
+   the exact version or deployment, source, approval status, and verification
+   method where the platform supports it.
 
 **Implementation resources**
 
@@ -283,10 +294,15 @@ first pipeline execution.
 
 ### Environment preparation
 
-1. Verify development, test, and production ownership and access boundaries.
+1. Name the owning group and permitted roles for development, test, and
+   production. Use a representative pipeline or operator identity to verify the
+   intended access and one prohibited action.
 2. Configure organization-managed pipeline identities and least-privilege roles.
 3. Configure approved secret and certificate storage.
-4. Establish environment-specific configuration and connection mappings.
+4. Create an environment-specific mapping for each connection, endpoint,
+   identity, secret reference, model deployment, and knowledge source. Mark
+   which values are supplied by the pipeline and which are configured after
+   deployment.
 
 **Implementation resources**
 
@@ -294,8 +310,9 @@ first pipeline execution.
 - [Scope Foundry roles for people, pipelines, agents, and observability](https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry)
 - [Protect and rotate application secrets and certificates](https://learn.microsoft.com/azure/security/fundamentals/secrets-best-practices)
 
-5. Validate network paths, private access, DNS, firewalls, and service
-   availability from the pipeline runner.
+5. From the pipeline runner, resolve required DNS names, authenticate with the
+   pipeline identity, and call each required Foundry or Azure endpoint. Record
+   the failing hop when a connection does not succeed.
 6. Seed representative nonproduction knowledge and test identities without
    copying unapproved production data.
 
@@ -304,9 +321,12 @@ first pipeline execution.
 - [Configure Foundry private endpoints, DNS, and secure client access paths](https://learn.microsoft.com/azure/foundry/how-to/configure-private-link)
 - [Select Foundry resource and project boundaries for isolated production data and workloads](https://learn.microsoft.com/azure/foundry/concepts/planning)
 
-7. Configure telemetry before production so deployment verification has signal.
-8. Confirm quotas, capacity, licenses, connectors, policies, and regional
-   support.
+7. Configure telemetry before production, send one controlled agent request,
+   and confirm that its agent version, response or trace ID, status, duration,
+   and dependencies appear in the selected monitoring destination.
+8. Record the available quota or capacity, required licenses, connector
+   availability, policy assignments, and regional support. Assign an owner to
+   every unresolved limit.
 
 **Implementation resources**
 
@@ -370,7 +390,8 @@ candidate promoted to the target environment.
 5. **Evaluation and safety gates**
    - run the approved smoke and regression sets;
    - execute required safety and Responsible AI checks;
-   - fail closed when required evidence is missing.
+   - stop the pipeline when required evidence is missing, incomplete, or cannot
+     be tied to the candidate version.
 
 **Implementation resources**
 
@@ -397,8 +418,10 @@ candidate promoted to the target environment.
 - [Promote one exact hosted-agent version at 100 percent and preserve the prior selector for rollback](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-production)
 
 8. **Post-deployment verification**
-   - verify agent identity/version, critical journeys, telemetry, access,
-     channel availability, and rollback readiness.
+   - invoke at least one approved critical journey against the production
+     endpoint;
+   - confirm the active agent version, expected response or action, trace,
+     channel access, and previous selector or artifact required for rollback.
 
 **Implementation resources**
 
@@ -447,16 +470,18 @@ Make release outcomes visible, reversible, and continuously improvable.
 
 ### Activities
 
-1. Define release health indicators and observation windows for errors, latency,
-   task outcomes, quality, safety, adoption, and dependency health.
+1. For each release health indicator, record the query or data source, expected
+   range, warning condition, rollback condition, observation window, and owner.
+   Cover errors, latency, task outcomes, quality, safety, adoption, and critical
+   dependencies.
 
 **Implementation resources**
 
 - [Use the Foundry Agent Monitoring Dashboard for operational metrics and continuous evaluation](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
 - [Instrument and analyze agent traces in Application Insights](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
 
-2. Establish a release calendar, freeze rules, maintenance windows, and
-   emergency-change process.
+2. Publish the release calendar, freeze dates, maintenance windows, required
+   approvers, and the exact condition that permits an emergency change.
 3. Document rollback and roll-forward triggers, authority, communications, and
    evidence requirements.
 4. Exercise rollback or redeployment of a known-good version in a nonproduction
@@ -468,11 +493,17 @@ Make release outcomes visible, reversible, and continuously improvable.
 - [Configure Azure Pipelines approvals, business hours, alert checks, and deployment locks](https://learn.microsoft.com/azure/devops/pipelines/process/approvals?view=azure-devops)
 - [Route hosted-agent traffic back to a known-good version without rebuilding](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-production)
 
-5. Record release metadata in the designated change and incident systems.
-6. Correlate production incidents and regressions with the release identity.
-7. Feed reviewed production failures into evaluation and future release gates.
-8. Review identity, permissions, secrets, certificates, dependencies, and
-   platform deprecations on a defined cadence.
+5. Record the repository commit, agent version, target environment, pipeline
+   run, approver, deployment time, verification result, and rollback point in
+   the designated change record.
+6. Add the release identity and relevant trace or response IDs to every
+   production incident or regression record.
+7. Convert each approved production failure into a versioned evaluation case,
+   rerun it against the fix, and link the passing result to the next release
+   gate.
+8. Assign an owner and review date for identities, permissions, secrets,
+   certificates, dependencies, and platform deprecations. Record each required
+   rotation, upgrade, migration, or access change in the backlog.
 
 **Implementation resources**
 
@@ -497,13 +528,16 @@ Ensure designated teams can operate, troubleshoot, and evolve the release path.
 
 ### Knowledge transfer activities
 
-1. Walk through the topology, release unit, version identity, and control matrix.
+1. Have the release owner identify the source commit, candidate version,
+   environment mapping, required gates, approver, production target, and
+   rollback point from the transferred records.
 2. Demonstrate one release from approved source to post-deployment verification.
 3. Run a failure rehearsal, including a blocked gate and rollback decision.
 4. Have designated operators perform a nonproduction release using
    organization-managed identities.
-5. Review the Foundry agent, deployment, evaluation, tracing, and dependency
-   lifecycle.
+5. Have the designated owner locate the active Foundry agent version, latest
+   deployment record, evaluation evidence, trace destination, and dependency
+   inventory, then explain when each item must be updated.
 6. Transfer pipeline, environment, and evidence access to organization-managed
    groups.
 7. Record owners, escalation paths, support boundaries, and the next control
