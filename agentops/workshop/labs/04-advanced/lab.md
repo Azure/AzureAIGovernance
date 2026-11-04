@@ -9,9 +9,9 @@
 **Objective:** Close one Outlook-status incident from detection through
 pre-release prevention, failed-candidate evidence, recovery and monitoring.
 
-**Duration:** 150 minutes hands-on. Stop after step 3 for a 60-minute first
-session, or after step 5 for a 110-minute second session. Complete steps 6 and
-7 in the final 40 minutes.
+**Duration:** 140 minutes hands-on. Stop after step 3 for a 55-minute first
+session, or after step 5 for a 95-minute second session. Complete steps 6 and
+7 in the final 45 minutes. These totals match the seven action estimates.
 
 **Difficulty:** 400: Expert.
 
@@ -57,9 +57,9 @@ easy to audit.
 
 | Tool | Role in Advanced |
 | --- | --- |
-| Microsoft Foundry evaluation | Runs the dataset against the exact test-agent version and retains responses, scores, reasons and run identifiers |
+| Microsoft Foundry evaluation | Runs the dataset against the exact candidate version and retains responses, scores, reasons and run identifiers |
 | `critical-case-gate.py` | Fails when any critical dataset case is absent, has an error or has an evaluator score below its minimum |
-| `smoke-outlook-status.sh` | Calls the deployed test agent and checks the Outlook answer independently of evaluator scores |
+| `smoke-outlook-status.sh` | Calls the exact candidate version and checks the Outlook answer independently of evaluator scores |
 | Pipeline artifact | Retains the report, gate result, smoke log, runbook and evidence manifest |
 | Git | Preserves the regression control, deliberate defect and recovery as separate commits |
 
@@ -69,7 +69,7 @@ easy to audit.
 
 - **Purpose:** Put the dataset, gates, tests and runbook beside the code they protect.
 - **Navigation:** Open the Advanced lab folder in File Explorer, type `powershell` in the address bar, and run the block below.
-- **Result:** Six local tests pass in `$HOME\agentops-ship`.
+- **Result:** Seven local tests pass in `$HOME\agentops-ship`.
 - **If it fails:** Stop before editing the pipeline. Fix the missing file or failing local test first.
 - **Save:** Keep the copied `evidence`, `runbooks`, `scripts` and `tests` folders.
 - **Time:** 10 minutes.
@@ -100,10 +100,10 @@ Copy-Item "$AdvancedRoot\scripts\evidence-manifest.py" scripts\evidence-manifest
 Copy-Item "$AdvancedRoot\scripts\smoke-outlook-status.sh" scripts\smoke-outlook-status.sh
 Copy-Item "$AdvancedRoot\scripts\run-release-controls.sh" scripts\run-release-controls.sh
 Copy-Item "$AdvancedRoot\tests\test_advanced_controls.py" tests\test_advanced_controls.py
-python tests\test_advanced_controls.py -v
+py -3.11 tests\test_advanced_controls.py -v
 ```
 
-**Expected result:** six tests pass. Stop if a test fails; do not put an
+**Expected result:** seven tests pass. Stop if a test fails; do not put an
 untested gate into the pipeline.
 
 ## 2. Add the Outlook regression and runbook
@@ -189,7 +189,7 @@ Add these controls to the pipeline you created in Ship.
         continue-on-error: true
         run: |
           bash scripts/run-release-controls.sh \
-            helpdesk-ALIAS-test "${{ needs.candidate.outputs.version }}"
+            helpdesk-ALIAS "${{ needs.candidate.outputs.version }}"
 ```
 
 **What this block does:** writes retained provenance even when a preceding evaluation or gate fails.
@@ -198,7 +198,7 @@ Add these controls to the pipeline you created in Ship.
       - name: Write evidence manifest
         if: always()
         env:
-          TEST_AGENT: helpdesk-ALIAS-test
+          TEST_AGENT: helpdesk-ALIAS
           TEST_AGENT_VERSION: ${{ needs.candidate.outputs.version }}
           PIPELINE_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SOURCE_COMMIT: ${{ github.sha }}
@@ -249,7 +249,7 @@ Pipelines variable, and allows the evidence tasks to continue.
               inlineScript: |
                 set +e
                 export AGENTOPS_AGENT
-                AGENTOPS_AGENT=$(cat "$(Pipeline.Workspace)/candidate-version/candidate-version.txt")
+                AGENTOPS_AGENT=$(cat "$(Pipeline.Workspace)/ship-candidate/candidate-version.txt")
                 agentops eval run --config "$(AGENTOPS_CONFIG)"
                 code=$?
                 echo "##vso[task.setvariable variable=AGENTOPS_EVAL_EXIT_CODE]$code"
@@ -280,15 +280,15 @@ candidate version.
                 azd extension install azure.ai.agents --version "1.0.0-beta.23"
                 azd config set auth.useAzCliAuth "true"
                 bash scripts/configure-azd.sh
-                candidate_version=$(cat "$(Pipeline.Workspace)/candidate-version/candidate-version.txt")
-                bash scripts/run-release-controls.sh helpdesk-ALIAS-test "$candidate_version"
+                candidate_version=$(cat "$(Pipeline.Workspace)/ship-candidate/candidate-version.txt")
+                bash scripts/run-release-controls.sh helpdesk-ALIAS "$candidate_version"
 ```
 
 **What this block does:** writes the manifest and assembles one retained artifact on every outcome.
 
 ```yaml
           - bash: |
-              TEST_AGENT_VERSION="$(cat "$(Pipeline.Workspace)/candidate-version/candidate-version.txt")" \
+              TEST_AGENT_VERSION="$(cat "$(Pipeline.Workspace)/ship-candidate/candidate-version.txt")" \
               python scripts/evidence-manifest.py \
                 --dataset turns.jsonl \
                 --config agentops.yaml \
@@ -303,7 +303,7 @@ candidate version.
             displayName: Assemble incident evidence
             condition: always()
             env:
-              TEST_AGENT: helpdesk-ALIAS-test
+              TEST_AGENT: helpdesk-ALIAS
               PIPELINE_RUN_URL: $(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
               SOURCE_COMMIT: $(Build.SourceVersion)
 ```
@@ -323,7 +323,7 @@ Run the local tests again, then commit and push.
 **What this block does:** tests the controls, commits them with the regression case and starts the last-good run.
 
 ```powershell
-python tests\test_advanced_controls.py -v
+py -3.11 tests\test_advanced_controls.py -v
 git add -A
 git commit -m "Add Outlook incident release controls"
 git push
@@ -331,7 +331,7 @@ git push
 
 **Expected result:** the tests pass and a pipeline run starts.
 
-**Stopping point:** end a 60-minute session here. The committed branch is safe
+**Stopping point:** end a 55-minute session here. The committed branch is safe
 to resume later.
 
 ## 4. Record the last good release
@@ -358,7 +358,7 @@ which deployment probably worked.
 7. Add the run URL, commit and released version to the runbook.
 
 **Expected result:** one successful run retains the dataset hash, evaluator
-names, Foundry evaluation ID and run ID, test-agent version, commit, smoke log
+names, Foundry evaluation ID and run ID, candidate version, commit, smoke log
 and run URL. Treat it as the last good release.
 
 ## 5. Prove that the gates stop the incident
@@ -474,7 +474,8 @@ need an explicit native Foundry equivalent.
    - Use [Convert agent traces into evaluation datasets](https://learn.microsoft.com/azure/foundry/observability/how-to/traces-to-dataset)
      to create a reusable evaluation dataset from reviewed production traces.
    - Use [Monitor agents with the Agent Monitoring Dashboard](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard#set-up-continuous-evaluation)
-     to define recurring evaluation for sampled live traffic.
+     to define recurring evaluation for sampled live traffic where that preview
+     capability is available.
 5. Record an owner, due date, privacy review and acceptance criterion for the
    chosen follow-on. Do not enable it in the shared workshop project.
 

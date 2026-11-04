@@ -44,7 +44,7 @@ fails.
 - [ ] Evaluation completed with no missing rows or scorer errors.
 - [ ] Every `outlook-status-unsupported` score met its configured minimum.
 - [ ] The critical-case gate passed every critical dataset case.
-- [ ] The test-agent Outlook smoke test stated the limitation and offered escalation.
+- [ ] The exact candidate-version Outlook smoke test stated the limitation and offered escalation.
 - [ ] The released-agent VPN smoke test passed.
 - [ ] A post-release Outlook trace showed the unsupported-service error.
 - [ ] The released answer did not claim that Outlook was operational or unavailable.

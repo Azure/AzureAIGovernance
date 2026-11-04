@@ -11,7 +11,8 @@ agent. Use the native Microsoft Foundry dashboard first, correlate one response
 with its exact trace, measure the defect for one agent version, fire an alert,
 and record the operational response.
 
-**Duration:** 60 minutes hands-on after the presentation.
+**Duration:** 75 minutes hands-on after the presentation. The actions require
+60 minutes of active work and reserve 15 minutes for alert evaluation.
 
 **Difficulty:** 300: Advanced.
 
@@ -21,8 +22,9 @@ Accelerator CLI health report.
 
 **Prerequisite:** Complete
 [participant pre-work](../../pre-work/README.md#observe-and-operate) and have the
-invitation's **Observe settings** open. Use the released agent and version named
-there. You do not deploy or change the agent in this lab.
+Ship's `release-manifest.json` open. Use its `released.service` and
+`released.version`. If you take this module without Ship, use the invitation's
+**Observe settings** fallback. You do not deploy or change the agent in this lab.
 
 **On this page**
 
@@ -59,10 +61,10 @@ future evaluation.
 
 | Tool | Role in this lab |
 | --- | --- |
-| Microsoft Foundry Agent Monitoring Dashboard | First operational view for traffic, latency, token use, success and evaluation signals |
+| Microsoft Foundry Agent Monitoring Dashboard (preview) | First operational view for traffic, latency, token use, success and evaluation signals |
 | Microsoft Foundry Tracing | Exact request, response, spans, Response ID and Trace ID |
 | Application Insights Logs | Structured telemetry discovery and version-scoped KQL |
-| Azure Monitor alerts | Scheduled detection and a retained fired-alert record |
+| Azure Monitor log alerts (generally available) | Scheduled detection and a retained fired-alert record |
 | AgentOps Accelerator CLI | Supporting health report after native monitoring |
 
 ## 1. Create the evidence folder
@@ -72,8 +74,8 @@ future evaluation.
 - **Purpose:** Keep every result tied to one released agent version.
 - **Navigation:** In File Explorer, open
   `agentops\workshop\labs\03-observe-operate`. Type `powershell` in the address
-  bar and press Enter. Enter the project endpoint, agent name and released
-  version from **Observe settings**.
+  bar and press Enter. Enter   the project endpoint, agent name and released version from
+  `release-manifest.json`, or from **Observe settings** for standalone delivery.
 - **Result:** PowerShell creates an evidence folder and opens
   `observe-evidence.md` with the exact target and start time.
 - **If it fails:** Stop if any assigned value is missing. Ask the instructor for
@@ -186,11 +188,12 @@ $RawText
 ### Action 4: Open the trace for the exact Response ID
 
 - **Purpose:** Prove which action produced the complaint without relying on time alone.
-- **Navigation:** In Foundry, open **Observability > Traces**. Filter for
+- **Navigation:** In Foundry, open **Agents > Traces**, or open the selected
+  agent and select its **Traces** tab. Filter for
   `$ResponseId`, open the matching trace, and copy its **Trace ID**. Open the
   `execute_tool check_service_status` span.
 - **Result:** The trace has the same request and answer as
-  `complaint-response.json`. The tool arguments contain
+  `complaint-response.txt`. The tool arguments contain
   `service="outlook"`, and the result contains the exact unsupported-service
   error. The trace identifies the assigned agent and released version.
 - **If it fails:** Mark **correlation not verified**. Do not substitute a nearby
@@ -313,9 +316,11 @@ If Action 5 shows the version in another `Attributes` field, replace only the
 - **Result:** Within 10 to 15 minutes, an alert instance has monitor condition
   **Fired**. Open it and match its time, agent and version to the new request.
   Continue with Action 9 while Azure evaluates the rule.
-- **If it fails:** After 15 minutes, run the alert query over the same lookback.
-  Record whether ingestion was late, the query returned zero rows, or the rule
-  evaluation failed. Do not record the alert test as passed.
+- **If it fails:** At minute 15, stop waiting. Run the alert query over the same
+  lookback and record whether ingestion was late, the query returned zero rows,
+  or rule evaluation failed. Then inspect the instructor's retained fired alert
+  for the same fallback identity and version. Label it **instructor
+  demonstration** and do not record your own alert test as passed.
 - **Save:** Export or capture the fired alert details as allowed, and record its
   alert instance ID and fired time in `observe-evidence.md`.
 - **Time:** 5 minutes active work, with up to 15 minutes elapsed in parallel.

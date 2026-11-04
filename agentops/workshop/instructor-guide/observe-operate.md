@@ -84,7 +84,7 @@ queries, alerts and later evaluation.
 Present AgentOps Accelerator as a supporting health check after native
 monitoring, not as the product monitoring surface.
 
-## Hands-on lab (60 minutes)
+## Hands-on lab (75 minutes)
 
 Use the lab's time plan:
 

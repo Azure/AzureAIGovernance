@@ -41,13 +41,37 @@ and Operate, or Advanced.
 
 You rehearse with the same repository that participants clone.
 
-**What this block does:** downloads the course files to Documents\AgentOps-workshop and prints their path.
+**What this block does:** checks Git and the commit identity needed later, then
+downloads or resumes the canonical course repository.
 
 ```powershell
+$ErrorActionPreference = 'Stop'
+git --version
+if ($LASTEXITCODE -ne 0) { throw 'Git is unavailable. Install Git for Windows, reopen PowerShell, and retry.' }
+$GitName = [string](git config --global user.name)
+$GitEmail = [string](git config --global user.email)
+$GitName = $GitName.Trim()
+$GitEmail = $GitEmail.Trim()
+if (-not $GitName -or -not $GitEmail) {
+    throw 'Set git config --global user.name and user.email before cloning or creating the class repository.'
+}
 $Root = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'AgentOps-workshop'
 New-Item -ItemType Directory -Force $Root | Out-Null
-git clone https://github.com/placerda/AzureAIGovernance.git (Join-Path $Root 'AzureAIGovernance')
-Join-Path $Root 'AzureAIGovernance'
+$Repo = Join-Path $Root 'AzureAIGovernance'
+$ExpectedRemote = 'https://github.com/placerda/AzureAIGovernance.git'
+if (-not (Test-Path $Repo)) {
+    git clone $ExpectedRemote $Repo
+} else {
+    $ActualRemote = [string](git -C $Repo remote get-url origin)
+    $ActualRemote = $ActualRemote.Trim()
+    if ($LASTEXITCODE -ne 0 -or $ActualRemote -ne $ExpectedRemote) {
+        throw "Existing repository origin '$ActualRemote' does not match '$ExpectedRemote'."
+    }
+    git -C $Repo switch main
+    git -C $Repo pull --ff-only origin main
+}
+if ($LASTEXITCODE -ne 0) { throw 'Course repository preparation failed.' }
+$Repo
 ```
 
 If the folder already exists, run `git -C <path> pull` instead.
@@ -216,9 +240,10 @@ instead of running it again.
 ### Ship
 
 Participants build their own release pipeline in a **class repository** that
-you prepare once for the whole class. Each participant works on a branch of it
-and deploys two agents of their own, so nobody overwrites anyone else.
-Allow 75 to 90 minutes for the GitHub Actions lab. Allow up to 120 minutes for
+you prepare once for the whole class. Each participant works on a branch and
+deploys versions under one alias-specific agent identity, so nobody overwrites
+another participant.
+Allow 90 minutes for the GitHub Actions lab. Allow 120 minutes for
 Azure Pipelines because participants must also create and select their
 pipeline. The Azure administrator's preparation time is separate.
 
@@ -254,6 +279,14 @@ You only copy that folder and push it.
 $ErrorActionPreference = 'Stop'
 if (-not $RepoRoot -or -not $ProjectEndpoint) { throw 'Run step 1 and environment setup step 5 in this window first.' }
 $Class = Join-Path $HOME 'agentops-ship-class'
+if (Test-Path $Class) {
+    if (-not (Test-Path (Join-Path $Class '.git'))) {
+        throw "$Class already exists but is not the prepared class repository. Move or remove it."
+    }
+    $ActualClassRemote = [string](git -C $Class remote get-url origin)
+    $ActualClassRemote = $ActualClassRemote.Trim()
+    throw "$Class already exists with origin '$ActualClassRemote'. Reuse it only after comparing it with the class repository URL, or move it and start again."
+}
 Copy-Item "$RepoRoot\agentops\workshop\labs\02-ship\class-repo" $Class -Recurse
 Remove-Item "$Class\README.md"
 (Get-Content "$Class\agentops.yaml") -replace 'FOUNDRY_ENDPOINT', $ProjectEndpoint |
@@ -290,8 +323,10 @@ their own identity, never with a participant's password.
   scoped to the workshop resource group. Name it `agentops-azure` and select
   **Grant access permission to all pipelines**.
 
-Then give that identity **Foundry User** and **Contributor** on the workshop
-Foundry project, using the same **Access control (IAM)** steps as
+Then give that identity **Foundry User** on the parent Foundry resource so the
+evaluation judge can run inference. Preserve **Foundry User** and
+**Contributor** on the workshop Foundry project for deployment. Use the same
+**Access control (IAM)** steps as
 [environment setup step 4](foundry-environment.md#4-give-people-access).
 
 #### 4. Add the class settings
@@ -360,10 +395,11 @@ The pipeline pauses before each release until a person approves it. In GitHub
 or Azure DevOps, `dev` and `production` are the two stages of the pipeline:
 `production` holds the approval rule.
 
-In Azure, both stages deploy to the same workshop Foundry project, to keep the
-setup short. They stay apart by agent name: `helpdesk-ALIAS-test` for `dev`,
-`helpdesk-ALIAS` for `production`. In a real rollout, each stage usually has
-its own Foundry project.
+In Azure, both pipeline environments use the same workshop Foundry project to
+keep setup short. The `dev` environment deploys and evaluates an exact version
+of `helpdesk-ALIAS`. The `production` environment protects the endpoint-selector
+change for that same identity. In a real rollout, environments usually bind to
+separate Foundry projects.
 
 - **GitHub Actions:** **Settings > Environments**, create `dev` with no rules,
   then `production` with **Required reviewers** set to a team that contains
@@ -424,7 +460,7 @@ create and test an alert. There is nothing to package.
 Advanced continues in each participant's Ship branch and needs no new Azure
 resource.
 Run [the Advanced lab](../labs/04-advanced/lab.md) once on your `rehearsal`
-branch, after your Ship and Observe rehearsals. Allow 150 minutes. Confirm that
+branch, after your Ship and Observe rehearsals. Allow 140 minutes. Confirm that
 the local Advanced tests pass, then retain the last-good, failed and recovery
 runs and their incident evidence artifacts.
 
@@ -459,7 +495,7 @@ Hi everyone,
 You are invited to the AgentOps workshop on <date>, <start time> to <end time> (<time zone>).
 
 Before the session, complete the pre-work for the modules whose settings appear below:
-https://github.com/Azure/AzureAIGovernance/blob/main/agentops/workshop/pre-work/README.md
+https://github.com/placerda/AzureAIGovernance/blob/main/agentops/workshop/pre-work/README.md
 
 Access
 - Foundry project: <project link>

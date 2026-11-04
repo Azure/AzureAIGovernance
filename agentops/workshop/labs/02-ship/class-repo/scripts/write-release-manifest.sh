@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
-# Records the evaluated and released identities, versions, source fingerprint,
-# and pipeline provenance after the exact released version passes its smoke test.
-# Usage: bash scripts/write-release-manifest.sh TEST_SERVICE TEST_VERSION RELEASE_SERVICE RELEASE_VERSION OUTPUT
+# Records the evaluated and promoted version, previous selector, source
+# fingerprint and pipeline provenance after the exact version passes smoke.
+# Usage: bash scripts/write-release-manifest.sh SERVICE VERSION PREVIOUS_SELECTOR OUTPUT
 set -euo pipefail
 
-test_service="${1:-}"
-test_version="${2:-}"
-release_service="${3:-}"
-release_version="${4:-}"
-output="${5:-release-manifest.json}"
-if [ -z "$test_service" ] || [ -z "$test_version" ] || \
-   [ -z "$release_service" ] || [ -z "$release_version" ]; then
-  echo "Usage: $0 TEST_SERVICE TEST_VERSION RELEASE_SERVICE RELEASE_VERSION [OUTPUT]" >&2
+service="${1:-}"
+version="${2:-}"
+previous_selector="${3:-}"
+output="${4:-release-manifest.json}"
+if [ -z "$service" ] || [ -z "$version" ] || [ -z "$previous_selector" ]; then
+  echo "Usage: $0 SERVICE VERSION PREVIOUS_SELECTOR [OUTPUT]" >&2
   exit 2
 fi
 
@@ -21,33 +19,31 @@ created_at="${RELEASE_CREATED_AT:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
 pipeline_url="${RELEASE_PIPELINE_URL:-unknown}"
 extension_version="${AZD_AI_AGENTS_EXTENSION_VERSION:-1.0.0-beta.23}"
 
-export test_service test_version release_service release_version output
+export service version previous_selector output
 export commit fingerprint created_at pipeline_url extension_version
 python - <<'PY'
 import json
 import os
 from pathlib import Path
 
+previous = json.loads(Path(os.environ["previous_selector"]).read_text(encoding="utf-8"))
 manifest = {
     "schema_version": 1,
     "created_at_utc": os.environ["created_at"],
     "promotion": {
-        "mode": "rebuild-from-reviewed-source",
-        "exact_version_promotion": False,
-        "claim": (
-            "The two agents are distinct identities with independently assigned "
-            "versions. Equivalence is established at source and configuration "
-            "level by the commit and fingerprint, not by claiming one immutable "
-            "runtime artifact was promoted."
-        ),
+        "mode": "single-agent-version-selector",
+        "exact_version_promotion": True,
+        "selected_traffic_percentage": 100,
+        "previous_selector": previous,
+        "rollback": "Restore previous_selector and run azd ai agent endpoint update.",
     },
     "evaluated": {
-        "service": os.environ["test_service"],
-        "version": os.environ["test_version"],
+        "service": os.environ["service"],
+        "version": os.environ["version"],
     },
     "released": {
-        "service": os.environ["release_service"],
-        "version": os.environ["release_version"],
+        "service": os.environ["service"],
+        "version": os.environ["version"],
         "smoke_test": "passed",
         "tool_evidence": {
             "queue": "Network Support",

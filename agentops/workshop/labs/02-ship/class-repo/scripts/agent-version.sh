@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Prints the version number of an agent service that azd has deployed.
-# Usage: bash scripts/agent-version.sh helpdesk-alias-test
+# Usage: bash scripts/agent-version.sh helpdesk-ALIAS
 set -euo pipefail
 
 service="${1:-}"

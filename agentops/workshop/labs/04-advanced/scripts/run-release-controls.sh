@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Runs both release defenses and returns failure only after both produce evidence.
-# Usage: bash scripts/run-release-controls.sh helpdesk-alias-test 3
+# Usage: bash scripts/run-release-controls.sh helpdesk-alias 3
 set -u
 
-service="${1:?Pass the deployed test-agent service name.}"
-version="${2:?Pass the exact evaluated test-agent version.}"
+service="${1:?Pass the deployed agent service name.}"
+version="${2:?Pass the exact evaluated candidate version.}"
 mkdir -p evidence
 status=0
 

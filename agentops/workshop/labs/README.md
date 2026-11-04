@@ -11,9 +11,9 @@ selected in your invitation.** Teaching the workshop? Start with the
 | Order | Open this lab | What you will work on |
 | --- | --- | --- |
 | 1 | [Evaluate](01-evaluate/lab.md) | 60 minutes: compare exact agent versions using responses, tool actions and evaluation results |
-| 2 | [Ship](02-ship/lab.md) | 75 to 90 minutes: build a release pipeline that evaluates, waits for approval and releases your own agent |
-| 3 | [Observe and Operate](03-observe-operate/lab.md) | 60 minutes: investigate a complaint with traces, a scoped query and a fired alert, then decide the response |
-| Optional | [Advanced](04-advanced/lab.md) | 150 minutes: add a regression test and automatic gates, then prove recovery from the same incident |
+| 2 | [Ship](02-ship/lab.md) | 90 minutes with GitHub Actions or 120 minutes with Azure Pipelines: evaluate, approve and promote one exact agent version |
+| 3 | [Observe and Operate](03-observe-operate/lab.md) | 75 minutes: investigate a complaint with traces, a scoped query and a fired alert, then decide the response |
+| Optional | [Advanced](04-advanced/lab.md) | 140 minutes: turn the incident into a regression gate, prove containment, and recover the selected production version |
 
 The folder numbers show the sequence for the full workshop. You can also
 attend a single module: complete the common pre-work and that module's section.

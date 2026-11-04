@@ -11,6 +11,9 @@ INSTRUCTOR = (
 AGENT_INSTRUCTIONS = (
     ROOT.parent / "shared" / "helpdesk-agent" / "instructions.md"
 ).read_text(encoding="utf-8")
+PREWORK = (
+    ROOT.parent.parent / "pre-work" / "README.md"
+).read_text(encoding="utf-8")
 
 
 class ObserveLabContractTests(unittest.TestCase):
@@ -19,6 +22,9 @@ class ObserveLabContractTests(unittest.TestCase):
         self.assertIn("--version $AgentVersion", LAB)
         self.assertIn("--output raw", LAB)
         self.assertIn("agent-version", LAB)
+        self.assertIn("release-manifest.json", LAB)
+        self.assertIn("azd ext install azure.ai.agents", PREWORK)
+        self.assertIn("azd auth login --tenant-id", PREWORK)
 
     def test_deterministic_complaint_is_in_agent_contract(self):
         self.assertIn("check_service_status exactly once", AGENT_INSTRUCTIONS)
@@ -55,6 +61,9 @@ class ObserveLabContractTests(unittest.TestCase):
         self.assertIn("Trace ID", LAB)
         self.assertIn("correlated identifiers, not the same value", LAB)
         self.assertIn("monitor condition\n  **Fired**", LAB)
+        self.assertIn("complaint-response.txt", LAB)
+        self.assertNotIn("complaint-response.json", LAB)
+        self.assertIn("Agents > Traces", LAB)
 
     def test_artifacts_retention_case_and_follow_ons_exist(self):
         for text in (

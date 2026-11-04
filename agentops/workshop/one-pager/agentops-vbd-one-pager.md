@@ -1,7 +1,7 @@
 ---
 title: "AgentOps Value Based Delivery Workshop"
 subtitle: "Evaluate, Ship, Observe, and Operate Microsoft Foundry agents"
-duration: "6-6.5h hands-on; 4h demo"
+duration: "6h45 GitHub or 7h15 Azure Pipelines hands-on; 4h demo"
 structure: "Three modules"
 difficulty: "300: Advanced"
 delivery: "Remote or onsite"
@@ -29,7 +29,7 @@ AI agents. Familiarity with Azure and agent development is recommended.
 - Evaluate agent responses and actions.
 - Automate evaluation and deployment.
 - Monitor agent quality and performance.
-- Set up continuous evaluation.
+- Plan preview recurring evaluation.
 - Respond to failures and improve the agent.
 
 ## Methodology
@@ -42,9 +42,9 @@ AI agents. Familiarity with Azure and agent development is recommended.
 
 | Module | Topics |
 | --- | --- |
-| **Evaluate** | Foundry evaluators, test datasets, rubric evaluation, red teaming. |
+| **Evaluate** | Evaluators, datasets, rubrics, preview red-team scans. |
 | **Ship** | Versioning, CI/CD, release gates and approvals, rollback. |
-| **Observe<br/>and Operate** | Tracing, monitoring, continuous evaluation, alerts and notifications, incident response. |
+| **Observe<br/>and Operate** | Traces, preview dashboard and recurring evaluation, Azure Monitor alerts, incidents. |
 
 Observe and Operate are distinct practices taught together.
 
@@ -61,13 +61,13 @@ The learning environment and participant setup are prepared before the session.
 | Module | Duration | Learning artifact |
 | --- | --- | --- |
 | Evaluate | 2h hands-on<br/>1h 20m demo | Sample evaluation criteria |
-| Ship | 2h 15m-2h 30m hands-on<br/>1h 20m demo | Sample release checklist |
-| Observe<br/>and Operate | 2h hands-on<br/>1h 20m demo | Sample runtime<br/>signal review |
+| Ship | 2h 30m GitHub or 3h Azure Pipelines hands-on<br/>1h 20m demo | Sample release checklist |
+| Observe<br/>and Operate | 2h 15m hands-on<br/>1h 20m demo | Sample runtime<br/>signal review |
 
 ## Format
 
-- **Hands-on:** 60m presentation per module, 60m labs for Evaluate and
-  Observe/Operate, and a 75-90m Ship lab.
+- **Hands-on:** 60m presentation per module; labs are 60m Evaluate, 75m
+  Observe/Operate, and 90m GitHub or 120m Azure Pipelines Ship.
 - **Demo:** 60m presentation and 20m instructor demonstration per module.
 
 Take all three modules or select those relevant to your team.
@@ -85,7 +85,7 @@ to its own projects.
 
 ## Optional advanced module
 
-**Additional 2h 30m hands-on (level 400).**
+**Additional 2h 20m hands-on (level 400).**
 
-**Responsible AI in practice:** ASSERT; Agent Control Specification (ACS);
-Agent hooks.
+Turn one incident into a regression gate, prove containment, restore production,
+and retain recovery evidence and a tested runbook.

@@ -37,6 +37,10 @@ if [ "$1 $2" = "env get-value" ]; then
   printf '%s\n' "${FAKE_VERSION:-7}"
 elif [ "$1 $2 $3" = "ai agent show" ]; then
   printf '{"agent":{"version":"%s"}}\n' "${FAKE_VERSION:-7}"
+elif [ "$1 $2 $3" = "ai agent endpoint" ] && [ "$4" = "show" ]; then
+  printf '{"agentEndpoint":{"versionSelector":{"versionSelectionRules":[{"type":"FixedRatio","agentVersion":"%s","trafficPercentage":100}]}}}\n' "${FAKE_SELECTED_VERSION:-7}"
+elif [ "$1 $2 $3" = "ai agent endpoint" ] && [ "$4" = "update" ]; then
+  printf 'updated\n'
 elif [ "$1 $2 $3" = "ai agent invoke" ]; then
   printf '%s\n' "${FAKE_REPLY:-Ticket SIM-VPN-001 routed to Network Support}"
 else
@@ -50,6 +54,7 @@ fi
         fake_azd.chmod(0o755)
         self.env = dict(os.environ)
         self.env["PATH"] = str(self.bin) + os.pathsep + self.env.get("PATH", "")
+        self.env["SELECTOR_EVIDENCE_FILE"] = str(self.work / "selected-selector.json")
 
     def run_script(self, name, *args, env=None):
         return subprocess.run(
@@ -79,8 +84,13 @@ fi
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("SIM-VPN-001", result.stderr)
 
-    def test_release_manifest_records_distinct_identities_and_provenance(self):
+    def test_release_manifest_records_single_identity_and_rollback_selector(self):
         output = self.work / "release-manifest.json"
+        selector = self.work / "previous-selector.json"
+        selector.write_text(
+            '{"versionSelectionRules":[{"type":"FixedRatio","agentVersion":"6","trafficPercentage":100}]}\n',
+            encoding="utf-8",
+        )
         env = dict(
             self.env,
             RELEASE_COMMIT="abc123",
@@ -91,18 +101,33 @@ fi
         )
         result = self.run_script(
             "write-release-manifest.sh",
-            "helpdesk-test", "7", "helpdesk", "3", output, env=env,
+            "helpdesk", "7", selector, output, env=env,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         manifest = json.loads(output.read_text(encoding="utf-8"))
-        self.assertFalse(manifest["promotion"]["exact_version_promotion"])
-        self.assertEqual(manifest["evaluated"], {"service": "helpdesk-test", "version": "7"})
+        self.assertTrue(manifest["promotion"]["exact_version_promotion"])
+        self.assertEqual(manifest["promotion"]["selected_traffic_percentage"], 100)
+        self.assertEqual(
+            manifest["promotion"]["previous_selector"]["versionSelectionRules"][0]["agentVersion"],
+            "6",
+        )
+        self.assertEqual(manifest["evaluated"], {"service": "helpdesk", "version": "7"})
         self.assertEqual(manifest["released"]["service"], "helpdesk")
-        self.assertEqual(manifest["released"]["version"], "3")
+        self.assertEqual(manifest["released"]["version"], "7")
         self.assertEqual(manifest["released"]["tool_evidence"]["ticket_reference"], "SIM-VPN-001")
         self.assertEqual(manifest["provenance"]["source_configuration_sha256"], "f" * 64)
 
-    def test_pipeline_guides_keep_stage_and_provenance_contract_aligned(self):
+    def test_endpoint_selector_requires_one_version_at_100_percent(self):
+        output = self.work / "selector.json"
+        result = self.run_script("read-endpoint-selector.sh", "helpdesk", output)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        selector = json.loads(output.read_text(encoding="utf-8"))
+        self.assertEqual(
+            selector["versionSelectionRules"],
+            [{"type": "FixedRatio", "agentVersion": "7", "trafficPercentage": 100}],
+        )
+
+    def test_pipeline_guides_keep_single_agent_promotion_contract_aligned(self):
         lab = ROOT.parent / "lab.md"
         guides = [
             ROOT.parent / "github-actions" / "README.md",
@@ -111,24 +136,32 @@ fi
         stages = (
             "Deploy candidate",
             "Evaluate candidate",
-            "Approve and release",
+            "Approve and promote",
             "Verify and record release",
         )
         for path in [lab, *guides]:
             text = path.read_text(encoding="utf-8")
             for stage in stages:
                 self.assertIn(stage, text, f"{stage} missing from {path}")
-            lowered = text.lower()
-            self.assertNotIn("promotes the same version", lowered)
-            self.assertNotIn("reuses the same immutable runtime", lowered)
+            self.assertIn("100 percent", text)
         lab_text = lab.read_text(encoding="utf-8")
-        self.assertIn("different agent identities", lab_text)
-        self.assertIn("independently assigned Foundry versions", lab_text)
+        self.assertIn("only agent identity", lab_text)
+        self.assertIn("previous selector", lab_text)
+        self.assertNotIn("helpdesk-ALIAS-test", lab_text)
         for path in guides:
             text = path.read_text(encoding="utf-8")
             self.assertIn("1.0.0-beta.23", text)
             self.assertIn("write-release-manifest.sh", text)
             self.assertIn("smoke-test.sh", text)
+            self.assertIn("promote-version.sh", text)
+
+    def test_self_service_clone_and_github_oidc_environment_are_guarded(self):
+        lab = (ROOT.parent / "lab.md").read_text(encoding="utf-8")
+        github = (ROOT.parent / "github-actions" / "README.md").read_text(encoding="utf-8")
+        self.assertIn("git remote get-url origin", lab)
+        verify = github[github.index("  verify:"):]
+        self.assertIn("environment: dev", verify)
+        self.assertIn("actions/download-artifact", verify)
 
 
 if __name__ == "__main__":

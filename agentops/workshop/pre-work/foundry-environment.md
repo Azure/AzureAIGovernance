@@ -195,10 +195,11 @@ created or connected in step 3.
 | Assign to | Role | Open this resource |
 | --- | --- | --- |
 | Instructor and attendees | Reader | Parent Foundry resource |
+| Instructor and attendees running judge-model evaluations | Foundry User | Parent Foundry resource |
 | Person deploying the models, if not already authorized | Contributor | Parent Foundry resource |
 | Instructor and attendees inspecting traces | Monitoring Reader | Connected Application Insights |
 | Instructor and attendees reading protected prompts, responses and tool content | Privileged Monitoring Data Reader | Connected Application Insights |
-| Instructor and attendees querying trace logs | Log Analytics Reader | Its Log Analytics workspace |
+| Instructor and attendees querying trace logs | Log Analytics Reader | Connected Application Insights and its Log Analytics workspace |
 | Attendees creating their own alert in Observe and Operate (optional) | Monitoring Contributor | Workshop resource group |
 
 For each required assignment:
@@ -214,7 +215,9 @@ must perform it. Do not broaden access to the subscription to clear an error.
 The workshop reads tool arguments and results from the protected
 `AppGenAIContent` table. Keep its protection enabled and grant
 **Privileged Monitoring Data Reader** only to the approved class group and
-instructor. Do not remove protection to clear an access error.
+instructor on the connected Application Insights resource, which is the query
+scope used by the lab. Do not assign the protected-content role at an unrelated
+workspace or remove protection to clear an access error.
 
 ### Let the project use its models
 

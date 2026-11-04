@@ -47,7 +47,8 @@ They will arrange access.
 
 ### Use a prepared machine, or install only missing tools
 
-**Every hands-on module needs Git, Python 3.11 and Azure CLI.**
+**Every hands-on module needs Git, Python 3.11 and Azure CLI. Observe and
+Operate also needs Azure Developer CLI (`azd`) and its Foundry agents extension.**
 Skip installation if the instructor provides a prepared machine.
 
 To check an existing installation, open **Start**, type **PowerShell**, and
@@ -59,10 +60,11 @@ output is missing or whose command is not recognized.
 | Git | Run the [Git for Windows installer](https://git-scm.com/download/win), then reopen PowerShell | `git --version` prints `git version` |
 | Python 3.11 | Install the [Python install manager for Windows](https://www.python.org/downloads/windows/), then run `pymanager install 3.11` | `py -3.11 --version` prints `Python 3.11.x` |
 | Azure CLI | Run the [official Windows installer](https://aka.ms/installazurecliwindowsx64), then reopen PowerShell | `az version` prints version details containing `azure-cli` |
+| Azure Developer CLI (`azd`), for Observe and Operate | Run `winget install microsoft.azd`, then reopen PowerShell | `azd version` prints version details |
 
 VS Code is a convenient editor, **not a requirement**. Use
 [VS Code](https://code.visualstudio.com/download) or an editor you already have.
-**No VS Code extension, Foundry Toolkit or azd is needed on your machine.**
+No VS Code extension or Foundry Toolkit is required.
 The labs use VS Code menu names; other editors can open the same files.
 
 If installation is blocked, contact the instructor for an approved machine.
@@ -78,8 +80,23 @@ and evaluation settings. Open **Start > PowerShell** and run:
 ```powershell
 $Root = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'AgentOps-workshop'
 New-Item -ItemType Directory -Force $Root | Out-Null
-git clone https://github.com/placerda/AzureAIGovernance.git (Join-Path $Root 'AzureAIGovernance')
-if ($LASTEXITCODE -ne 0) { throw 'Download failed. Contact the instructor.' }
+$Repo = Join-Path $Root 'AzureAIGovernance'
+$ExpectedRemote = 'https://github.com/placerda/AzureAIGovernance.git'
+if (-not (Test-Path $Repo)) {
+    git clone $ExpectedRemote $Repo
+    if ($LASTEXITCODE -ne 0) { throw 'Download failed. Contact the instructor.' }
+} else {
+    $ActualRemote = [string](git -C $Repo remote get-url origin)
+    $ActualRemote = $ActualRemote.Trim()
+    if ($LASTEXITCODE -ne 0 -or $ActualRemote -ne $ExpectedRemote) {
+        throw "Existing folder has origin '$ActualRemote', not '$ExpectedRemote'. Move or remove $Repo, then retry."
+    }
+    git -C $Repo fetch origin main
+    if ($LASTEXITCODE -ne 0) { throw 'Repository refresh failed. Contact the instructor.' }
+    git -C $Repo switch main
+    git -C $Repo pull --ff-only origin main
+    if ($LASTEXITCODE -ne 0) { throw 'Repository has local changes or cannot fast-forward. Contact the instructor.' }
+}
 ```
 
 This creates **Documents > AgentOps-workshop > AzureAIGovernance**. Instructions
@@ -218,12 +235,31 @@ Do not create a branch or run a pipeline during pre-work.
 ## Observe and Operate
 
 You will investigate the released help desk agent with its traces, a log query
-and an alert. You need the sign-in and the CLI from
-[Common preparation](#common-preparation), nothing else to install.
+and an alert. Ship participants take the agent name and version from their
+`release-manifest.json`. Participants taking Observe and Operate standalone use
+the fallback identity and version in the invitation.
+
+Install and authenticate the command that invokes the exact agent version.
+
+**What this block does:** installs or checks the Foundry agents extension and
+signs `azd` in to the invitation's tenant.
+
+```powershell
+azd version
+if ($LASTEXITCODE -ne 0) { throw 'Azure Developer CLI is unavailable. Install it from the table above, reopen PowerShell, and retry.' }
+azd ext install azure.ai.agents --version 1.0.0-beta.23
+if ($LASTEXITCODE -ne 0) { throw 'Foundry agents extension installation failed. Contact the instructor.' }
+azd ai agent version
+if ($LASTEXITCODE -ne 0) { throw 'Foundry agent commands are unavailable.' }
+$TenantId = Read-Host 'Tenant ID from the invitation'
+azd auth login --tenant-id $TenantId
+if ($LASTEXITCODE -ne 0) { throw 'Azure Developer CLI sign-in failed.' }
+```
 
 1. Open **Foundry project** from the invitation and select **Agents**. You
-   should see the agent and released version from your Ship lab, or **Agent to
-   observe if you skip Ship** and **Agent version if you skip Ship**.
+   should see the identity and released version from `release-manifest.json`,
+   or **Agent to observe if you skip Ship** and **Agent version if you skip
+   Ship**.
 2. In the [Azure portal](https://portal.azure.com), search for the
    **Application Insights resource** named in **Observe settings** and open it.
    Select **Logs**; the query editor should open without an access error.

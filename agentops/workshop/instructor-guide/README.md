@@ -143,10 +143,15 @@ work with and what you finish with.
 
 ## Choose a format
 
-**Hands-on:** 60 minutes of presentation per module. Evaluate and Observe and
-Operate have 60-minute guided labs. Ship needs 75 to 90 minutes elapsed because
+**Hands-on:** 60 minutes of presentation per module. Evaluate has a 60-minute
+guided lab. Observe and Operate needs 75 minutes, including the alert-evaluation
+margin. Ship needs 90 minutes with GitHub Actions or 120 minutes with Azure
+Pipelines because
 its cloud deployments and evaluation run while participants inspect evidence.
 Allow about six to six and a half hours for all three modules.
+
+The complete hands-on workshop is 6 hours 45 minutes with GitHub Actions or
+7 hours 15 minutes with Azure Pipelines, excluding breaks and provisioning.
 
 **Demo:** 60 minutes of presentation followed by a 20-minute instructor
 demonstration per module. The complete workshop takes four hours. Demo attendees
@@ -168,7 +173,7 @@ who skipped Ship. Participants do not need to have attended earlier modules.
 
 The optional **Advanced AgentOps workshop lab** extends this cycle from
 incident to recovery and a test that catches the same defect. It sits outside
-the core workshop, at level 400: allow an additional 150 minutes hands-on or
+the core workshop, at level 400: allow an additional 140 minutes hands-on or
 one hour as a demo. Its preparation is in step 4 of the **Instructor technical
 setup**.
 

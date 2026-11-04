@@ -1,9 +1,9 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
 # Ship class repository. Each participant replaces ALIAS with their own alias
-# on their branch. Both agents run the same help desk code in src/helpdesk:
-# the pipeline evaluates the test agent first and deploys the released agent
-# only after a person approves the production environment.
+# on their branch. One agent identity holds the stable production version and
+# every candidate version. The endpoint selector stays pinned to the current
+# production version until evaluation and approval complete.
 
 requiredVersions:
     azd: '>=1.37.0'
@@ -13,30 +13,6 @@ name: agentops-ship-class
 services:
     ai-project:
         host: azure.ai.project
-    helpdesk-ALIAS-test:
-        project: src/helpdesk
-        host: azure.ai.agent
-        language: python
-        uses:
-            - ai-project
-        env:
-            AZURE_AI_MODEL_DEPLOYMENT_NAME: ${AZURE_AI_MODEL_DEPLOYMENT_NAME}
-            HELPDESK_VARIANT: candidate
-            OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT: "true"
-        codeConfiguration:
-            dependencyResolution: remote_build
-            entryPoint: main.py
-            runtime: python_3_13
-        container:
-            resources:
-                cpu: "0.5"
-                memory: 1Gi
-        description: Help desk agent under test before release.
-        kind: hosted
-        name: helpdesk-ALIAS-test
-        protocols:
-            - protocol: responses
-              version: 2.0.0
     helpdesk-ALIAS:
         project: src/helpdesk
         host: azure.ai.agent
@@ -55,9 +31,15 @@ services:
             resources:
                 cpu: "0.5"
                 memory: 1Gi
-        description: Released help desk agent.
+        description: Versioned help desk agent with a pinned production endpoint.
         kind: hosted
         name: helpdesk-ALIAS
+        agentEndpoint:
+            versionSelector:
+                versionSelectionRules:
+                    - type: FixedRatio
+                      agentVersion: "PRODUCTION_VERSION"
+                      trafficPercentage: 100
         protocols:
             - protocol: responses
               version: 2.0.0

@@ -7,13 +7,14 @@
 ## Lab definition
 
 **Objective:** build a controlled release pipeline for the help desk agent.
-Deploy a candidate, evaluate its exact version, require approval, release from
-the reviewed commit, invoke the exact released version, and retain a release
-manifest.
+Keep production pinned to its current version, deploy and evaluate an exact
+candidate version under the same agent identity, require approval, switch the
+production endpoint selector to the approved version at 100 percent, invoke it,
+and retain the previous selector for rollback.
 
-**Time:** allow 75 to 90 minutes elapsed. You perform about 60 minutes of work.
-Each cloud deployment and evaluation can take 10 to 20 minutes, so use the wait
-time to inspect the run.
+**Time:** allow 90 minutes with GitHub Actions or 120 minutes with Azure
+Pipelines. Each cloud deployment and evaluation can take 10 to 20 minutes.
+Azure Pipelines also requires participants to create and bind a pipeline.
 Action 7 is a conditional recovery procedure and is not included in this
 standard-path estimate unless a release fails.
 
@@ -44,35 +45,35 @@ Choose the pipeline tool named in your invitation:
 
 ### Action 1: Identify what the pipeline can prove
 
-- **Purpose:** Distinguish source equivalence from promotion of one immutable runtime version.
+- **Purpose:** Identify the native single-agent version-promotion contract.
 - **Navigation:** Read the five contract statements below before editing a file.
-- **Result:** You can explain why the candidate and release have different agent names and version numbers.
-- **If it fails:** Ask the instructor to compare the two identities in `azure.yaml`. Do not describe them as the same version.
+- **Result:** You can explain how one agent keeps production on the stable version while an exact candidate is tested.
+- **If it fails:** Ask the instructor to compare the endpoint selector and service in `azure.yaml`. Do not continue with a second agent identity.
 - **Save:** Keep the contract with your release evidence.
 - **Time:** 4 minutes.
 
 Read this contract before you edit the pipeline:
 
-- `helpdesk-ALIAS-test` and `helpdesk-ALIAS` are different agent identities.
-- A version number is scoped to one identity. Test version `7` and release
-  version `7` are not the same deployed object.
-- The current documented `azd ai agent` commands deploy a new version and can
-  invoke a selected version. They do not provide a documented command that
-  promotes one immutable version from the test identity to the release identity.
-- This lab therefore rebuilds the release identity from the same Git commit and
-  configuration that passed evaluation. It does not claim that Foundry reused
-  the candidate's immutable runtime artifact.
-- `release-manifest.json` records both identities and versions, the Git commit,
-  a source-and-configuration SHA-256 fingerprint, the pipeline URL, and the
-  pinned extension version.
+- `helpdesk-ALIAS` is the only agent identity for the participant.
+- Before candidate deployment, its endpoint selector routes 100 percent to one
+  stable production version. The pipeline saves that selector.
+- Candidate deployment creates a new version without changing the saved stable
+  production route.
+- Evaluation and smoke controls invoke the exact candidate with `--version`.
+- After approval, `azd ai agent endpoint update` changes the selector to one
+  rule that routes 100 percent to the approved candidate. This workshop does
+  not use percentage canaries or split traffic.
+- `release-manifest.json` records the identity, evaluated and released version,
+  previous selector, Git commit, source-and-configuration SHA-256 fingerprint,
+  pipeline URL, and pinned extension version.
 
 The pipeline sign-in identity performs deployments. The hosted agent has a
 separate runtime identity. Give deployment roles to the pipeline identity.
 Give access to downstream Azure services to the runtime identity only when the
 agent needs that access.
 
-**Expected result:** you can explain why the manifest contains two agent names
-and two version numbers.
+**Expected result:** you can explain why the manifest contains one agent and
+one evaluated version, plus the previous selector used for rollback.
 
 ## 2. Clone the class repository
 
@@ -80,7 +81,7 @@ and two version numbers.
 
 - **Purpose:** Work without changing another participant's pipeline or agents.
 - **Navigation:** Open `agentops\workshop\labs\02-ship` in File Explorer, type `powershell` in the address bar, and run the block below.
-- **Result:** Your clone is on `ship/<alias>`, and `azure.yaml` names your test and release agents.
+- **Result:** Your clone is on `ship/<alias>`, its origin matches the invitation, and `azure.yaml` names one agent.
 - **If it fails:** Read the first Git error. Ask the instructor to check repository access before you retry.
 - **Save:** Keep `$HOME\agentops-ship` and the branch name.
 - **Time:** 6 minutes.
@@ -102,6 +103,12 @@ $Clone = Join-Path $HOME 'agentops-ship'
 if (-not (Test-Path $Clone)) { git clone $ClassRepo $Clone }
 if ($LASTEXITCODE -ne 0) { throw 'Clone failed. Read the error, then ask the instructor to check your repository access.' }
 Set-Location $Clone
+$ExpectedRemote = ($ClassRepo.TrimEnd('/') -replace '\.git$','')
+$ActualRemote = [string](git remote get-url origin)
+$ActualRemote = ($ActualRemote.Trim().TrimEnd('/') -replace '\.git$','')
+if ($LASTEXITCODE -ne 0 -or $ActualRemote -ne $ExpectedRemote) {
+  throw "Existing clone origin '$ActualRemote' does not match '$ExpectedRemote'. Move or remove $Clone, then clone again."
+}
 $Branch = "ship/$Alias"
 if ((git branch --list $Branch) -or (git branch -r --list "origin/$Branch")) { git switch $Branch }
 else { git switch -c $Branch }
@@ -114,8 +121,7 @@ Select-String -Path azure.yaml -Pattern 'name: helpdesk'
 
 Keep the window open.
 
-**Expected result:** the output names `helpdesk-<your alias>-test` and
-`helpdesk-<your alias>`.
+**Expected result:** the output names only `helpdesk-<your alias>`.
 
 ## 3. Build the four-stage pipeline
 
@@ -153,7 +159,7 @@ agentops workflow generate --kinds dev --deploy-mode azd --platform azure-devops
 
    1. **Deploy candidate**
    2. **Evaluate candidate**
-   3. **Approve and release**
+   3. **Approve and promote**
    4. **Verify and record release**
 
 5. Find the exact extension pin `1.0.0-beta.23`.
@@ -187,7 +193,7 @@ git push -u origin "ship/$Alias"
 ```
 
 2. Open the run.
-3. Open **1. Deploy candidate** and record the candidate identity and version.
+3. Open **1. Deploy candidate** and record the stable and candidate versions.
 4. Open **2. Evaluate candidate**.
 5. Download `agentops-dev-results`.
 6. Open `report.md`.
@@ -195,7 +201,7 @@ git push -u origin "ship/$Alias"
 8. Open the `vpn-ticket` trace.
 9. Select `execute_tool create_ticket`.
 10. Read the returned `queue`.
-11. Reject **3. Approve and release** with the reason `VPN ticket routed to
+11. Reject **3. Approve and promote** with the reason `VPN ticket routed to
     Software Support`.
 
 If the evaluation stage fails before it publishes evidence, stop. Open the first
@@ -230,15 +236,14 @@ git push
 3. Read the new evaluation report.
 4. Open the `vpn-ticket` trace.
 5. Read `queue: Network Support`.
-6. Approve **3. Approve and release**.
+6. Approve **3. Approve and promote**.
 7. Open **4. Verify and record release**.
 8. Read `Testing exact target`.
 9. Read the released identity and version.
 10. Read `SIM-VPN-001`, `Network Support`, and `Smoke test passed`.
 
-The release stage performs a second deployment under the release identity. The
-candidate and release share the reviewed commit and fingerprint, but they have
-independently assigned Foundry versions.
+The release stage does not rebuild the agent. It switches the production
+endpoint selector to the evaluated candidate at 100 percent.
 
 **Expected result:** all four stages pass.
 
@@ -256,8 +261,9 @@ independently assigned Foundry versions.
 1. Download `ship-release-manifest`.
 2. Open `release-manifest.json`.
 3. Match `evaluated.version` to stage 1.
-4. Match `released.version` to stage 3 and the smoke-test log.
-5. Match `provenance.git_commit` to this command.
+4. Match `released.version` to the same candidate and the smoke-test log.
+5. Match `promotion.previous_selector` to the selector saved before deployment.
+6. Match `provenance.git_commit` to this command.
 
 **What this block does:** prints the commit represented by your branch. Local only.
 
@@ -265,7 +271,7 @@ independently assigned Foundry versions.
 git rev-parse HEAD
 ```
 
-6. Keep links to the rejected and released runs with the manifest.
+7. Keep links to the rejected and released runs with the manifest.
 
 **Expected result:** another person can identify what was evaluated, what was
 released, which commit produced both deployments, who approved the release, and
@@ -289,7 +295,9 @@ problem:
 2. Restrict or disable the released endpoint if the instructor's class access
    permits it. Otherwise ask the instructor to do so.
 3. Keep the failed run, logs, evaluation artifact, and manifest.
-4. Revert the bad commit.
+4. Restore the retained previous selector first when immediate rollback is
+   authorized. This route change creates no new version.
+5. Revert the bad commit.
 
 **What this block does:** creates a new commit that reverses the last change.
 Review the resulting diff before you push.
@@ -300,11 +308,11 @@ git show --stat
 git push
 ```
 
-5. Run all four stages.
-6. Review the new evaluation evidence.
-7. Approve only after the gate passes.
-8. Download the new release manifest.
-9. Restore endpoint access after stage 4 passes.
+6. Run all four stages.
+7. Review the new evaluation evidence.
+8. Approve only after the gate passes.
+9. Download the new release manifest.
+10. Restore endpoint access after stage 4 passes.
 
 Do not rerun only the release stage. A release-only rerun breaks the current
 evaluation, approval, exact-version smoke test, and manifest chain.

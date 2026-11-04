@@ -284,7 +284,7 @@ feedback loop.
 
 ### Activities
 
-1. Define triggers for recurring evaluation:
+1. Define triggers for recurring evaluation where the preview capability is available:
    - prompt, instruction, model, knowledge, tool, connector, or policy change;
    - pull request or release candidate;
    - scheduled regression run;

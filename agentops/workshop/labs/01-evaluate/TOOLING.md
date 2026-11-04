@@ -15,7 +15,7 @@ source and public CLI help on September 6, 2026.
 - [Tool roles and scenario design](#tool-roles-and-scenario-design)
 - [Exact evaluator and gate scope](#exact-evaluator-and-gate-scope)
 - [Deliberate boundaries](#deliberate-boundaries)
-- [Why not azd evaluation recipes?](#why-not-azd-evaluation-recipes)
+- [Native evaluation capability map and workshop scope](#native-evaluation-capability-map-and-workshop-scope)
 - [Reproducible offline validation](#reproducible-offline-validation)
 - [Host compatibility and installation](#host-compatibility-and-installation)
 - [Validation evidence](#validation-evidence)
@@ -176,18 +176,29 @@ The former native SDK runner, internal-module bridge, separate gate JSON and
 bridge tests were removed. Do not reintroduce a wrapper, importer, patched
 normalizer or pseudo execution mode to stretch this CLI's coverage.
 
-## Why not azd evaluation recipes?
+## Native evaluation capability map and workshop scope
 
-The release supports legacy `azd ai agent eval` and the newer recipe adapter,
-but the `azure.ai.evaluations` extension was not published in the default
-registry at verification. The released legacy extension
-`azure.ai.agents` 1.0.0-beta.13 has evaluation commands, but its Accelerator
-results are **aggregate-only** and its dataset is recipe-owned.
+The published Azure Developer CLI extension `azure.ai.evaluations` is now a
+native alternative. It defines, runs and inspects Foundry evaluations from
+source-controlled evaluation configuration. The Foundry SDK and service also
+support broader evaluation shapes than this workshop uses.
 
-The documented cloud hosted-target path avoids that extension dependency
-while preserving live agent execution and per-row downloads. This workshop
-does not need an azd evaluation recipe. Neither adapter tests nor a source
-build of an unpublished extension would establish public availability.
+| Native capability | Current coverage | Workshop decision |
+| --- | --- | --- |
+| Single-turn response quality | Built-in quality evaluators and graders | Covered with coherence and similarity through the bounded Accelerator workflow |
+| Conversation evaluation | Turn-level and conversation-level evaluation for supported built-in evaluators | Not included because the eight-row dataset is intentionally single turn |
+| Tool-use quality | Native tool-use quality and tool-call accuracy evaluators | Reviewed in the capability map, but the lab proves exact tool actions from traces instead of adding another judge |
+| Reusable cloud definitions | `azure.ai.evaluations` configuration and Foundry evaluation runs | Native alternative for implementation teams; not required for the 60-minute participant path |
+| Continuous evaluation | Recurring evaluation for sampled agent traffic where supported | Taught as an Observe and Operate follow-on, not enabled in the shared project |
+
+The selected Accelerator remains a bounded workshop tool for repeatable
+submission, baseline comparison, local evidence retention and threshold
+reporting. It is not the native product contract and does not replace the
+published `azure.ai.evaluations` extension, Foundry SDK, evaluation service or
+portal. The lab deliberately keeps one small single-turn dataset and two answer
+quality judges so participants can finish the evidence review within the
+session. Conversation and tool-call evaluators are valid implementation
+options outside that deliberate scope.
 
 ## Reproducible offline validation
 

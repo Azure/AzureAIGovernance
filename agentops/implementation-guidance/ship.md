@@ -92,7 +92,9 @@ environments, evidence, approvals, and failure behavior explicit.
 
 #### Release unit and dependencies
 
-- Is the target a Foundry prompt agent, hosted agent, workflow, or combination?
+- Is the target a Foundry prompt agent, hosted agent, or an existing Foundry
+  Workflow? Do not select Foundry Workflows for a new implementation. Plan
+  migration of existing workflows to the supported agent path.
 - Which artifacts can change independently: instructions, code, knowledge,
   tools, actions, connections, child agents, models, policies, or
   infrastructure?
@@ -108,7 +110,8 @@ environments, evidence, approvals, and failure behavior explicit.
   environments exist?
 - Are environments isolated by subscription, resource group, Foundry project,
   tenant, region, or network?
-- Is promotion immutable, rebuilt from source, or manually reconfigured?
+- For a hosted agent, can one identity retain the stable version while an exact
+  candidate is tested and then selected for production?
 - Which knowledge sources, connections, endpoints, environment variables, and
   policies differ by environment?
 - Which channels or user rings receive a release first?
@@ -128,7 +131,7 @@ environments, evidence, approvals, and failure behavior explicit.
 
 1. Map source change through build, evaluation, approval, deployment,
    verification, and rollback.
-2. Define the release unit and immutable identity carried through every stage.
+2. Define the release unit and exact version identity carried through every stage.
 3. Identify all environment-specific values and post-deployment actions.
 4. Create a control matrix with required evidence, gate behavior, owner, and
    exception authority.
@@ -177,6 +180,9 @@ available skills, source-control system, and governance model.
 3. Store environment configuration outside source when it contains secrets.
    Keep non-secret deployment configuration versioned and reviewable.
 4. Integrate evaluation after the candidate is available and before promotion.
+   For a hosted agent, keep the production endpoint selector on the stable
+   version, test the candidate with `--version`, then select the approved
+   version at 100 percent and retain the previous selector for rollback.
 5. Optionally use the
    [AgentOps Accelerator](https://aka.ms/agentops-accelerator) as a
    **Foundry-specific** reference for repository-side gates and evidence. Confirm
@@ -261,7 +267,7 @@ candidate promoted to the target environment.
    - configuration and secret scanning;
    - solution or infrastructure validation.
 2. **Build or package**
-   - create an immutable candidate;
+   - create an exact, versioned candidate;
    - record source, dependency, and configuration identity.
 3. **Deploy or stage in a controlled environment**
    - deploy to the intended nonproduction target;
@@ -277,8 +283,10 @@ candidate promoted to the target environment.
    - present evidence and known exceptions to the authorized approver;
    - record the decision and any expiry-bound waiver.
 7. **Production promotion**
-   - promote the approved artifact or rebuild reproducibly from the approved
-     source;
+   - for a hosted agent, switch the endpoint selector to the approved version
+     at 100 percent without creating another version;
+   - for other supported agent types, promote or rebuild only through their
+     documented mechanism;
    - prevent unreviewed manual customization.
 8. **Post-deployment verification**
    - verify agent identity/version, critical journeys, telemetry, access,
@@ -291,6 +299,8 @@ candidate promoted to the target environment.
 - Keep separate environment values and roles for each Foundry target.
 - Tie evaluation records and traces to the deployed agent version and source
   commit.
+- Retain the previous hosted-agent endpoint selector and the final one-version,
+  100-percent selector as release evidence.
 - Preserve prior versions or a redeployable known-good artifact according to the
   supported agent lifecycle.
 - If the AgentOps Accelerator is used, its gate and evidence output supplements

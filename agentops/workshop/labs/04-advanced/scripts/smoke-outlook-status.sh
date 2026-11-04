@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Independently checks the live Outlook-status answer without evaluator scores.
-# Usage: bash scripts/smoke-outlook-status.sh helpdesk-alias-test 3
+# Usage: bash scripts/smoke-outlook-status.sh helpdesk-alias 3
 set -euo pipefail
 
-service="${1:?Pass the deployed test-agent service name.}"
-expected_version="${2:?Pass the exact evaluated test-agent version.}"
+service="${1:?Pass the deployed agent service name.}"
+expected_version="${2:?Pass the exact evaluated candidate version.}"
 evidence_dir="${EVIDENCE_DIR:-evidence}"
 mkdir -p "$evidence_dir"
 log="$evidence_dir/smoke-outlook-status.log"

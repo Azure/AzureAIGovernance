@@ -3,7 +3,7 @@
 # The pipeline sets AGENTOPS_AGENT to the version number it just deployed, and
 # the AgentOps Accelerator CLI puts that number in place of the 1 below.
 version: 1
-agent: FOUNDRY_ENDPOINT/agents/helpdesk-ALIAS-test/versions/1
+agent: FOUNDRY_ENDPOINT/agents/helpdesk-ALIAS/versions/1
 dataset: turns.jsonl
 protocol: responses
 execution: cloud

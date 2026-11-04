@@ -4,25 +4,30 @@
 
 Replace the generated workflow with the file below. Then replace every `ALIAS`
 with your alias. The workflow uses four jobs: candidate, evaluate, release and
-verify. The `production` environment pauses the release job for approval.
+verify. One agent identity holds the stable and candidate versions. The
+`production` environment pauses the endpoint-selector change for approval.
 
 The instructor must grant the GitHub OpenID Connect (OIDC) identity **Foundry
-User** and **Contributor** on the target Foundry project for code deployment.
+User** on the parent Foundry resource for judge-model inference, plus **Foundry
+User** and **Contributor** on the target Foundry project for deployment.
 These roles belong to the pipeline identity. They do not grant an agent access
 to other Azure resources. An agent that calls another Azure service needs its
 own hosted-agent identity assignment.
 
-The workflow pins `azure.ai.agents` `1.0.0-beta.23`. Microsoft currently marks
-the extension and hosted agents as preview. The install step also runs
+The workflow pins the beta `azure.ai.agents` extension at `1.0.0-beta.23`.
+The current endpoint-selector production-promotion guidance is preview. Do not
+treat that feature status as a blanket status for all hosted-agent capabilities.
+The install step also runs
 `azd ai agent version`, so a missing or different extension fails before a
 deployment starts.
 
 Reference: [install the Azure Developer CLI Foundry extensions](https://learn.microsoft.com/azure/foundry/agents/how-to/install-cli-foundry-extensions)
 and [review hosted-agent deployment permissions](https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agent-permissions).
 
-**What this block does:** deploys and evaluates the candidate, waits for approval,
-rebuilds the release agent from the same commit, invokes its exact version, and
-publishes `release-manifest.json`.
+**What this block does:** keeps production pinned to its current version,
+deploys and evaluates an exact candidate under the same identity, waits for
+approval, selects that version at 100 percent, invokes it, and publishes the
+release manifest and rollback selector.
 
 ```yaml
 name: Ship ALIAS
@@ -73,9 +78,19 @@ jobs:
       - name: Deploy candidate
         id: deploy
         run: |
-          version=$(bash scripts/deploy-agent.sh helpdesk-ALIAS-test)
+          mkdir -p ship-candidate
+          version=$(bash scripts/deploy-agent.sh \
+            helpdesk-ALIAS ship-candidate/candidate-version.txt \
+            ship-candidate/previous-selector.json)
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "Candidate identity: helpdesk-ALIAS-test; version: $version"
+          echo "Candidate identity: helpdesk-ALIAS; version: $version"
+      - name: Retain candidate and rollback selector
+        uses: actions/upload-artifact@v7
+        with:
+          name: ship-candidate
+          path: |
+            ship-candidate/candidate-version.txt
+            ship-candidate/previous-selector.json
 
   evaluate:
     name: 2. Evaluate candidate
@@ -115,14 +130,15 @@ jobs:
           if-no-files-found: warn
 
   release:
-    name: 3. Approve and release
+    name: 3. Approve and promote
     needs: [candidate, evaluate]
     runs-on: ubuntu-latest
     environment: production
-    outputs:
-      version: ${{ steps.deploy.outputs.version }}
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v8
+        with:
+          name: ship-candidate
       - uses: Azure/setup-azd@v2
       - uses: azure/login@v3
         with:
@@ -134,19 +150,23 @@ jobs:
           azd ext install azure.ai.agents --version "$AZD_AI_AGENTS_EXTENSION_VERSION"
           azd ai agent version
           azd config set auth.useAzCliAuth true
-      - name: Deploy release identity
-        id: deploy
+      - name: Promote the approved candidate
         run: |
-          version=$(bash scripts/deploy-agent.sh helpdesk-ALIAS)
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "Release identity: helpdesk-ALIAS; version: $version"
+          bash scripts/configure-azd.sh
+          bash scripts/promote-version.sh \
+            helpdesk-ALIAS "${{ needs.candidate.outputs.version }}"
+          echo "Production identity: helpdesk-ALIAS; version: ${{ needs.candidate.outputs.version }}"
 
   verify:
     name: 4. Verify and record release
     needs: [candidate, release]
     runs-on: ubuntu-latest
+    environment: dev
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v8
+        with:
+          name: ship-candidate
       - uses: Azure/setup-azd@v2
       - uses: azure/login@v3
         with:
@@ -160,21 +180,23 @@ jobs:
           azd config set auth.useAzCliAuth true
           bash scripts/configure-azd.sh
       - name: Invoke the exact released version
-        run: bash scripts/smoke-test.sh helpdesk-ALIAS "${{ needs.release.outputs.version }}"
+        run: bash scripts/smoke-test.sh helpdesk-ALIAS "${{ needs.candidate.outputs.version }}"
       - name: Write release manifest
         env:
           RELEASE_PIPELINE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           bash scripts/write-release-manifest.sh \
-            helpdesk-ALIAS-test "${{ needs.candidate.outputs.version }}" \
-            helpdesk-ALIAS "${{ needs.release.outputs.version }}" \
+            helpdesk-ALIAS "${{ needs.candidate.outputs.version }}" \
+            previous-selector.json \
             release-manifest.json
           cat release-manifest.json
       - name: Publish release manifest
         uses: actions/upload-artifact@v7
         with:
           name: ship-release-manifest
-          path: release-manifest.json
+          path: |
+            release-manifest.json
+            previous-selector.json
 ```
 
 ## Run and recover

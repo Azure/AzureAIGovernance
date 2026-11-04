@@ -4,16 +4,20 @@
 
 Rename the generated file, then replace its contents with the pipeline below.
 Replace every `ALIAS` with your alias. The stages match the GitHub Actions
-version: candidate, evaluate, release and verify.
+version: candidate, evaluate, release and verify. One agent identity holds the
+stable and candidate versions.
 
 The instructor must grant the `agentops-azure` service-connection identity
-**Foundry User** and **Contributor** on the target Foundry project for code
+**Foundry User** on the parent Foundry resource for judge-model inference,
+plus **Foundry User** and **Contributor** on the target Foundry project for
 deployment. These roles belong to the pipeline identity. They do not grant the
 hosted agent access to another Azure service. Assign such access to the
 hosted-agent identity separately.
 
-The pipeline pins `azure.ai.agents` `1.0.0-beta.23`. Microsoft currently marks
-the extension and hosted agents as preview. Each deployment stage prints
+The pipeline pins the beta `azure.ai.agents` extension at `1.0.0-beta.23`.
+The current endpoint-selector production-promotion guidance is preview. Do not
+treat that feature status as a blanket status for all hosted-agent capabilities.
+Each deployment stage prints
 `azd ai agent version` before it changes the agent.
 
 Reference: [install the Azure Developer CLI Foundry extensions](https://learn.microsoft.com/azure/foundry/agents/how-to/install-cli-foundry-extensions)
@@ -29,9 +33,10 @@ Rename-Item .azuredevops\pipelines\agentops-deploy-dev.yml "ship-$Alias.yml"
 
 Replace the renamed file with the pipeline below.
 
-**What this block does:** deploys and evaluates the candidate, waits for approval,
-rebuilds the release agent from the same commit, invokes its exact version, and
-publishes `release-manifest.json`.
+**What this block does:** keeps production pinned to its current version,
+deploys and evaluates an exact candidate under the same identity, waits for
+approval, selects that version at 100 percent, invokes it, and publishes the
+release manifest and rollback selector.
 
 ```yaml
 trigger:
@@ -73,13 +78,15 @@ stages:
                 azd ext install azure.ai.agents --version "$(AZD_AI_AGENTS_EXTENSION_VERSION)"
                 azd ai agent version
                 azd config set auth.useAzCliAuth true
-                version=$(bash scripts/deploy-agent.sh helpdesk-ALIAS-test)
-                echo "Candidate identity: helpdesk-ALIAS-test; version: $version"
-                printf '%s\n' "$version" > candidate-version.txt
+                mkdir -p ship-candidate
+                version=$(bash scripts/deploy-agent.sh \
+                  helpdesk-ALIAS ship-candidate/candidate-version.txt \
+                  ship-candidate/previous-selector.json)
+                echo "Candidate identity: helpdesk-ALIAS; version: $version"
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: candidate-version.txt
-              artifact: candidate-version
+              targetPath: ship-candidate
+              artifact: ship-candidate
               publishLocation: pipeline
 
   - stage: evaluate
@@ -90,7 +97,7 @@ stages:
         steps:
           - checkout: self
           - download: current
-            artifact: candidate-version
+            artifact: ship-candidate
           - task: UsePythonVersion@0
             inputs:
               versionSpec: "3.11"
@@ -105,7 +112,7 @@ stages:
               inlineScript: |
                 set -euo pipefail
                 export AGENTOPS_AGENT
-                AGENTOPS_AGENT=$(cat "$(Pipeline.Workspace)/candidate-version/candidate-version.txt")
+                AGENTOPS_AGENT=$(cat "$(Pipeline.Workspace)/ship-candidate/candidate-version.txt")
                 agentops eval run --config "$(AGENTOPS_CONFIG)"
             env:
               AZURE_AI_FOUNDRY_PROJECT_ENDPOINT: $(AZURE_AI_FOUNDRY_PROJECT_ENDPOINT)
@@ -121,7 +128,7 @@ stages:
               publishLocation: pipeline
 
   - stage: release
-    displayName: 3. Approve and release
+    displayName: 3. Approve and promote
     dependsOn: evaluate
     jobs:
       - deployment: deploy_release
@@ -131,8 +138,10 @@ stages:
             deploy:
               steps:
                 - checkout: self
+                - download: current
+                  artifact: ship-candidate
                 - task: AzureCLI@2
-                  displayName: Deploy release identity
+                  displayName: Promote the approved candidate
                   inputs:
                     azureSubscription: $(AZURE_SERVICE_CONNECTION)
                     scriptType: bash
@@ -143,14 +152,10 @@ stages:
                       azd ext install azure.ai.agents --version "$(AZD_AI_AGENTS_EXTENSION_VERSION)"
                       azd ai agent version
                       azd config set auth.useAzCliAuth true
-                      version=$(bash scripts/deploy-agent.sh helpdesk-ALIAS)
-                      echo "Release identity: helpdesk-ALIAS; version: $version"
-                      printf '%s\n' "$version" > release-version.txt
-                - task: PublishPipelineArtifact@1
-                  inputs:
-                    targetPath: release-version.txt
-                    artifact: release-version
-                    publishLocation: pipeline
+                      bash scripts/configure-azd.sh
+                      version=$(cat "$(Pipeline.Workspace)/ship-candidate/candidate-version.txt")
+                      bash scripts/promote-version.sh helpdesk-ALIAS "$version"
+                      echo "Production identity: helpdesk-ALIAS; version: $version"
 
   - stage: verify
     displayName: 4. Verify and record release
@@ -162,9 +167,7 @@ stages:
         steps:
           - checkout: self
           - download: current
-            artifact: candidate-version
-          - download: current
-            artifact: release-version
+            artifact: ship-candidate
           - task: AzureCLI@2
             displayName: Invoke exact version and write manifest
             inputs:
@@ -178,18 +181,19 @@ stages:
                 azd ai agent version
                 azd config set auth.useAzCliAuth true
                 bash scripts/configure-azd.sh
-                candidate_version=$(cat "$(Pipeline.Workspace)/candidate-version/candidate-version.txt")
-                release_version=$(cat "$(Pipeline.Workspace)/release-version/release-version.txt")
-                bash scripts/smoke-test.sh helpdesk-ALIAS "$release_version"
+                candidate_version=$(cat "$(Pipeline.Workspace)/ship-candidate/candidate-version.txt")
+                bash scripts/smoke-test.sh helpdesk-ALIAS "$candidate_version"
+                mkdir -p ship-release
                 RELEASE_PIPELINE_URL="$(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)" \
                   bash scripts/write-release-manifest.sh \
-                    helpdesk-ALIAS-test "$candidate_version" \
-                    helpdesk-ALIAS "$release_version" \
-                    release-manifest.json
-                cat release-manifest.json
+                    helpdesk-ALIAS "$candidate_version" \
+                    "$(Pipeline.Workspace)/ship-candidate/previous-selector.json" \
+                    ship-release/release-manifest.json
+                cp "$(Pipeline.Workspace)/ship-candidate/previous-selector.json" ship-release/
+                cat ship-release/release-manifest.json
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: release-manifest.json
+              targetPath: ship-release
               artifact: ship-release-manifest
               publishLocation: pipeline
 ```
@@ -214,7 +218,7 @@ stages:
 5. Select **Run**.
 6. Rename the pipeline to `ship-<your alias>`.
 7. Download `agentops-dev-results` before you decide.
-8. Select **Review** on **3. Approve and release** and reject the first run.
+8. Select **Review** on **3. Approve and promote** and reject the first run.
 9. Approve the corrected run.
 10. Download `ship-release-manifest` after stage 4 passes.
 

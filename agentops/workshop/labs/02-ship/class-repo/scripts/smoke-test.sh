@@ -11,9 +11,10 @@ if [ -z "$service" ] || [ -z "$expected_version" ]; then
   exit 2
 fi
 
-current_version=$(bash "$(dirname "$0")/agent-version.sh" "$service")
-if [ "$current_version" != "$expected_version" ]; then
-  echo "Smoke test stopped: $service currently resolves to version $current_version, not expected version $expected_version." >&2
+selected_version=$(bash "$(dirname "$0")/read-endpoint-selector.sh" "$service" \
+  "${SELECTOR_EVIDENCE_FILE:-selected-selector.json}")
+if [ "$selected_version" != "$expected_version" ]; then
+  echo "Smoke test stopped: $service endpoint selects version $selected_version, not expected version $expected_version." >&2
   exit 1
 fi
 echo "Testing exact target: $service version $expected_version"

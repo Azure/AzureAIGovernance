@@ -54,9 +54,9 @@ commercial scope, a Definition of Use, or a detailed product runbook.
 
 | Area | Guidance |
 | --- | --- |
-| Native operational view | Foundry traces and Agent Monitoring Dashboard connected to Azure Monitor Application Insights |
+| Native operational view | Foundry traces and the preview Agent Monitoring Dashboard connected to Azure Monitor Application Insights |
 | Extended telemetry | OpenTelemetry and Application Insights for application, model, tool, dependency, and custom operational signals |
-| Quality in production | Scheduled or continuous evaluation where supported, correlated with traces and agent versions |
+| Quality in production | Preview recurring evaluation where supported, correlated with traces and agent versions |
 | Incident learning | Reviewed trace and evaluation evidence promoted into regression coverage |
 | AgentOps Accelerator | Foundry-specific reference for reading Foundry and Application Insights signals, readiness findings, and evidence packaging |
 
