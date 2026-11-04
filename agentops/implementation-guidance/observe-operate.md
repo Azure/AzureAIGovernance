@@ -136,9 +136,10 @@ not from the list of available dashboards.
 - Who can view analytics, transcripts, traces, and raw content?
 - Which evidence must be preserved for audit or incident response?
 
-> 🔗 **Implementation reference:** [Learn how Foundry tracing handles security, privacy, content capture, retention, and cost](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
->
-> 🔗 **Implementation reference:** [Learn how to restrict access to sensitive Log Analytics tables](https://learn.microsoft.com/azure/azure-monitor/logs/protected-tables-configure)
+**Implementation resources**
+
+- [Configure Foundry tracing security, privacy, content capture, retention, and cost](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
+- [Restrict access to sensitive Log Analytics tables](https://learn.microsoft.com/azure/azure-monitor/logs/protected-tables-configure)
 
 ### Activities
 
@@ -157,9 +158,10 @@ not from the list of available dashboards.
    response for each actionable signal.
 5. Identify blind spots and unsupported expectations before implementation.
 
-> 🔗 **Implementation reference:** [Learn how to plan monitoring outcomes, signals, responsibilities, and response across an Azure estate](https://learn.microsoft.com/azure/cloud-adoption-framework/manage/monitor)
->
-> 🔗 **Implementation reference:** [Learn how Foundry combines operational, quality, safety, and evaluation signals](https://learn.microsoft.com/azure/foundry/concepts/observability)
+**Implementation resources**
+
+- [Plan monitoring outcomes, signals, responsibilities, and response across an Azure estate](https://learn.microsoft.com/azure/cloud-adoption-framework/manage/monitor)
+- [Review operational, quality, safety, and evaluation signals in Foundry](https://learn.microsoft.com/azure/foundry/concepts/observability)
 
 ### Expected outputs and evidence
 
@@ -188,11 +190,11 @@ questions and support incident response.
 - Cost, sampling, and ingestion limits
 - Integration with incident, on-call, work-item, and release systems
 
-> 🔗 **Implementation reference:** [Learn how to manage resource, workspace, and table-level access to Log Analytics data](https://learn.microsoft.com/azure/azure-monitor/logs/manage-access)
->
-> 🔗 **Implementation reference:** [Learn how to configure analytics and long-term retention for Log Analytics tables](https://learn.microsoft.com/azure/azure-monitor/logs/data-retention-configure)
->
-> 🔗 **Implementation reference:** [Learn how Azure Monitor billing works and how to analyze telemetry usage and cost](https://learn.microsoft.com/azure/azure-monitor/fundamentals/cost-usage)
+**Implementation resources**
+
+- [Manage resource, workspace, and table-level access to Log Analytics data](https://learn.microsoft.com/azure/azure-monitor/logs/manage-access)
+- [Configure analytics and long-term retention for Log Analytics tables](https://learn.microsoft.com/azure/azure-monitor/logs/data-retention-configure)
+- [Analyze Azure Monitor billing, telemetry usage, and cost](https://learn.microsoft.com/azure/azure-monitor/fundamentals/cost-usage)
 
 ### Microsoft Foundry implementation path
 
@@ -210,11 +212,11 @@ questions and support incident response.
    Insights evidence and producing readiness findings. It does not replace
    Azure Monitor or native Foundry capabilities.
 
-> 🔗 **Implementation reference:** [Learn how to connect Application Insights and enable Foundry agent tracing](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
->
-> 🔗 **Implementation reference:** [Learn how to monitor agent operations and configure continuous evaluation](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
->
-> 🔗 **Implementation reference:** [Learn how to schedule cloud evaluations and evaluate production traces](https://learn.microsoft.com/azure/foundry/how-to/develop/cloud-evaluation)
+**Implementation resources**
+
+- [Connect Application Insights and enable Foundry agent tracing](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
+- [Monitor agent operations and configure continuous evaluation](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
+- [Schedule cloud evaluations and evaluate production traces](https://learn.microsoft.com/azure/foundry/how-to/develop/cloud-evaluation)
 
 ### Expected outputs and evidence
 
@@ -244,11 +246,11 @@ arrives.
 5. Configure redaction, sampling, retention, access, and export controls.
 6. Generate controlled traffic and verify end-to-end correlation before release.
 
-> 🔗 **Implementation reference:** [Learn how to connect Application Insights and instrument Microsoft Foundry agent tracing](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
->
-> 🔗 **Implementation reference:** [Learn how to sample OpenTelemetry telemetry while preserving useful Application Insights diagnostics](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-sampling)
->
-> 🔗 **Implementation reference:** [Learn which prompts, responses, instructions, tool interactions, and evaluation fields are stored in AppGenAIContent](https://learn.microsoft.com/azure/azure-monitor/reference/tables/appgenaicontent)
+**Implementation resources**
+
+- [Connect Application Insights and instrument Microsoft Foundry agent tracing](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
+- [Sample OpenTelemetry telemetry while preserving useful Application Insights diagnostics](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-sampling)
+- [Review the prompts, responses, tool interactions, and evaluation fields stored in AppGenAIContent](https://learn.microsoft.com/azure/azure-monitor/reference/tables/appgenaicontent)
 
 ### Dashboard preparation
 
@@ -264,9 +266,10 @@ Build role-oriented views rather than one universal dashboard:
 - **Business owner:** adoption, completion, resolution, escalation, satisfaction,
   and value indicators.
 
-> 🔗 **Implementation reference:** [Learn how to interpret and configure the Foundry Agent Monitoring Dashboard](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
->
-> 🔗 **Implementation reference:** [Learn how to build interactive Azure Workbooks for role-specific operational views](https://learn.microsoft.com/azure/azure-monitor/visualize/workbooks-overview)
+**Implementation resources**
+
+- [Interpret and configure the Foundry Agent Monitoring Dashboard](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
+- [Build interactive Azure Workbooks for role-specific operational views](https://learn.microsoft.com/azure/azure-monitor/visualize/workbooks-overview)
 
 ### Alert preparation
 
@@ -279,9 +282,10 @@ Build role-oriented views rather than one universal dashboard:
 5. Distinguish no-traffic/no-data from healthy behavior.
 6. Test access from the on-call identity, not only the implementer's account.
 
-> 🔗 **Implementation reference:** [Learn how Azure Monitor alert rules evaluate signals and create alert instances](https://learn.microsoft.com/azure/azure-monitor/alerts/alerts-overview)
->
-> 🔗 **Implementation reference:** [Learn how to route notifications and trigger automated response with action groups](https://learn.microsoft.com/azure/azure-monitor/alerts/action-groups)
+**Implementation resources**
+
+- [Review how Azure Monitor evaluates signals and creates alert instances](https://learn.microsoft.com/azure/azure-monitor/alerts/alerts-overview)
+- [Route notifications and trigger automated response with action groups](https://learn.microsoft.com/azure/azure-monitor/alerts/action-groups)
 
 ### Runbook outline preparation
 
@@ -303,7 +307,9 @@ escalation, rollback or disablement options, communications, and the evidence to
 preserve. Link to product runbooks rather than duplicating every product step in
 this field guide.
 
-> 🔗 **Implementation reference:** [Learn how to design incident roles, escalation, communications, mitigation, recovery, and post-incident learning](https://learn.microsoft.com/azure/well-architected/operational-excellence/incident-response)
+**Implementation resources**
+
+- [Design incident roles, escalation, communications, mitigation, recovery, and post-incident learning](https://learn.microsoft.com/azure/well-architected/operational-excellence/incident-response)
 
 ### Microsoft Foundry preparation
 
@@ -313,9 +319,10 @@ this field guide.
 - Add client-side OpenTelemetry instrumentation for custom logic where needed.
 - Define scheduled or continuous evaluation where supported and appropriate.
 
-> 🔗 **Implementation reference:** [Learn how to connect Foundry to Application Insights and validate trace ingestion](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
->
-> 🔗 **Implementation reference:** [Learn how to configure operational, quality, safety, and red-teaming monitoring for agents](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
+**Implementation resources**
+
+- [Connect Foundry to Application Insights and validate trace ingestion](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
+- [Configure operational, quality, safety, and red-teaming monitoring for agents](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
 
 ### Expected outputs and evidence
 
@@ -353,11 +360,11 @@ diagnose realistic failures.
    permissions.
 8. Record gaps and repeat the rehearsal after remediation.
 
-> 🔗 **Implementation reference:** [Learn how to investigate agent traces and correlate Foundry evidence with Application Insights](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
->
-> 🔗 **Implementation reference:** [Learn how to organize alert-driven investigation, automation, and responder access in Azure Monitor](https://learn.microsoft.com/azure/azure-monitor/alerts/alerts-overview)
->
-> 🔗 **Implementation reference:** [Learn how to rehearse incident detection, response, recovery, and review](https://learn.microsoft.com/azure/well-architected/operational-excellence/incident-response)
+**Implementation resources**
+
+- [Investigate agent traces and correlate Foundry evidence with Application Insights](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
+- [Organize alert-driven investigation, automation, and responder access in Azure Monitor](https://learn.microsoft.com/azure/azure-monitor/alerts/alerts-overview)
+- [Rehearse incident detection, response, recovery, and review](https://learn.microsoft.com/azure/well-architected/operational-excellence/incident-response)
 
 ### Microsoft Foundry evidence
 
@@ -403,11 +410,11 @@ controls, and operating practice.
 9. Conduct periodic service reviews across product, engineering, operations,
    quality, safety, and business stakeholders.
 
-> 🔗 **Implementation reference:** [Learn how to review operational, token, quality, safety, and red-teaming trends in Foundry](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
->
-> 🔗 **Implementation reference:** [Learn how to tune OpenTelemetry sampling as traffic and diagnostic needs change](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-sampling)
->
-> 🔗 **Implementation reference:** [Learn how to analyze and optimize Azure Monitor ingestion and retention cost](https://learn.microsoft.com/azure/azure-monitor/fundamentals/cost-usage)
+**Implementation resources**
+
+- [Review operational, token, quality, safety, and red-teaming trends in Foundry](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
+- [Tune OpenTelemetry sampling as traffic and diagnostic needs change](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-sampling)
+- [Analyze and optimize Azure Monitor ingestion and retention cost](https://learn.microsoft.com/azure/azure-monitor/fundamentals/cost-usage)
 
 ### Microsoft Foundry improvement loop
 
@@ -415,9 +422,10 @@ Review traces and monitoring, convert approved production evidence into
 evaluation coverage, rerun Foundry evaluations, and feed the results into
 release gates.
 
-> 🔗 **Implementation reference:** [Learn how to evaluate sampled production traces and schedule recurring Foundry evaluations](https://learn.microsoft.com/azure/foundry/how-to/develop/cloud-evaluation)
->
-> 🔗 **Implementation reference:** [Learn how Foundry Insights turns recurring production trace patterns into reviewable improvement evidence](https://learn.microsoft.com/azure/foundry/observability/how-to/agent-insights)
+**Implementation resources**
+
+- [Evaluate sampled production traces and schedule recurring Foundry evaluations](https://learn.microsoft.com/azure/foundry/how-to/develop/cloud-evaluation)
+- [Use Foundry Insights to turn production trace patterns into improvement evidence](https://learn.microsoft.com/azure/foundry/observability/how-to/agent-insights)
 
 ### Expected outputs and evidence
 
@@ -447,11 +455,11 @@ Ensure designated teams can monitor, diagnose, respond, and improve independentl
 6. Transfer dashboards, queries, alerts, runbook outlines, and evaluation links.
 7. Record ownership, support paths, escalation contacts, and next review dates.
 
-> 🔗 **Implementation reference:** [Learn how to transfer monitoring ownership through explicit scope, responsibilities, processes, and review practices](https://learn.microsoft.com/azure/cloud-adoption-framework/manage/monitor)
->
-> 🔗 **Implementation reference:** [Learn how to assign least-privilege access to Log Analytics evidence](https://learn.microsoft.com/azure/azure-monitor/logs/manage-access)
->
-> 🔗 **Implementation reference:** [Learn how to document and rehearse the incident management process that operators inherit](https://learn.microsoft.com/azure/well-architected/operational-excellence/incident-response)
+**Implementation resources**
+
+- [Transfer monitoring ownership through explicit scope, responsibilities, processes, and review practices](https://learn.microsoft.com/azure/cloud-adoption-framework/manage/monitor)
+- [Assign least-privilege access to Log Analytics evidence](https://learn.microsoft.com/azure/azure-monitor/logs/manage-access)
+- [Document and rehearse the incident management process that operators inherit](https://learn.microsoft.com/azure/well-architected/operational-excellence/incident-response)
 
 ## Roles and responsibilities
 

@@ -57,9 +57,10 @@ evidence, and target environment traceable through the release. AgentOps
 Accelerator evidence supplements native Foundry and pipeline records; it does
 not replace them.
 
-> 🔗 **Implementation reference:** [Learn how Microsoft Foundry structures accounts, projects, assets, connections, and regional boundaries](https://learn.microsoft.com/azure/foundry/concepts/architecture)
->
-> 🔗 **Implementation reference:** [Learn how to plan Foundry rollout and isolation across organizational environments](https://learn.microsoft.com/azure/foundry/concepts/planning)
+**Implementation resources**
+
+- [Review Microsoft Foundry architecture for accounts, projects, assets, connections, and regional boundaries](https://learn.microsoft.com/azure/foundry/concepts/architecture)
+- [Plan Foundry rollout and isolation across organizational environments](https://learn.microsoft.com/azure/foundry/concepts/planning)
 
 ## Implementation outcomes
 
@@ -108,9 +109,10 @@ environments, evidence, approvals, and failure behavior explicit.
 - How will a release identify the exact agent configuration and commit or
   solution version that was evaluated?
 
-> 🔗 **Implementation reference:** [Learn how to migrate retiring Foundry declarative workflows to supported Agent Framework implementations](https://learn.microsoft.com/azure/foundry/how-to/develop/vs-code-agents-workflow-low-code)
->
-> 🔗 **Implementation reference:** [Learn how Foundry agent versions move through development, evaluation, deployment, and monitoring](https://learn.microsoft.com/azure/foundry/agents/concepts/development-lifecycle)
+**Implementation resources**
+
+- [Migrate retiring Foundry declarative workflows to supported Agent Framework implementations](https://learn.microsoft.com/azure/foundry/how-to/develop/vs-code-agents-workflow-low-code)
+- [Review the Foundry agent lifecycle from development through monitoring](https://learn.microsoft.com/azure/foundry/agents/concepts/development-lifecycle)
 
 #### Environments and promotion
 
@@ -124,11 +126,11 @@ environments, evidence, approvals, and failure behavior explicit.
   policies differ by environment?
 - Which channels or user rings receive a release first?
 
-> 🔗 **Implementation reference:** [Learn how to choose isolated Foundry resources and projects for development and production boundaries](https://learn.microsoft.com/azure/foundry/concepts/planning)
->
-> 🔗 **Implementation reference:** [Learn how to configure private networking and validate access paths for Foundry environments](https://learn.microsoft.com/azure/foundry/how-to/configure-private-link)
->
-> 🔗 **Implementation reference:** [Learn how to promote an exact hosted-agent version across environments and endpoint selectors](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-production)
+**Implementation resources**
+
+- [Choose isolated Foundry resources and projects for development and production boundaries](https://learn.microsoft.com/azure/foundry/concepts/planning)
+- [Configure private networking and validate access paths for Foundry environments](https://learn.microsoft.com/azure/foundry/how-to/configure-private-link)
+- [Promote an exact hosted-agent version across environments and endpoint selectors](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-production)
 
 #### Controls and decisions
 
@@ -141,9 +143,10 @@ environments, evidence, approvals, and failure behavior explicit.
   a dependency is unavailable?
 - What are the rollback time objective and maximum acceptable release impact?
 
-> 🔗 **Implementation reference:** [Learn how GitHub deployment environments enforce reviewers, branch restrictions, and protection rules](https://docs.github.com/actions/reference/workflows-and-actions/deployments-and-environments)
->
-> 🔗 **Implementation reference:** [Learn how Azure Pipelines approvals and checks protect environments and deployment resources](https://learn.microsoft.com/azure/devops/pipelines/process/approvals?view=azure-devops)
+**Implementation resources**
+
+- [Configure GitHub deployment environments, reviewers, and protection rules](https://docs.github.com/actions/reference/workflows-and-actions/deployments-and-environments)
+- [Configure Azure Pipelines approvals and checks](https://learn.microsoft.com/azure/devops/pipelines/process/approvals?view=azure-devops)
 
 ### Activities
 
@@ -158,7 +161,9 @@ environments, evidence, approvals, and failure behavior explicit.
 6. Define the minimum viable release path before adding advanced rings,
    schedules, or orchestration.
 
-> 🔗 **Implementation reference:** [Learn how to validate Foundry architecture decisions for identity, networking, data protection, regions, and quotas](https://learn.microsoft.com/azure/foundry/concepts/architecture)
+**Implementation resources**
+
+- [Validate Foundry architecture decisions for identity, networking, data protection, regions, and quotas](https://learn.microsoft.com/azure/foundry/concepts/architecture)
 
 ### Expected outputs and evidence
 
@@ -195,35 +200,38 @@ available skills, source-control system, and governance model.
    integration; other Foundry agent types may use portal, SDK, or approved
    automation patterns documented for that type.
 
-> 🔗 **Implementation reference:** [Learn how to set up hosted-agent CI/CD with Azure Developer CLI and GitHub Actions](https://learn.microsoft.com/azure/foundry/agents/quickstarts/set-up-cicd-hosted-agent)
->
-> 🔗 **Implementation reference:** [Learn how Azure Developer CLI configures CI/CD for GitHub Actions or Azure Pipelines](https://learn.microsoft.com/azure/foundry/agents/how-to/set-up-ci-cd-cli)
+**Implementation resources**
+
+- [Set up hosted-agent CI/CD with Azure Developer CLI and GitHub Actions](https://learn.microsoft.com/azure/foundry/agents/quickstarts/set-up-cicd-hosted-agent)
+- [Configure CI/CD with Azure Developer CLI for GitHub Actions or Azure Pipelines](https://learn.microsoft.com/azure/foundry/agents/how-to/set-up-ci-cd-cli)
 
 2. Use federated workload identity or another approved secretless
    pattern for pipelines. Grant least privilege at the correct Foundry and Azure
    scopes.
 
-> 🔗 **Implementation reference:** [Learn how Foundry authentication, managed identities, and control-plane and data-plane authorization work](https://learn.microsoft.com/azure/foundry/concepts/authentication-authorization-foundry)
->
-> 🔗 **Implementation reference:** [Learn how GitHub Actions uses OpenID Connect to authenticate to Azure without long-lived secrets](https://docs.github.com/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-azure)
->
-> 🔗 **Implementation reference:** [Learn how Azure Pipelines creates a workload-identity-federated Azure service connection](https://learn.microsoft.com/azure/devops/pipelines/library/connect-to-azure?view=azure-devops)
+**Implementation resources**
+
+- [Review Foundry authentication, managed identities, and authorization](https://learn.microsoft.com/azure/foundry/concepts/authentication-authorization-foundry)
+- [Configure GitHub Actions OpenID Connect authentication for Azure](https://docs.github.com/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-azure)
+- [Create a workload-identity-federated Azure service connection](https://learn.microsoft.com/azure/devops/pipelines/library/connect-to-azure?view=azure-devops)
 
 3. Store environment configuration outside source when it contains secrets.
    Keep non-secret deployment configuration versioned and reviewable.
 
-> 🔗 **Implementation reference:** [Learn how to discover, store, rotate, monitor, and protect secrets in Azure workloads](https://learn.microsoft.com/azure/security/fundamentals/secrets-best-practices)
->
-> 🔗 **Implementation reference:** [Learn how Azure Pipelines accesses Key Vault through a federated service connection](https://learn.microsoft.com/azure/devops/pipelines/release/azure-key-vault?view=azure-devops)
+**Implementation resources**
+
+- [Discover, store, rotate, monitor, and protect secrets in Azure workloads](https://learn.microsoft.com/azure/security/fundamentals/secrets-best-practices)
+- [Connect Azure Pipelines to Key Vault with a federated service connection](https://learn.microsoft.com/azure/devops/pipelines/release/azure-key-vault?view=azure-devops)
 
 4. Integrate evaluation after the candidate is available and before promotion.
    For a hosted agent, keep the production endpoint selector on the stable
    version, test the candidate with `--version`, then select the approved
    version at 100 percent and retain the previous selector for rollback.
 
-> 🔗 **Implementation reference:** [Learn how to test an exact hosted-agent version, update traffic selectors, and roll back without creating another version](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-production)
->
-> 🔗 **Implementation reference:** [Learn how to run managed Foundry evaluations and retain comparable cloud evaluation results](https://learn.microsoft.com/azure/foundry/observability/how-to/cloud-evaluation)
+**Implementation resources**
+
+- [Test an exact hosted-agent version, update traffic selectors, and roll back without creating another version](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-production)
+- [Run managed Foundry evaluations and retain comparable cloud evaluation results](https://learn.microsoft.com/azure/foundry/observability/how-to/cloud-evaluation)
 
 5. Optionally use the
    [AgentOps Accelerator](https://aka.ms/agentops-accelerator) as a
@@ -239,9 +247,10 @@ available skills, source-control system, and governance model.
 - Source control and artifact retention decision
 - Preview, licensing, region, and support constraints
 
-> 🔗 **Implementation reference:** [Learn how GitHub Actions stores release, build, and test evidence as workflow artifacts](https://docs.github.com/actions/tutorials/store-and-share-data)
->
-> 🔗 **Implementation reference:** [Learn how Azure Pipelines retention policies preserve or delete runs, logs, and artifacts](https://learn.microsoft.com/azure/devops/pipelines/policies/retention?view=azure-devops)
+**Implementation resources**
+
+- [Store release, build, and test evidence as GitHub Actions artifacts](https://docs.github.com/actions/tutorials/store-and-share-data)
+- [Configure Azure Pipelines retention for runs, logs, and artifacts](https://learn.microsoft.com/azure/devops/pipelines/policies/retention?view=azure-devops)
 
 ## Phase 3 - Prepare source, versioning, and environments
 
@@ -266,11 +275,11 @@ first pipeline execution.
 6. Define dependency pinning and provenance for packages, images, models, custom
    connectors, and external APIs where supported.
 
-> 🔗 **Implementation reference:** [Learn how GitHub protected branches require reviews and successful status checks](https://docs.github.com/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)
->
-> 🔗 **Implementation reference:** [Learn how Azure Repos branch policies require reviewers, builds, and linked work before merge](https://learn.microsoft.com/azure/devops/repos/git/branch-policies?view=azure-devops)
->
-> 🔗 **Implementation reference:** [Learn how Foundry cloud evaluations pin datasets, evaluator versions, and reports for repeatable release evidence](https://learn.microsoft.com/azure/foundry/observability/how-to/cloud-evaluation)
+**Implementation resources**
+
+- [Configure GitHub protected branches with reviews and status checks](https://docs.github.com/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)
+- [Configure Azure Repos branch policies for reviews, builds, and linked work](https://learn.microsoft.com/azure/devops/repos/git/branch-policies?view=azure-devops)
+- [Pin datasets, evaluator versions, and reports for repeatable release evidence](https://learn.microsoft.com/azure/foundry/observability/how-to/cloud-evaluation)
 
 ### Environment preparation
 
@@ -279,30 +288,31 @@ first pipeline execution.
 3. Configure approved secret and certificate storage.
 4. Establish environment-specific configuration and connection mappings.
 
-> 🔗 **Implementation reference:** [Learn how to configure Microsoft Entra authentication and managed identities for Foundry automation](https://learn.microsoft.com/azure/foundry/concepts/authentication-authorization-foundry)
->
-> 🔗 **Implementation reference:** [Learn how to scope Foundry roles for people, pipelines, agents, and observability](https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry)
->
-> 🔗 **Implementation reference:** [Learn how to protect and rotate application secrets and certificates](https://learn.microsoft.com/azure/security/fundamentals/secrets-best-practices)
+**Implementation resources**
+
+- [Configure Microsoft Entra authentication and managed identities for Foundry automation](https://learn.microsoft.com/azure/foundry/concepts/authentication-authorization-foundry)
+- [Scope Foundry roles for people, pipelines, agents, and observability](https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry)
+- [Protect and rotate application secrets and certificates](https://learn.microsoft.com/azure/security/fundamentals/secrets-best-practices)
 
 5. Validate network paths, private access, DNS, firewalls, and service
    availability from the pipeline runner.
 6. Seed representative nonproduction knowledge and test identities without
    copying unapproved production data.
 
-> 🔗 **Implementation reference:** [Learn how to configure Foundry private endpoints, DNS, and secure client access paths](https://learn.microsoft.com/azure/foundry/how-to/configure-private-link)
->
-> 🔗 **Implementation reference:** [Learn how to select Foundry resource and project boundaries for isolated production data and workloads](https://learn.microsoft.com/azure/foundry/concepts/planning)
+**Implementation resources**
+
+- [Configure Foundry private endpoints, DNS, and secure client access paths](https://learn.microsoft.com/azure/foundry/how-to/configure-private-link)
+- [Select Foundry resource and project boundaries for isolated production data and workloads](https://learn.microsoft.com/azure/foundry/concepts/planning)
 
 7. Configure telemetry before production so deployment verification has signal.
 8. Confirm quotas, capacity, licenses, connectors, policies, and regional
    support.
 
-> 🔗 **Implementation reference:** [Learn how to connect Application Insights and validate Foundry agent tracing](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
->
-> 🔗 **Implementation reference:** [Learn how to monitor agent latency, failures, usage, and continuous evaluation results](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
->
-> 🔗 **Implementation reference:** [Learn how to inspect, allocate, and request Foundry model quota](https://learn.microsoft.com/azure/foundry/how-to/quota)
+**Implementation resources**
+
+- [Connect Application Insights and validate Foundry agent tracing](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
+- [Monitor agent latency, failures, usage, and continuous evaluation results](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
+- [Inspect, allocate, and request Foundry model quota](https://learn.microsoft.com/azure/foundry/how-to/quota)
 
 ### Microsoft Foundry readiness
 
@@ -313,11 +323,11 @@ first pipeline execution.
 - Azure and Foundry roles verified
 - Prior known-good version or redeployable artifact identified
 
-> 🔗 **Implementation reference:** [Learn how to deploy and inspect immutable hosted-agent versions with Azure Developer CLI](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent)
->
-> 🔗 **Implementation reference:** [Learn how to assign the Foundry and connected-resource roles required for deployment and runtime access](https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry)
->
-> 🔗 **Implementation reference:** [Learn how to connect the evaluation and trace services used for release verification](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
+**Implementation resources**
+
+- [Deploy and inspect immutable hosted-agent versions with Azure Developer CLI](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent)
+- [Assign the Foundry and connected-resource roles required for deployment and runtime access](https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry)
+- [Connect the evaluation and trace services used for release verification](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
 
 ### Expected outputs and evidence
 
@@ -352,24 +362,28 @@ candidate promoted to the target environment.
    - invoke critical paths;
    - validate tools, connectors, permissions, knowledge, and channels.
 
-> 🔗 **Implementation reference:** [Learn how Azure Developer CLI deploys a hosted-agent candidate and reports its immutable version and endpoints](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent)
->
-> 🔗 **Implementation reference:** [Learn how to inspect active agent properties, endpoint protocols, authorization, and version routing](https://learn.microsoft.com/azure/foundry/agents/how-to/configure-agent)
+**Implementation resources**
+
+- [Deploy a hosted-agent candidate and capture its immutable version and endpoints](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent)
+- [Inspect active agent properties, endpoint protocols, authorization, and version routing](https://learn.microsoft.com/azure/foundry/agents/how-to/configure-agent)
 
 5. **Evaluation and safety gates**
    - run the approved smoke and regression sets;
    - execute required safety and Responsible AI checks;
    - fail closed when required evidence is missing.
 
-> 🔗 **Implementation reference:** [Learn how to run Foundry cloud evaluations with quality, safety, and custom evaluators](https://learn.microsoft.com/azure/foundry/observability/how-to/cloud-evaluation)
+**Implementation resources**
+
+- [Run Foundry cloud evaluations with quality, safety, and custom evaluators](https://learn.microsoft.com/azure/foundry/observability/how-to/cloud-evaluation)
 
 6. **Approval**
    - present evidence and known exceptions to the authorized approver;
    - record the decision and any expiry-bound waiver.
 
-> 🔗 **Implementation reference:** [Learn how GitHub environments require deployment approval before jobs can access protected secrets](https://docs.github.com/actions/reference/workflows-and-actions/deployments-and-environments)
->
-> 🔗 **Implementation reference:** [Learn how Azure Pipelines records approvals and evaluates checks before a protected stage starts](https://learn.microsoft.com/azure/devops/pipelines/process/approvals?view=azure-devops)
+**Implementation resources**
+
+- [Require GitHub deployment approval before jobs access protected secrets](https://docs.github.com/actions/reference/workflows-and-actions/deployments-and-environments)
+- [Require Azure Pipelines approvals and checks before protected stages](https://learn.microsoft.com/azure/devops/pipelines/process/approvals?view=azure-devops)
 
 7. **Production promotion**
    - for a hosted agent, switch the endpoint selector to the approved version
@@ -378,15 +392,18 @@ candidate promoted to the target environment.
      documented mechanism;
    - prevent unreviewed manual customization.
 
-> 🔗 **Implementation reference:** [Learn how to promote one exact hosted-agent version at 100 percent and preserve the prior selector for rollback](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-production)
+**Implementation resources**
+
+- [Promote one exact hosted-agent version at 100 percent and preserve the prior selector for rollback](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-production)
 
 8. **Post-deployment verification**
    - verify agent identity/version, critical journeys, telemetry, access,
      channel availability, and rollback readiness.
 
-> 🔗 **Implementation reference:** [Learn how to inspect a Foundry agent's active version, endpoint, sharing, and traffic configuration](https://learn.microsoft.com/azure/foundry/agents/how-to/configure-agent)
->
-> 🔗 **Implementation reference:** [Learn how to verify agent telemetry and troubleshoot missing Foundry traces](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
+**Implementation resources**
+
+- [Inspect a Foundry agent's active version, endpoint, sharing, and traffic configuration](https://learn.microsoft.com/azure/foundry/agents/how-to/configure-agent)
+- [Verify agent telemetry and troubleshoot missing Foundry traces](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
 
 ### Microsoft Foundry considerations
 
@@ -403,9 +420,10 @@ candidate promoted to the target environment.
   the Foundry and pipeline records; it does not replace authorized approval,
   compliance, or platform deployment evidence.
 
-> 🔗 **Implementation reference:** [Learn how to generate and run a hosted-agent CI/CD pipeline with Azure Developer CLI](https://learn.microsoft.com/azure/foundry/agents/quickstarts/set-up-cicd-hosted-agent)
->
-> 🔗 **Implementation reference:** [Learn how to retain release-safe hosted-agent versions and endpoint routing evidence](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-production)
+**Implementation resources**
+
+- [Generate and run a hosted-agent CI/CD pipeline with Azure Developer CLI](https://learn.microsoft.com/azure/foundry/agents/quickstarts/set-up-cicd-hosted-agent)
+- [Retain release-safe hosted-agent versions and endpoint routing evidence](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-production)
 
 ### Expected outputs and evidence
 
@@ -416,9 +434,10 @@ candidate promoted to the target environment.
 - Deployment and post-deployment verification evidence
 - Rollback point and decision log
 
-> 🔗 **Implementation reference:** [Learn how GitHub Actions uploads durable gate and deployment evidence as workflow artifacts](https://docs.github.com/actions/tutorials/store-and-share-data)
->
-> 🔗 **Implementation reference:** [Learn how Azure Pipelines retention settings control release records, logs, and artifacts](https://learn.microsoft.com/azure/devops/pipelines/policies/retention?view=azure-devops)
+**Implementation resources**
+
+- [Upload durable gate and deployment evidence as GitHub Actions artifacts](https://docs.github.com/actions/tutorials/store-and-share-data)
+- [Retain Azure Pipelines release records, logs, and artifacts](https://learn.microsoft.com/azure/devops/pipelines/policies/retention?view=azure-devops)
 
 ## Phase 5 - Operationalize release management
 
@@ -431,9 +450,10 @@ Make release outcomes visible, reversible, and continuously improvable.
 1. Define release health indicators and observation windows for errors, latency,
    task outcomes, quality, safety, adoption, and dependency health.
 
-> 🔗 **Implementation reference:** [Learn how to use the Foundry Agent Monitoring Dashboard for operational metrics and continuous evaluation](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
->
-> 🔗 **Implementation reference:** [Learn how to instrument and analyze agent traces in Application Insights](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
+**Implementation resources**
+
+- [Use the Foundry Agent Monitoring Dashboard for operational metrics and continuous evaluation](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
+- [Instrument and analyze agent traces in Application Insights](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
 
 2. Establish a release calendar, freeze rules, maintenance windows, and
    emergency-change process.
@@ -442,11 +462,11 @@ Make release outcomes visible, reversible, and continuously improvable.
 4. Exercise rollback or redeployment of a known-good version in a nonproduction
    environment.
 
-> 🔗 **Implementation reference:** [Learn how GitHub deployment protection rules implement approvals, wait timers, and branch restrictions](https://docs.github.com/actions/reference/workflows-and-actions/deployments-and-environments)
->
-> 🔗 **Implementation reference:** [Learn how Azure Pipelines implements approvals, business hours, alert checks, and exclusive deployment locks](https://learn.microsoft.com/azure/devops/pipelines/process/approvals?view=azure-devops)
->
-> 🔗 **Implementation reference:** [Learn how to route hosted-agent traffic back to a known-good version without rebuilding](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-production)
+**Implementation resources**
+
+- [Configure GitHub deployment approvals, wait timers, and branch restrictions](https://docs.github.com/actions/reference/workflows-and-actions/deployments-and-environments)
+- [Configure Azure Pipelines approvals, business hours, alert checks, and deployment locks](https://learn.microsoft.com/azure/devops/pipelines/process/approvals?view=azure-devops)
+- [Route hosted-agent traffic back to a known-good version without rebuilding](https://learn.microsoft.com/azure/foundry/agents/how-to/deploy-hosted-agent-production)
 
 5. Record release metadata in the designated change and incident systems.
 6. Correlate production incidents and regressions with the release identity.
@@ -454,11 +474,11 @@ Make release outcomes visible, reversible, and continuously improvable.
 8. Review identity, permissions, secrets, certificates, dependencies, and
    platform deprecations on a defined cadence.
 
-> 🔗 **Implementation reference:** [Learn how to use Foundry production telemetry and continuous evaluations to identify release regressions](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
->
-> 🔗 **Implementation reference:** [Learn how to review Foundry identity and role assignments for production operations](https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry)
->
-> 🔗 **Implementation reference:** [Learn how to inventory and migrate Foundry declarative workflows before their retirement](https://learn.microsoft.com/azure/foundry/how-to/develop/vs-code-agents-workflow-low-code)
+**Implementation resources**
+
+- [Use Foundry production telemetry and continuous evaluations to identify release regressions](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
+- [Review Foundry identity and role assignments for production operations](https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry)
+- [Inventory and migrate Foundry declarative workflows before their retirement](https://learn.microsoft.com/azure/foundry/how-to/develop/vs-code-agents-workflow-low-code)
 
 ### Expected outputs and evidence
 
@@ -489,11 +509,11 @@ Ensure designated teams can operate, troubleshoot, and evolve the release path.
 7. Record owners, escalation paths, support boundaries, and the next control
    review.
 
-> 🔗 **Implementation reference:** [Learn how to assign Foundry operational access to organization-managed groups with least privilege](https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry)
->
-> 🔗 **Implementation reference:** [Learn how operators inspect active agent versions, endpoints, and runtime configuration](https://learn.microsoft.com/azure/foundry/agents/how-to/configure-agent)
->
-> 🔗 **Implementation reference:** [Learn how service owners monitor production agent health and evaluation outcomes](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
+**Implementation resources**
+
+- [Assign Foundry operational access to organization-managed groups with least privilege](https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry)
+- [Inspect active agent versions, endpoints, and runtime configuration](https://learn.microsoft.com/azure/foundry/agents/how-to/configure-agent)
+- [Monitor production agent health and evaluation outcomes](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
 
 ## Roles and responsibilities
 
