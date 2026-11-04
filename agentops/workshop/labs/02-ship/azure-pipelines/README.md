@@ -217,10 +217,15 @@ stages:
    `/.azuredevops/pipelines/ship-<your alias>.yml`.
 5. Select **Run**.
 6. Rename the pipeline to `ship-<your alias>`.
-7. Download `agentops-dev-results` before you decide.
+7. On the run **Summary**, open **Related > Published**, select
+   **agentops-dev-results**, and select **Download artifacts**. Extract the
+   downloaded ZIP and open `report.md` before you decide.
 8. Select **Review** on **3. Approve and promote** and reject the first run.
 9. Approve the corrected run.
-10. Download `ship-release-manifest` after stage 4 passes.
+10. After stage 4 passes, return to the run **Summary**, open
+    **Related > Published**, select **ship-release-manifest**, and select
+    **Download artifacts**. Extract the downloaded ZIP and open
+    `release-manifest.json`.
 
 If a stage fails, open its first failed task and keep the run. Do not approve a
 run with missing evaluation evidence. Fix the branch and push again.

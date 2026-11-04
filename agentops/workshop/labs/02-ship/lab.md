@@ -177,7 +177,8 @@ and produce the same two retained artifacts.
 - **Navigation:** Push the branch, open the current pipeline run, and follow steps 2 through 11 below.
 - **Result:** The evaluation identifies `Software Support`, you reject the approval, and no release is created.
 - **If it fails:** Stop at the first failed task. Do not approve a run that lacks its report, exact candidate version or trace.
-- **Save:** Download `agentops-dev-results` and retain the rejected run URL.
+- **Save:** Download and extract `agentops-dev-results` from the run summary.
+  Retain the rejected run URL.
 - **Time:** 15 minutes active, plus 10 to 20 minutes cloud wait.
 
 1. Commit and push your pipeline.
@@ -195,7 +196,13 @@ git push -u origin "ship/$Alias"
 2. Open the run.
 3. Open **1. Deploy candidate** and record the stable and candidate versions.
 4. Open **2. Evaluate candidate**.
-5. Download `agentops-dev-results`.
+5. Download and extract `agentops-dev-results`:
+   - **GitHub Actions:** on the run summary, scroll to **Artifacts** and select
+     **agentops-dev-results**. Open the downloaded ZIP from **Downloads** and
+     select **Extract all**.
+   - **Azure Pipelines:** on the run **Summary**, open **Related > Published**,
+     select **agentops-dev-results**, select **Download artifacts**, and extract
+     the downloaded ZIP.
 6. Open `report.md`.
 7. Open `cloud_evaluation.json`, copy `report_url`, and open that URL.
 8. Open the `vpn-ticket` trace.
@@ -252,14 +259,25 @@ endpoint selector to the evaluated candidate at 100 percent.
 ### Action 6: Validate the release manifest
 
 - **Purpose:** Make the evaluated and released identities, source and approval auditable.
-- **Navigation:** Download `ship-release-manifest`, open `release-manifest.json`, and perform checks 3 through 6 below.
+- **Navigation:** Open the successful run summary. Use the exact GitHub Actions
+  or Azure Pipelines path in step 1 to download and extract
+  `ship-release-manifest`. Then open `release-manifest.json` and perform the
+  checks below.
 - **Result:** The manifest matches both pipeline versions, the branch commit and the exact-version smoke test.
 - **If it fails:** Mark the release evidence incomplete. Keep the run and ask the instructor before using it in Observe and Operate.
 - **Save:** Keep the manifest with both run URLs.
 - **Time:** 6 minutes.
 
-1. Download `ship-release-manifest`.
-2. Open `release-manifest.json`.
+1. Download and extract `ship-release-manifest`:
+   - **GitHub Actions:** open **Actions**, select **Ship** plus your alias, open
+     the successful run, scroll to **Artifacts**, and select
+     **ship-release-manifest**. Open the downloaded ZIP from **Downloads** and
+     select **Extract all**.
+   - **Azure Pipelines:** open **Pipelines**, select `ship-<your alias>`, open
+     the successful run, and stay on **Summary**. Open
+     **Related > Published**, select **ship-release-manifest**, select
+     **Download artifacts**, and extract the downloaded ZIP.
+2. Open the extracted folder and open `release-manifest.json`.
 3. Match `evaluated.version` to stage 1.
 4. Match `released.version` to the same candidate and the smoke-test log.
 5. Match `promotion.previous_selector` to the selector saved before deployment.

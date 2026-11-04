@@ -158,10 +158,14 @@ fi
     def test_self_service_clone_and_github_oidc_environment_are_guarded(self):
         lab = (ROOT.parent / "lab.md").read_text(encoding="utf-8")
         github = (ROOT.parent / "github-actions" / "README.md").read_text(encoding="utf-8")
+        azure = (ROOT.parent / "azure-pipelines" / "README.md").read_text(encoding="utf-8")
         self.assertIn("git remote get-url origin", lab)
         verify = github[github.index("  verify:"):]
         self.assertIn("environment: dev", verify)
         self.assertIn("actions/download-artifact", verify)
+        self.assertIn("scroll to **Artifacts**", github)
+        self.assertIn("**Related > Published**", azure)
+        self.assertIn("select **Extract all**", lab)
 
 
 if __name__ == "__main__":

@@ -214,10 +214,15 @@ jobs:
 2. Replace `ALIAS` with your alias.
 3. Push your branch.
 4. Open **Actions**, select **Ship** plus your alias, and open the current run.
-5. Download `agentops-dev-results` before you decide.
+5. On the run summary, scroll to **Artifacts** and select
+   **agentops-dev-results**. Open the downloaded ZIP from **Downloads**, select
+   **Extract all**, and open `report.md` before you decide.
 6. Select **Review deployments** and reject the first run.
 7. Approve the corrected run.
-8. Download `ship-release-manifest` after **Verify and record release** passes.
+8. After **Verify and record release** passes, return to the run summary,
+   scroll to **Artifacts**, and select **ship-release-manifest**. Open the
+   downloaded ZIP from **Downloads**, select **Extract all**, and open
+   `release-manifest.json`.
 
 If a job fails, open the first failed step and keep the run. Do not approve a
 run with missing evaluation evidence. Fix the branch and push again.
