@@ -123,6 +123,9 @@ affect those outcomes.
 6. Record gaps where no automated measure is sufficient and human review is
    required.
 
+> 🔗 **Implementation reference:** [Plan quality, safety, and production evaluation approaches](https://learn.microsoft.com/azure/foundry/concepts/evaluation-overview),
+> [run cloud red-team scans against a model or application](https://learn.microsoft.com/azure/foundry/how-to/develop/run-ai-red-teaming-cloud)
+
 ### Expected outputs and evidence
 
 - Evaluation plan and scope boundaries
@@ -172,6 +175,12 @@ evidence and can be maintained by the designated owners.
    safety checks, baselines, and evidence packs. It is not the product contract
    and does not replace native Foundry evaluation capabilities.
 
+> 🔗 **Implementation reference:** [Choose built-in evaluators and their required inputs](https://learn.microsoft.com/azure/foundry/concepts/built-in-evaluators),
+> [create rubric-based custom evaluators](https://learn.microsoft.com/azure/foundry/concepts/evaluation-evaluators/custom-evaluators),
+> [configure and run repeatable cloud evaluations](https://learn.microsoft.com/azure/foundry/observability/how-to/cloud-evaluation)
+
+> 🔗 **Implementation reference:** [Connect Application Insights and instrument agent tracing](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
+
 ### Expected outputs and evidence
 
 - Tooling decision record with rejected alternatives
@@ -210,6 +219,10 @@ before applying release criteria.
    where the preview capability is available. Review, redact, label, and approve
    the generated cases before adding them to a maintained test set.
 
+> 🔗 **Implementation reference:** [Create and manage versioned evaluation datasets](https://learn.microsoft.com/azure/foundry/observability/how-to/evaluation-datasets),
+> [convert reviewed agent traces into evaluation datasets](https://learn.microsoft.com/azure/foundry/observability/how-to/traces-to-dataset),
+> [understand how Foundry processes and protects model data](https://learn.microsoft.com/azure/foundry/responsible-ai/openai/data-privacy)
+
 ### Run and gate preparation
 
 1. Map dataset fields to the selected evaluator and target inputs.
@@ -224,6 +237,8 @@ before applying release criteria.
    than appear as a pass.
 6. Run a small readiness sample to validate mappings, permissions, evaluator
    behavior, result retention, and trace correlation.
+
+> 🔗 **Implementation reference:** [Assign the permissions required for evaluation workflows](https://learn.microsoft.com/azure/foundry/observability/how-to/evaluation-permissions)
 
 ### Expected outputs and evidence
 
@@ -257,6 +272,9 @@ evidence, and record the decision supported by the run.
 6. Assign remediation owners and rerun the same versioned set after changes.
 7. Preserve the run identity, agent identity, dataset/test-set version, methods,
    thresholds, results, exceptions, and approval decision.
+
+> 🔗 **Implementation reference:** [Run agent evaluations and integrate acceptance thresholds into delivery workflows](https://learn.microsoft.com/azure/foundry/observability/how-to/evaluate-agent#integrate-into-your-workflow),
+> [inspect aggregate metrics and row-level evaluation results](https://learn.microsoft.com/azure/foundry/how-to/evaluate-results)
 
 ### Microsoft Foundry evidence
 
@@ -302,6 +320,8 @@ feedback loop.
    dependency, or incomplete run must not appear as a passing evaluation.
 7. Review thresholds periodically as coverage, usage patterns, and risk evolve.
 
+> 🔗 **Implementation reference:** [Configure telemetry retention for the Log Analytics workspace](https://learn.microsoft.com/azure/azure-monitor/logs/data-retention-configure)
+
 ### Microsoft Foundry considerations
 
 - Use scheduled or continuous evaluation where supported and appropriate.
@@ -316,6 +336,8 @@ feedback loop.
 - If the AgentOps Accelerator is adopted, keep it in the Foundry track and
   document which Accelerator artifacts are authoritative for the release
   process.
+
+> 🔗 **Implementation reference:** [Monitor agent quality and configure continuous evaluation](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard#set-up-continuous-evaluation)
 
 ### Expected outputs and evidence
 
@@ -346,6 +368,9 @@ evaluation system.
 6. Assign access through managed groups and workload identities rather than
    personal accounts.
 7. Record the next evaluation review date and the backlog owner.
+
+> 🔗 **Implementation reference:** [Apply least-privilege Foundry role assignments](https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry),
+> [configure authentication for users and workload identities](https://learn.microsoft.com/azure/foundry/concepts/authentication-authorization-foundry)
 
 ## Roles and responsibilities
 
@@ -402,15 +427,4 @@ The evaluation workstream is complete when:
 
 ### AgentOps references
 
-- [AgentOps Accelerator](https://aka.ms/agentops-accelerator) - Foundry-specific
-  reference implementation
 - [AgentOps Accelerator: Evaluation](https://azure.github.io/agentops/evaluation/)
-
-### Microsoft Foundry
-
-- [Observability in generative AI](https://learn.microsoft.com/azure/foundry/concepts/observability)
-- [Built-in evaluators](https://learn.microsoft.com/azure/foundry/concepts/built-in-evaluators)
-- [Run cloud evaluations with the Microsoft Foundry SDK](https://learn.microsoft.com/azure/foundry/how-to/develop/cloud-evaluation)
-- [Monitor agents and set up continuous evaluation](https://learn.microsoft.com/azure/foundry/observability/how-to/how-to-monitor-agents-dashboard)
-- [Set up tracing in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
-- [Convert agent traces into evaluation datasets](https://learn.microsoft.com/azure/foundry/observability/how-to/traces-to-dataset)
