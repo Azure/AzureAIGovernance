@@ -10,10 +10,10 @@ selected in your invitation.** Teaching the workshop? Start with the
 
 | Order | Open this lab | What you will work on |
 | --- | --- | --- |
-| 1 | [Evaluate](01-evaluate/lab.md) | Compare agent versions using responses, tool actions and evaluation results |
-| 2 | [Ship](02-ship/lab.md) | Build a release pipeline that evaluates, waits for approval and releases your own agent |
-| 3 | [Observe and Operate](03-observe-operate/lab.md) | Investigate a complaint with traces, a query and an alert, then decide the response |
-| Optional | [Advanced](04-advanced/lab.md) | Add a regression test and an automatic gate to your pipeline, then recover from a bad release |
+| 1 | [Evaluate](01-evaluate/lab.md) | 60 minutes: compare exact agent versions using responses, tool actions and evaluation results |
+| 2 | [Ship](02-ship/lab.md) | 75 to 90 minutes: build a release pipeline that evaluates, waits for approval and releases your own agent |
+| 3 | [Observe and Operate](03-observe-operate/lab.md) | 60 minutes: investigate a complaint with traces, a scoped query and a fired alert, then decide the response |
+| Optional | [Advanced](04-advanced/lab.md) | 150 minutes: add a regression test and automatic gates, then prove recovery from the same incident |
 
 The folder numbers show the sequence for the full workshop. You can also
 attend a single module: complete the common pre-work and that module's section.

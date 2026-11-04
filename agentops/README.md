@@ -82,7 +82,7 @@ Complete one, not both.
 | Evaluation tooling | Evaluate versions, rationale, capability boundaries and authoring status | [Tooling notes](workshop/labs/01-evaluate/TOOLING.md), [pinned dependencies](workshop/labs/01-evaluate/requirements.txt) |
 | Evaluation workflow | Evaluate | [Public Accelerator CLI config](workshop/labs/01-evaluate/assets/agentops.yaml), [offline public CLI tests](workshop/labs/01-evaluate/scripts/test_public_cli.py) |
 | Evaluation inputs | Evaluate | [Turn cases](workshop/labs/01-evaluate/assets/turns.jsonl) |
-| Evaluation assignment and evidence | Evaluate | [Receive the prepared workspace](workshop/pre-work/README.md#2-participant-initialize-the-supported-evaluation-workspace), [technical setup](workshop/pre-work/technical-setup.md#instructoradmin-prepare-the-evaluation-workspace), [closing discussion](workshop/labs/01-evaluate/lab.md#5-decide-and-hand-off-to-ship), [required instructor evidence](workshop/labs/01-evaluate/assets/evidence/README.md) |
+| Evaluation assignment and evidence | Evaluate | [Receive the prepared workspace](workshop/pre-work/README.md#2-participant-initialize-the-supported-evaluation-workspace), [technical setup](workshop/pre-work/technical-setup.md#instructoradmin-prepare-the-evaluation-workspace), [closing discussion](workshop/labs/01-evaluate/lab.md#6-record-the-decision), [required instructor evidence](workshop/labs/01-evaluate/assets/evidence/README.md) |
 | Workshop deck | Ship | [`agentops-ship-workshop.pptx`](workshop/decks/ship/agentops-ship-workshop.pptx) |
 | Workshop lab | Ship | [`lab.md`](workshop/labs/02-ship/lab.md) |
 | Ship pipeline tools | Choose one alternative | [GitHub Actions](workshop/labs/02-ship/github-actions/README.md), [Azure Pipelines](workshop/labs/02-ship/azure-pipelines/README.md) |
@@ -116,9 +116,10 @@ submitting runs against an already deployed help desk agent; learners do not
 use azd in Evaluate. In Ship, participants generate a pipeline with the
 Accelerator CLI that deploys with azd, evaluates, waits for approval and runs a
 smoke test. Creating Azure resources stays outside workshop time.
-In Observe and Operate, participants investigate traces, write a query and
-create an alert. Advanced adds a regression test and an automatic gate, then
-recovers from a bad release.
+In Observe and Operate, participants investigate an exact response and trace,
+run a version-scoped query, fire an alert and retain an operational decision.
+Advanced turns that same incident into a critical regression test, proves that
+the release controls stop it, then retains the recovery evidence and runbook.
 
 ## Delivery sequence
 

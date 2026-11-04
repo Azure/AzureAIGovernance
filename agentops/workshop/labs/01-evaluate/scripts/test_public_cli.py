@@ -160,6 +160,10 @@ class PublicCliTests(unittest.TestCase):
             "$env:Path = (Join-Path $EvaluateRoot '.venv\\Scripts') + ';' + $env:Path",
             f"$env:Path = '{scripts}' + ';' + $env:Path",
         )
+        startup = startup.replace(
+            "python -m pip check",
+            "Write-Output 'No broken requirements found.'; $global:LASTEXITCODE = 0",
+        )
         env = dict(self.env, AZURE_AI_FOUNDRY_PROJECT_ENDPOINT="https://stale.invalid")
         result = subprocess.run(
             ["pwsh", "-NoProfile", "-Command", startup],
@@ -293,6 +297,81 @@ class TeachingAssetTests(unittest.TestCase):
         self.assertIn('similarity: ">=3"', config)
         self.assertNotIn("response_source: dataset", config)
         self.assertNotIn("input_mapping", config)
+
+    def test_lab_action_cards_meet_structure_standard(self):
+        lab = (LAB / "lab.md").read_text(encoding="utf-8")
+        cards = re.findall(
+            r"(?ms)^### Action \d+:[^\n]+\n(.*?)(?=^### Action \d+:|^## |\Z)",
+            lab,
+        )
+        self.assertGreaterEqual(len(cards), 10)
+        required = (
+            "**Purpose:**", "**Result:**", "**If it fails:**",
+            "**Save:**", "**Time:**",
+        )
+        complete = 0
+        for card in cards:
+            has_action_path = (
+                "**Command:**" in card
+                or "**Navigation:**" in card
+                or "**Command or navigation:**" in card
+            )
+            if has_action_path and all(label in card for label in required):
+                complete += 1
+        self.assertGreaterEqual(complete / len(cards), 0.8)
+
+    def test_lab_requires_exact_targets_and_strict_critical_policy(self):
+        lab = (LAB / "lab.md").read_text(encoding="utf-8")
+        for text in (
+            "baseline_expected=$BaselineAgent",
+            "baseline_actual=$($BaselineResult.target.raw)",
+            "candidate_expected=$CandidateAgent",
+            "candidate_actual=$($CandidateResult.target.raw)",
+            "Baseline result target does not match",
+            "Candidate result target does not match",
+            "Baseline and candidate must be versions of the same agent",
+            "Workspace candidate differs from the invitation",
+            "Workspace project differs from the invitation",
+            "Workspace scoring model differs from the invitation",
+            "Strict critical-case policy",
+            "NO-SHIP: INSUFFICIENT EVIDENCE",
+            "Response ID",
+            "Trace ID",
+            "python -m pip check",
+            "Native Microsoft Foundry product path",
+        ):
+            self.assertIn(text, lab)
+
+    def test_durable_decision_record_captures_action_evidence(self):
+        record = (ASSETS / "decision-record.md").read_text(encoding="utf-8")
+        for text in (
+            "Baseline expected target",
+            "Baseline actual target",
+            "Candidate expected target",
+            "Candidate actual target",
+            "password-basic",
+            "vpn-ticket",
+            "privileged-request",
+            "private-ticket",
+            "Response ID",
+            "Trace ID",
+            "lookup_article",
+            "create_ticket",
+            "NO-SHIP: INSUFFICIENT EVIDENCE",
+        ):
+            self.assertIn(text, record)
+
+    def test_fallback_requires_matching_exact_evidence(self):
+        lab = (LAB / "lab.md").read_text(encoding="utf-8")
+        evidence = (ASSETS / "evidence" / "README.md").read_text(encoding="utf-8")
+        instructor = (
+            LAB.parents[1] / "instructor-guide" / "evaluate.md"
+        ).read_text(encoding="utf-8")
+        for document in (lab, evidence, instructor):
+            self.assertIn("instructor demonstration", document)
+            self.assertIn("NO-SHIP: INSUFFICIENT EVIDENCE", document)
+        self.assertIn("targets.txt", evidence)
+        self.assertIn("exact", instructor.lower())
 
     def test_controlled_tools_preserve_teaching_defects(self):
         path = LAB.parent / "shared" / "helpdesk-agent" / "tools.py"

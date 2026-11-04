@@ -197,6 +197,7 @@ created or connected in step 3.
 | Instructor and attendees | Reader | Parent Foundry resource |
 | Person deploying the models, if not already authorized | Contributor | Parent Foundry resource |
 | Instructor and attendees inspecting traces | Monitoring Reader | Connected Application Insights |
+| Instructor and attendees reading protected prompts, responses and tool content | Privileged Monitoring Data Reader | Connected Application Insights |
 | Instructor and attendees querying trace logs | Log Analytics Reader | Its Log Analytics workspace |
 | Attendees creating their own alert in Observe and Operate (optional) | Monitoring Contributor | Workshop resource group |
 
@@ -210,8 +211,10 @@ For each required assignment:
 Existing equivalent or inherited permissions need no duplicate assignment.
 If **Add role assignment** is disabled, the resource's access administrator
 must perform it. Do not broaden access to the subscription to clear an error.
-Protected log tables require a separate administrator review; do not remove
-their protection.
+The workshop reads tool arguments and results from the protected
+`AppGenAIContent` table. Keep its protection enabled and grant
+**Privileged Monitoring Data Reader** only to the approved class group and
+instructor. Do not remove protection to clear an access error.
 
 ### Let the project use its models
 

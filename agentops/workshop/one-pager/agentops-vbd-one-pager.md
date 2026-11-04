@@ -1,7 +1,7 @@
 ---
 title: "AgentOps Value Based Delivery Workshop"
 subtitle: "Evaluate, Ship, Observe, and Operate Microsoft Foundry agents"
-duration: "6h hands-on; 4h demo"
+duration: "6-6.5h hands-on; 4h demo"
 structure: "Three modules"
 difficulty: "300: Advanced"
 delivery: "Remote or onsite"
@@ -61,12 +61,13 @@ The learning environment and participant setup are prepared before the session.
 | Module | Duration | Learning artifact |
 | --- | --- | --- |
 | Evaluate | 2h hands-on<br/>1h 20m demo | Sample evaluation criteria |
-| Ship | 2h hands-on<br/>1h 20m demo | Sample release checklist |
+| Ship | 2h 15m-2h 30m hands-on<br/>1h 20m demo | Sample release checklist |
 | Observe<br/>and Operate | 2h hands-on<br/>1h 20m demo | Sample runtime<br/>signal review |
 
 ## Format
 
-- **Hands-on:** 60m presentation and 60m lab per module.
+- **Hands-on:** 60m presentation per module, 60m labs for Evaluate and
+  Observe/Operate, and a 75-90m Ship lab.
 - **Demo:** 60m presentation and 20m instructor demonstration per module.
 
 Take all three modules or select those relevant to your team.
@@ -84,7 +85,7 @@ to its own projects.
 
 ## Optional advanced module
 
-**Additional 2h hands-on (level 400).**
+**Additional 2h 30m hands-on (level 400).**
 
 **Responsible AI in practice:** ASSERT; Agent Control Specification (ACS);
 Agent hooks.

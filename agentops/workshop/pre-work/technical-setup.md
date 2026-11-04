@@ -218,7 +218,9 @@ instead of running it again.
 Participants build their own release pipeline in a **class repository** that
 you prepare once for the whole class. Each participant works on a branch of it
 and deploys two agents of their own, so nobody overwrites anyone else.
-Allow about an hour, plus the time the Azure administrator needs.
+Allow 75 to 90 minutes for the GitHub Actions lab. Allow up to 120 minutes for
+Azure Pipelines because participants must also create and select their
+pipeline. The Azure administrator's preparation time is separate.
 
 #### 1. Create the empty class repository
 
@@ -393,25 +395,38 @@ and [approvals](https://learn.microsoft.com/azure/devops/pipelines/process/appro
 
 Participants observe their own released agent from Ship, or your baseline agent
 if they skip Ship. They read its traces, query them, run the health check and
-create an alert. There is nothing to package.
+create and test an alert. There is nothing to package.
 
 1. **Check trace access.** [Environment setup step 4](foundry-environment.md#4-give-people-access)
-   already gives participants **Monitoring Reader** and **Log Analytics Reader**.
-2. **Decide who creates the alert.** Creating an alert rule needs
+   already gives participants **Monitoring Reader**, **Log Analytics Reader**
+   and **Privileged Monitoring Data Reader** for the protected generative AI
+   content used in this workshop.
+2. **Prepare alert creation.** Creating an alert rule needs
    **Monitoring Contributor** on the workshop resource group. Either ask the
    administrator to grant it to the participants, or create the alert yourself
-   during [lab step 6](../labs/03-observe-operate/lab.md#6-create-an-alert) while
-   they watch. Send alert notifications only to people who agreed to receive them.
-3. **Run the lab yourself** with the test account: follow
+   during [lab step 7](../labs/03-observe-operate/lab.md#7-create-and-fire-the-alert)
+   while they watch. Use no action group unless recipients agreed to receive
+   notifications.
+3. **Discover and save the current telemetry mapping.** Run the lab's
+   structured-attribute discovery query against the rehearsal response. Keep
+   the working agent, version, tool argument and tool result keys. Do not give
+   participants an unscoped query that searches the entire telemetry bag.
+4. **Fire the rehearsal alert.** Send the deterministic Outlook request and
+   retain the fired alert instance. Participants use this exact-version result
+   as the fallback if telemetry ingestion exceeds the class window.
+5. **Run the lab yourself** with the test account: follow
    [the Observe and Operate lab](../labs/03-observe-operate/lab.md) with your
    `rehearsal` agent from Ship, or your baseline agent. Traces can take a few
    minutes to appear after each request.
 
 ### Advanced (optional)
 
-Advanced continues in each participant's Ship branch and needs no extra setup.
+Advanced continues in each participant's Ship branch and needs no new Azure
+resource.
 Run [the Advanced lab](../labs/04-advanced/lab.md) once on your `rehearsal`
-branch, after your Ship and Observe rehearsals.
+branch, after your Ship and Observe rehearsals. Allow 150 minutes. Confirm that
+the local Advanced tests pass, then retain the last-good, failed and recovery
+runs and their incident evidence artifacts.
 
 ## 5. Invite and rehearse
 
@@ -466,6 +481,7 @@ Ship settings
 Observe settings
 - Project endpoint: <https://RESOURCE.services.ai.azure.com/api/projects/PROJECT>
 - Agent to observe if you skip Ship: <baseline agent name>
+- Agent version if you skip Ship: <baseline version number>
 - Application Insights resource: <resource name>
 
 Keep your work until: <retention date>
@@ -485,6 +501,7 @@ not work, reply to this invitation before the session.
 - **Baseline agent** and **Candidate agent:** `versions.txt`, saved in
   [agent deployment step 4](../labs/shared/helpdesk-agent/README.md#4-save-the-two-version-references).
   **Agent to observe if you skip Ship** is the name inside the baseline URL.
+  **Agent version if you skip Ship** is the final version number in that URL.
 - **Scoring-model deployment:** **Build > Models** in the Foundry project.
 - **Sign-in account** and **Network access:** ask the Azure administrator.
 - **Class repository** and **Pipeline tool:** the repository from
@@ -518,9 +535,9 @@ supports the whole class at once comes from the
 2. **Complete the pre-work** for your modules from the invitation's link, on a
    machine like the ones participants will use. Use **Network access** first if
    a VPN is required.
-3. **Evaluate:** run [lab step 3](../labs/01-evaluate/lab.md#3-run-the-supported-public-command)
+3. **Evaluate:** run [lab step 4](../labs/01-evaluate/lab.md#4-evaluate-both-versions)
    once, baseline then candidate, and check with
-   [step 4](../labs/01-evaluate/lab.md#4-inspect-the-report-and-actual-interactions)
+   [step 5](../labs/01-evaluate/lab.md#5-correlate-results-and-actions)
    that all eight requests have answers, both scores and no errors. Exit `2`
    means a quality threshold failed, not that sign-in failed.
 4. **Ship, Observe and Operate, Advanced:** your runs from [step 4](#4-prepare-your-module)
@@ -539,7 +556,7 @@ restrictions.
 - [ ] A person with participant permissions completed the pre-work and started each hands-on lab.
 - [ ] Evaluate uses the versions named in the invitation; all eight requests were reviewed.
 - [ ] Ship: the class repository has its settings and environments, and your `rehearsal` branch has one rejected and one released run.
-- [ ] Observe and Operate: your agent's traces appear, and you know who creates the alert.
+- [ ] Observe and Operate: the deterministic trace appears, the scoped query works, and a fired rehearsal alert is retained.
 - [ ] Each rehearsal fits the lab time, with a capacity plan for simultaneous runs.
 
 <a id="readiness-gate"></a>

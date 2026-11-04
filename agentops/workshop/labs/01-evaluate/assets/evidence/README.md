@@ -1,47 +1,53 @@
-# Guide to the instructor's result files
+# Guide to Evaluate evidence
 
 ![Every score has a story. Keep the right evidence. Open the files that show what was tested and what happened.](../../../../assets/banners/evidence.png)
 
-Use this guide to find the right report and understand where its results came
-from. The repository supplies the instructions and test inputs, not evaluation
-results: every result comes from a run in the shared Foundry project.
-Authors track unfinished work in [TOOLING.md](../../TOOLING.md#validation-evidence).
+Use this guide to identify evidence from a participant run or an instructor
+demonstration. Repository fixtures are test inputs, not evaluation evidence.
 
-## Who produces which results
+## Required evidence set
 
-All paths below are relative to `agentops\workshop\labs\01-evaluate`.
+Keep one timestamped run folder with:
 
-| Results | Produced by | Where |
-| --- | --- | --- |
-| Baseline and candidate evaluations | Each participant, in [lab step 3](../../lab.md#3-run-the-supported-public-command) | `.local\runs\<timestamp>\baseline` and `candidate` |
-| Tool traces for `password-basic` and `vpn-ticket` | Each participant, from their own run in lab step 4 | Foundry **Traces** |
-| The same evaluations and traces, as a fallback | The instructor, in [rehearsal](../../../../pre-work/technical-setup.md#3-instructoradmin-rehearse-the-public-cli-and-retain-the-baseline) | Shown on screen, labelled **instructor demonstration** |
+- `targets.txt`: the assigned project, baseline, candidate and scoring model.
+- `target-proof.txt`: expected and actual `target.raw` for both runs.
+- `baseline\` and `candidate\`: unmodified `results.json`, `report.md`,
+  `cloud_evaluation.json` and `cloud_output_items.json`.
+- `baseline-terminal.txt` and `candidate-terminal.txt`: submission output.
+- `decision.md`: completeness, critical cases, Response ID to Trace ID
+  correlation, executed actions, decision, owners and retest scope.
 
-Each run folder contains the CLI's `results.json`, `report.md`,
-`cloud_evaluation.json` and `cloud_output_items.json`.
+The local folders are normally under
+`.local\runs\<timestamp>\baseline` and `candidate`. Foundry retains the native
+evaluation and trace records in the shared project.
 
-If a report link is unavailable, ask the instructor for the missing
-permission. Do not replace it with `scripts/fixtures/offline-results.json`;
-that fixture only tests report rendering and is not a workshop result.
+## Evidence rules
 
-## Main evaluation results
+1. Match rows by request ID or full input, not file position.
+2. Require eight unique responses and two valid scores per response.
+3. Match each downloaded `target.raw` to the exact saved version URL.
+4. Record both identifiers: a Response ID identifies an agent response; a
+   Trace ID identifies telemetry. Do not treat them as interchangeable.
+5. For `password-basic`, retain the `lookup_article` result and its `source`.
+6. For `vpn-ticket`, retain the `create_ticket` `category` argument and `queue`
+   result.
+7. Treat missing or failed critical evidence as **NO-SHIP**, not as a pass.
+8. Leave run files unchanged. Put review conclusions in `decision.md`.
 
-**INSTRUCTOR:** in rehearsal, run [both evaluations](../../../../pre-work/technical-setup.md#3-instructoradmin-rehearse-the-public-cli-and-retain-the-baseline)
-and keep the **unmodified** CLI output. Confirm that the traces for
-`password-basic` and `vpn-ticket` open from those evaluations in Foundry.
-Keep these results on your computer; remove sensitive information before
-showing them and never include passwords or keys.
+The four critical cases are `password-basic`, `vpn-ticket`,
+`privileged-request`, and `private-ticket`.
 
-**PARTICIPANT:** your own runs are the results you review. When the instructor
-shows theirs instead, label them **instructor demonstration**, not your result.
+## Instructor fallback
 
-Check all eight requests have two valid scores each. A good average or exit
-code `0` does not prove that every result is present.
-The instructor checks that both runs use the same requests and scoring rules.
-Participants report differences rather than edit settings to make them match.
-`--baseline` shows score changes; it does not block a release because a score got worse.
+An instructor demonstration is eligible only when its `targets.txt`, exact
+agent versions, dataset, evaluators, thresholds and deliberate defects match
+the participant lab. Label it **instructor demonstration** in `decision.md`.
+Do not copy it into a participant run folder or present it as that
+participant's completed run.
 
-If evidence is unavailable, mark it **not assessed** in the decision and name
-the person who will provide it. Missing results are not a pass.
-Remove sensitive information before showing results; do not commit
-tenant-specific output or production data.
+If exact evidence is unavailable, record
+**NO-SHIP: INSUFFICIENT EVIDENCE** and name the owner and follow-up. Do not use
+`scripts\fixtures\offline-results.json`; that file tests report rendering only.
+
+Remove secrets and private data before showing evidence. Do not commit
+tenant-specific output.

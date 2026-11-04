@@ -6,98 +6,86 @@
 
 ## Lab definition
 
-**Objective:** Use Microsoft Foundry evaluation and its evaluators to assess a
-specific version of a help desk agent and decide whether its answers and actions
-are good enough to release.
+**Objective:** Use Microsoft Foundry evaluation to compare an exact baseline
+agent version with an exact candidate version. Review answers and executed
+actions, then record a release decision.
 
 **Duration:** 60 minutes hands-on after the 60-minute presentation.
 
 **Difficulty:** 300: Advanced.
 
-**What you will keep:** Evaluation settings, the results for each request,
-and reports showing what passed, failed or still needs investigation.
+**What you will keep:** The exact targets, dataset, configuration, baseline and
+candidate results, tool-action evidence, and `decision.md`.
 
-**Prerequisite:** Complete [participant pre-work](../../pre-work/README.md)
-and have the invitation's **Evaluate settings** at hand.
-Installation, authentication, permissions and deployment are outside this lab.
-The instructor completes [environment setup](../../pre-work/foundry-environment.md)
-and [agent deployment](../shared/helpdesk-agent/README.md) before you start.
+**Prerequisite:** Complete [participant pre-work](../../pre-work/README.md) and
+have the invitation's **Evaluate settings** open. The instructor completes
+[environment setup](../../pre-work/foundry-environment.md) and
+[agent deployment](../shared/helpdesk-agent/README.md) before the lab.
 
 **On this page**
 
-- [Scenario](#scenario)
-- [Tool roles](#tool-roles)
-- [1. Create your workspace and confirm the agent versions](#1-create-your-workspace-and-confirm-the-agent-versions)
-- [2. Review the dataset and criteria](#2-review-the-dataset-and-criteria)
-- [3. Evaluate the baseline and the candidate](#3-evaluate-the-baseline-and-the-candidate)
-- [4. Inspect the report and actual interactions](#4-inspect-the-report-and-actual-interactions)
-- [5. Decide and hand off to Ship](#5-decide-and-hand-off-to-ship)
+1. [Scenario and tool roles](#scenario-and-tool-roles): understand the evidence.
+2. [1. Create the workspace](#1-create-the-workspace): load and test local settings.
+3. [2. Validate both exact targets](#2-validate-both-exact-targets): prevent a comparison of the wrong versions.
+4. [3. Review the dataset and criteria](#3-review-the-dataset-and-criteria): identify critical cases.
+5. [4. Evaluate both versions](#4-evaluate-both-versions): produce comparable results.
+6. [5. Correlate results and actions](#5-correlate-results-and-actions): inspect responses and traces.
+7. [6. Record the decision](#6-record-the-decision): retain a durable Ship handoff.
 
-## Scenario
+## Scenario and tool roles
 
-The [help desk agent](../shared/helpdesk-agent/README.md) looks up fictional
-support articles, checks simulated VPN status and creates simulated tickets.
-No real tickets or private employee records are involved.
+The [help desk agent](../shared/helpdesk-agent/README.md) uses fictional support
+articles and simulated tickets. The candidate contains two deliberate defects.
 
-| Version | Password article reference | Team receiving a VPN ticket |
+| Version | Password article result | VPN ticket result |
 | --- | --- | --- |
-| Baseline | Preserved | Network Support |
-| Candidate | Removed | Software Support |
+| Baseline | `source: KB-PASSWORD-v1` | `category: vpn`, `queue: Network Support` |
+| Candidate | `source` is absent | `category: vpn`, `queue: Software Support` |
 
-These are deliberate bugs in the agent's tools. Can a helpful-sounding answer
-hide a wrong action? Inspect what the tools actually returned to find out.
+A helpful answer does not prove that the correct action occurred. Review the
+answer-quality scores and the executed tool records.
 
-Use Microsoft Foundry evaluation to test the deployed help desk agent with the
-lab dataset. Foundry evaluators assess whether its responses are coherent and
-how closely they match the expected answers.
+| Need | Native Microsoft Foundry product path | Supporting CLI path |
+| --- | --- | --- |
+| Run and retain an evaluation | The project's **Evaluation** page and built-in evaluators | `agentops eval run` submits the same hosted-agent evaluation and downloads its results |
+| Compare cases and scores | Evaluation result details and row-level evaluator reasons | `report.md` and `results.json` |
+| Inspect executed actions | The project's **Tracing** page and `execute_tool` spans | The CLI preserves run identifiers; it does not replace trace inspection |
+| Decide whether to ship | Team release policy and retained Foundry evidence | The lab's `decision.md` records the decision |
 
-Review these scores alongside the
-actual tool calls and results to decide whether the candidate is ready to
-release. The AgentOps Accelerator CLI supports this workflow by submitting the
-evaluation and generating reports.
+The CLI is a reference implementation alongside native Foundry capabilities.
+It is not the Microsoft Foundry product contract and does not approve releases.
 
-## Tool roles
+### Time plan
 
-A **candidate** is the agent version under review. The **baseline** is the
-earlier version used for comparison. A **CLI** is a program you run by typing
-commands in PowerShell.
+| Activity | Time |
+| --- | ---: |
+| Workspace, target validation and criteria | 12 minutes |
+| Baseline and candidate submissions | Up to 22 minutes total |
+| Results and trace review | 18 minutes |
+| Decision and handoff | 8 minutes |
 
-An **evaluator** checks one aspect of an answer. The two evaluators here use
-a **scoring model**, also called a **judge**, to assign scores.
+At minute 34, stop waiting for a live run. Use the exact-version instructor
+fallback in step 4 so the class still has time to inspect evidence and decide.
+Do not submit another run to recover workshop time.
 
-| Tool | Role in the workshop |
-| --- | --- |
-| Microsoft Foundry Agent Service | Runs the selected agent version, including its model and tool calls |
-| Microsoft Foundry Evaluation and evaluators | Runs requests, scores answers and retains per-case results |
-| AgentOps Accelerator (`agentops`) | Submits evaluations, downloads results and checks scores against the configured minimums; it does not deploy agents |
+## 1. Create the workspace
 
-Use any text editor. The steps illustrate VS Code; no extension is needed.
+### Action 1: Open the lab folder
 
-<a id="1-start-the-workspace-and-confirm-the-exact-candidate"></a>
+- **Purpose:** Start from the folder that contains the reviewed configuration and dataset.
+- **Navigation:** In File Explorer, open `agentops\workshop\labs\01-evaluate`, type `powershell` in the address bar, and press Enter.
+- **Result:** PowerShell opens with `01-evaluate` as the current folder.
+- **If it fails:** Ask the instructor for the repository folder. Do not create substitute files.
+- **Save:** Keep this PowerShell window open.
+- **Time:** 1 minute.
 
-## 1. Create your workspace and confirm the agent versions
+### Action 2: Create or reopen the workspace
 
-**Why this step:** the AgentOps Accelerator CLI needs to know which Foundry project to
-use, which two agent versions to compare and which model scores the answers.
-You enter those four values once; the block below writes them into your
-**workspace**, a local folder with your settings and test requests.
+- **Purpose:** Save the assigned project, candidate and scoring model in one local workspace.
+- **Navigation:** Paste the four values from the invitation when prompted, then run this block once.
 
-The invitation's **Evaluate settings** section lists the four values:
-
-| Invitation value | What it identifies |
-| --- | --- |
-| Project endpoint | The shared Foundry project, as a URL ending in `/api/projects/NAME` |
-| Baseline agent | The earlier agent version, as a URL ending in `/agents/NAME/versions/NUMBER` |
-| Candidate agent | The version under review, in the same format |
-| Scoring-model deployment | The model deployment that scores the answers |
-
-### Start PowerShell and create the workspace
-
-1. In File Explorer, open `agentops\workshop\labs\01-evaluate` inside the repository.
-2. Type `powershell` in the address bar and press Enter.
-3. Paste and run the entire block below. Paste each value from the invitation when prompted.
-
-**What this block does:** creates your evaluation workspace from the invitation values. Local only.
+**What this block does:** creates the local workspace, checks installed packages,
+and displays the effective settings. It does not call Azure.
 
 ```powershell
 $ErrorActionPreference = 'Stop'
@@ -111,12 +99,16 @@ $CandidateAgent = (Read-Host 'Candidate agent').Trim()
 $ScoringModel = (Read-Host 'Scoring-model deployment').Trim()
 'AGENTOPS_AGENT','AZURE_AI_FOUNDRY_PROJECT_ENDPOINT','AZURE_OPENAI_DEPLOYMENT','AZURE_AI_MODEL_DEPLOYMENT_NAME' |
     ForEach-Object { Remove-Item "Env:$_" -ErrorAction SilentlyContinue }
+python -m pip check
+if ($LASTEXITCODE -ne 0) { throw 'Evaluation dependencies conflict. Stop and ask the instructor to repair the prepared environment.' }
+agentops --version
+if ($LASTEXITCODE -ne 0) { throw 'AgentOps Accelerator CLI is unavailable. Stop and ask the instructor.' }
 if (-not (Test-Path $Workspace)) {
     New-Item -ItemType Directory -Force $Workspace | Out-Null
     Copy-Item (Join-Path $EvaluateRoot 'assets\turns.jsonl') $Workspace
     agentops init --dir $Workspace --no-prompt `
       --project-endpoint $ProjectEndpoint --agent $CandidateAgent --dataset turns.jsonl
-    if ($LASTEXITCODE -ne 0) { throw 'Workspace creation failed. Check the four values, then ask the instructor.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Workspace creation failed. Check the invitation values, then ask the instructor.' }
     (Get-Content (Join-Path $EvaluateRoot 'assets\agentops.yaml')) -replace '^agent: .*', "agent: $CandidateAgent" |
         Set-Content (Join-Path $Workspace 'agentops.yaml')
     New-Item -ItemType Directory -Force (Join-Path $Workspace '.agentops') | Out-Null
@@ -131,337 +123,313 @@ if ($LASTEXITCODE -ne 0) { throw 'Cannot read the workspace settings. Ask the in
 Select-String -Path '.agentops\.env' -Pattern '^AZURE_OPENAI_DEPLOYMENT='
 ```
 
-The block creates `.local\workspace` the first time you run it: it copies the
-test requests and settings from `assets`, then fills in your four values.
-If the folder already exists, it keeps it and only displays its settings.
-Nothing is deployed or submitted, and no cost is incurred.
+- **Result:** `pip check` reports no broken requirements, the CLI prints version
+  `0.15.0`, and `init show` displays the assigned project and candidate.
+- **If it fails:** Stop. Keep the error visible and ask the instructor to repair
+  the prepared environment. Do not install or downgrade packages during the lab.
+- **Save:** Keep `.local\workspace`; it contains `turns.jsonl`,
+  `agentops.yaml`, and `.agentops\.env`.
+- **Time:** 2 minutes on the prepared workspace.
 
-The reset lines remove old project or model choices from this PowerShell
-window. They do not delete saved sign-ins or change your computer's settings.
+`no azd environment found` and an unset
+`APPLICATIONINSIGHTS_CONNECTION_STRING` are expected here.
 
-#### Check the displayed values
+## 2. Validate both exact targets
 
-Keep the invitation open beside PowerShell:
+### Action 3: Validate and save the target URLs
 
-1. Find `AZURE_AI_FOUNDRY_PROJECT_ENDPOINT` in the output. Its `value` must match **Project endpoint**.
-2. Find `agent:`. It must match **Candidate agent**, including the number after `/versions/`.
-3. The final `AZURE_OPENAI_DEPLOYMENT=` line must match **Scoring-model deployment**.
+- **Purpose:** Prove that the baseline and candidate are distinct version URLs in the assigned project before spending time on evaluations.
+- **Navigation:** Run this block in the same PowerShell window.
 
-**A value is wrong?** Delete the `.local\workspace` folder and run the block
-again with the correct values. Do not edit the settings to point at another project.
+**What this block does:** validates both version URLs, checks their shared
+project endpoint, saves them, and performs local configuration analysis.
 
-`no azd environment found` and an unset `APPLICATIONINSIGHTS_CONNECTION_STRING`
-are expected in this lab's CLI workspace. They refer to optional features;
-do not install or configure them to remove those messages.
+```powershell
+$VersionPattern = '^(?<project>https://[^/]+/api/projects/[^/]+)/agents/(?<agent>[^/]+)/versions/(?<version>[^/]+)$'
+$baselineMatch = [regex]::Match($BaselineAgent, $VersionPattern)
+$candidateMatch = [regex]::Match($CandidateAgent, $VersionPattern)
+if (-not $baselineMatch.Success) { throw 'Baseline agent is not an exact /agents/NAME/versions/NUMBER URL.' }
+if (-not $candidateMatch.Success) { throw 'Candidate agent is not an exact /agents/NAME/versions/NUMBER URL.' }
+if ($baselineMatch.Groups['project'].Value -ne $ProjectEndpoint) { throw 'Baseline agent is outside the assigned project.' }
+if ($candidateMatch.Groups['project'].Value -ne $ProjectEndpoint) { throw 'Candidate agent is outside the assigned project.' }
+if ($baselineMatch.Groups['agent'].Value -ne $candidateMatch.Groups['agent'].Value) { throw 'Baseline and candidate must be versions of the same agent.' }
+if ($BaselineAgent -eq $CandidateAgent) { throw 'Baseline and candidate must be different version URLs.' }
+$ConfiguredCandidate = ((Select-String -Path 'agentops.yaml' -Pattern '^agent: ').Line -replace '^agent: ', '').Trim()
+$SavedProject = ((Select-String -Path '.agentops\.env' -Pattern '^AZURE_AI_FOUNDRY_PROJECT_ENDPOINT=').Line -split '=', 2)[1].Trim()
+$SavedScoringModel = ((Select-String -Path '.agentops\.env' -Pattern '^AZURE_OPENAI_DEPLOYMENT=').Line -split '=', 2)[1].Trim()
+if ($ConfiguredCandidate -ne $CandidateAgent) { throw 'Workspace candidate differs from the invitation. Delete the workspace and recreate it.' }
+if ($SavedProject -ne $ProjectEndpoint) { throw 'Workspace project differs from the invitation. Delete the workspace and recreate it.' }
+if ($SavedScoringModel -ne $ScoringModel) { throw 'Workspace scoring model differs from the invitation. Delete the workspace and recreate it.' }
+$TargetRecord = Join-Path $Workspace 'targets.txt'
+Set-Content $TargetRecord @(
+    "project=$ProjectEndpoint",
+    "baseline=$BaselineAgent",
+    "candidate=$CandidateAgent",
+    "scoring_model=$ScoringModel"
+)
+agentops eval analyze --dir . --format json
+if ($LASTEXITCODE -ne 0) { throw 'Local configuration analysis failed. Stop before submitting an evaluation.' }
+Get-Content $TargetRecord
+```
 
-Keep this window open. If you close it, run the block again with the same values:
-the later steps use the variables it defines.
+- **Result:** The analysis reports `config_status: ready` and
+  `dataset_status: ready`. `targets.txt` prints the exact invitation values.
+- **If it fails:** Correct the invitation value with the instructor. Delete
+  `.local\workspace`, repeat action 2, and do not submit an evaluation first.
+- **Save:** `targets.txt`.
+- **Time:** 3 minutes.
 
-## 2. Review the dataset and criteria
+### Action 4: Compare the saved targets with the invitation
 
-![Before testing everything, decide what good looks like. Choose the outcomes, risks, metrics, and tests that matter.](../../assets/banners/criteria.png)
+- **Purpose:** Catch a valid-looking but wrong version number.
+- **Navigation:** Place `targets.txt` beside the invitation. Compare every
+  character after `/versions/` for both `baseline=` and `candidate=`.
+- **Result:** Both exact values match the invitation and are different.
+- **If it fails:** Stop and obtain corrected Evaluate settings from the instructor.
+- **Save:** Add your initials and the current time to your workshop notes.
+- **Time:** 1 minute.
 
-The **dataset** is the collection of test requests. First, see what the agent
-will be asked and how its answers will be scored.
+## 3. Review the dataset and criteria
 
-1. In VS Code's repository tree, expand `agentops\workshop\labs\01-evaluate\.local\workspace`.
-2. Open `turns.jsonl`: eight employee requests, one per line.
-3. Open `agentops.yaml`: the selected agent and scoring rules.
+### Action 5: Review the eight requests
 
-Do not edit either file.
+- **Purpose:** Know which cases require a strict no-ship decision.
+- **Navigation:** In VS Code, open
+  `agentops\workshop\labs\01-evaluate\.local\workspace\turns.jsonl`.
+  Read the `id`, `expected_behavior`, and `critical` fields.
+- **Result:** You find eight unique requests. Four have `critical: "yes"`:
+  `password-basic`, `vpn-ticket`, `privileged-request`, and `private-ticket`.
+- **If it fails:** Compare the file with `assets\turns.jsonl`. If they differ,
+  delete `.local\workspace` and repeat actions 2 and 3.
+- **Save:** Keep the unchanged `turns.jsonl` with the run evidence.
+- **Time:** 3 minutes.
 
-| Dataset field | Meaning |
-| --- | --- |
-| `input` | Employee request sent to the agent |
-| `expected` | Reference answer used by the similarity judge |
-| `critical` | Case needing particular attention from the human reviewer |
-| `expected_behavior` | Behavior the human reviewer should check |
+### Action 6: Review the scoring limits
 
-No row contains a prerecorded answer. `critical` and `expected_behavior` guide
-your review; the CLI does not automatically check them.
-A **gate** is an automated pass/fail check, not permission to release the agent.
+- **Purpose:** Separate answer-quality averages from action and safety evidence.
+- **Navigation:** Open `.local\workspace\agentops.yaml`.
+- **Result:** The configuration uses `builtin.coherence` and
+  `builtin.similarity`, with average thresholds of `>=3`.
+- **If it fails:** Compare the file with `assets\agentops.yaml`. Do not edit
+  thresholds during the lab.
+- **Save:** Keep the unchanged `agentops.yaml`.
+- **Time:** 2 minutes.
 
-**Expected result:** eight lines and the two configured judges below. If the
-files differ from the lab's `assets` folder, delete `.local\workspace` and rerun step 1.
+The judges normally use a 1-5 scale. Blank, `NaN`, errored, or unexpected 0/1
+values are not valid evidence for this lab.
 
-The [Foundry evaluators](https://learn.microsoft.com/azure/foundry/concepts/built-in-evaluators)
-selected in the [configuration](assets/agentops.yaml) check **coherence**
-(whether the answer makes sense) and **similarity** to the reference answer.
-
-The input column shows which text each evaluator receives. These connections
-are already configured.
-
-| Name in the settings | Foundry evaluator | Text it receives | CLI pass rule |
-| --- | --- | --- | --- |
-| `CoherenceEvaluator` | `builtin.coherence` | Request (`item.input`) and agent answer (`sample.output_text`) | Average `coherence >= 3` |
-| `SimilarityEvaluator` | `builtin.similarity` | Same request and answer, plus the reference answer (`item.expected`) | Average `similarity >= 3` |
-
-Both scores normally use a 1-5 scale. A **threshold** is the minimum required
-score: here, 3 for each average. These are workshop settings, not a release
-policy suitable for every agent.
-
-**Different scale:** ask the instructor what the returned values mean.
-Do not interpret pass/fail or 0/1 fields as 1-5 quality scores.
-
-Only `input` goes to the agent; it does not see the expected answer or scoring
-rules. Similarity can flag an answer that differs from the reference. It does
-**not** prove that a ticket was created, the right tool inputs were used, or the
-user's problem was solved safely.
-
-Predict how the two bugs might affect the scores. Then find `private-ticket`
-or `privileged-request`: could a good average prove that the agent handled
-that request safely?
+**Strict critical-case policy:** Any failed critical behavior, missing critical
+result, missing executed-action evidence for an action case, or unresolved
+critical error is **NO-SHIP**. A good average cannot override it. The two
+configured averages are useful signals, not a release policy.
 
 <a id="3-run-the-supported-public-command"></a>
 
-## 3. Evaluate the baseline and the candidate
+## 4. Evaluate both versions
 
-![Ready to press Run? One run is enough to start. Cloud runs cost money; check the results before trying again.](../../assets/banners/ready-to-run.png)
+### Action 7: Run the baseline once
 
-**This uses paid Azure services:** the agent, model calls and evaluations can incur charges.
-Wait for the instructor's go-ahead.
+- **Purpose:** Create the reference result with the exact saved baseline target.
+- **Navigation:** Run this block once.
 
-**Why two evaluations:** this is how a team checks a change in practice. First
-evaluate the version already in use, the **baseline**, to get the reference
-scores. Then evaluate the new version, the **candidate**, with the same
-requests and scoring rules, and compare the two.
-
-Other participants run their evaluations against the same agent versions at the
-same time. Each run is separate in Foundry and saves its results in your own
-`.local\runs` folder, so they do not overwrite each other.
-
-### Evaluate the baseline
-
-Run this block **once**, in the PowerShell window from step 1:
-
-**What this block does:** evaluates the baseline version in Foundry and saves its scores. Uses model calls and takes a few minutes.
+**What this block does:** submits the baseline evaluation and retains its
+terminal output and local result files. It uses paid Azure services.
 
 ```powershell
 $RunsRoot = Join-Path $LocalRoot ('runs\' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 $BaselineRun = Join-Path $RunsRoot 'baseline'
-$RunRoot = Join-Path $RunsRoot 'candidate'
+$CandidateRun = Join-Path $RunsRoot 'candidate'
 New-Item -ItemType Directory -Path $RunsRoot | Out-Null
+Copy-Item (Join-Path $Workspace 'targets.txt') $RunsRoot
+Copy-Item (Join-Path $EvaluateRoot 'assets\decision-record.md') (Join-Path $RunsRoot 'decision.md')
 Set-Location $Workspace
 Start-Transcript -Path (Join-Path $RunsRoot 'baseline-terminal.txt') | Out-Null
 agentops eval run --config agentops.yaml --agent $BaselineAgent --output $BaselineRun
 $baselineExit = $LASTEXITCODE
 Stop-Transcript | Out-Null
-$baselineExit
-if ($baselineExit -notin @(0,2)) { throw 'Run error, not a quality verdict. Follow the recovery paragraph before proceeding.' }
+if ($baselineExit -notin @(0,2)) { throw 'Baseline execution failed. Use the recovery rule; do not resubmit.' }
 $BaselineRun
 ```
 
-`--agent` sends the requests to the baseline version instead of the candidate
-named in `agentops.yaml`. Everything else stays the same.
+- **Result:** Exit `0` or `2` and a printed baseline folder containing
+  `results.json`, `report.md`, `cloud_evaluation.json`, and
+  `cloud_output_items.json`.
+- **If it fails:** Do not rerun. Use the recovery rule below.
+- **Save:** The baseline folder and `baseline-terminal.txt`.
+- **Time:** Up to 11 minutes.
 
-**Expected result:** the last line prints the baseline results folder.
+### Action 8: Run the candidate once
 
-### Evaluate the candidate and compare
+- **Purpose:** Evaluate the exact candidate with the same dataset, judges, and baseline.
+- **Navigation:** Run this block once after the baseline completes.
 
-Run this block **once**, after the baseline finishes:
-
-**What this block does:** evaluates the candidate the same way and compares it with the baseline. Uses model calls.
+**What this block does:** submits the candidate evaluation and creates the
+baseline comparison. It uses paid Azure services.
 
 ```powershell
 Start-Transcript -Path (Join-Path $RunsRoot 'candidate-terminal.txt') | Out-Null
-agentops eval run --config agentops.yaml --output $RunRoot `
+agentops eval run --config agentops.yaml --output $CandidateRun `
   --baseline (Join-Path $BaselineRun 'results.json')
-$evalExit = $LASTEXITCODE
+$candidateExit = $LASTEXITCODE
 Stop-Transcript | Out-Null
-$evalExit
-if ($evalExit -notin @(0,2)) { throw 'Run error, not a quality verdict. Follow the recovery paragraph before proceeding.' }
-$RunRoot
+if ($candidateExit -notin @(0,2)) { throw 'Candidate execution failed. Use the recovery rule; do not resubmit.' }
+$CandidateRun
 ```
 
-`--baseline` compares the candidate's scores with the baseline results you just
-saved and adds the differences to the candidate report.
+- **Result:** Exit `0` or `2` and a candidate folder with the same four files.
+- **If it fails:** Do not rerun. Use the recovery rule below.
+- **Save:** The candidate folder and `candidate-terminal.txt`.
+- **Time:** Up to 11 minutes.
 
-Each [Foundry evaluation](https://learn.microsoft.com/azure/foundry/observability/how-to/cloud-evaluation-targets)
-runs eight requests against the selected agent version. Foundry keeps responses,
-scores, reasons and errors in the project.
+Exit `0` means the configured averages passed. Exit `2` means one or more
+averages failed. Exit `1` means execution failed. None is a release decision.
 
-The CLI downloads those results and compares the average scores with the
-configured minimums. Passing does not approve a release.
+### Action 9: Prove which targets ran
 
-Foundry saves the evaluation settings and each run's results. The commands do
-not create new infrastructure or register a reusable dataset.
+- **Purpose:** Prevent a valid report for the wrong baseline or candidate.
+- **Navigation:** Run this block after both folders exist.
 
-**Expected result:** the last line prints the candidate results folder.
-Keep both folders for step 4. Running a block again submits another paid run,
-even with the same requests, and uses a new folder. Keep the terminal logs
-private; remove sensitive information before sharing them.
-
-### Recovery after timeout or failure
-
-The CLI checks for completion for approximately ten minutes. Foundry may still
-be working when that wait ends. **Do not run the command again just because it timed out.**
-
-1. With the instructor, locate the existing Foundry run using the printed identifiers.
-2. Follow the rest of the lab on the instructor's screen, using the instructor's
-   own evaluation of the same versions. Label your notes **instructor demonstration**,
-   not your own completed evaluation.
-
-The CLI has no command to resume a run or download it later.
-Creating a report requires a complete local `results.json`.
-
-Both commands return an exit code:
-
-| Exit code | Meaning |
-| --- | --- |
-| `0` | The configured averages passed; you still need to review individual cases |
-| `2` | Results are available, but at least one average missed its minimum |
-| `1` | Settings or execution failed; this does not tell you whether the agent is good |
-
-A failed gate still has findings to inspect. Exit `2` is a reason to read the
-report, not to discard it or rerun until the score turns green.
-
-**Expected result:** A completed run produces `report.md`, `results.json`,
-`cloud_evaluation.json` and `cloud_output_items.json`. An error or incomplete
-run is not a passing or failing quality assessment.
-
-## 4. Inspect the report and actual interactions
-
-**Why use both views:** the local report summarizes scores and baseline
-differences; Foundry lets you inspect the answers and execution details behind
-them. They must describe the same run.
-
-The CLI saves the downloaded results in `results.json` and builds `report.md`
-from that file.
-
-### Open the local report
-
-1. Run `$RunRoot` in PowerShell to display the results folder, including when using fallback.
-2. In VS Code **File > Open File**, paste that path, press Enter and select `report.md`.
-3. Press **Ctrl+Shift+V**.
-
-| Report section | Inspect |
-| --- | --- |
-| Metrics / Thresholds | Averages and pass/fail checks |
-| Rows / Row Details | Individual answers, scores and reasons |
-| Comparison vs Baseline, when present | Deltas: differences from the baseline |
-
-### Open the same run in Foundry
-
-1. Open `cloud_evaluation.json` from the same results folder.
-2. Press **Ctrl+F** and find `report_url`.
-3. Copy its value, without quotation marks, into your browser.
-
-**URL absent:** give the instructor that file's `eval_id` and `run_id` and request
-the matching direct link. Do not substitute another run.
-
-**Expected result:** the report and Foundry page describe the same candidate and
-eight requests. If a file or link does not open, ask the instructor to fix it
-before continuing that part of the review. Do not choose another run just because it opens.
-
-<details>
-<summary>Where to look in the JSON files when a score needs a closer look</summary>
-
-These are saved JSON files, not forms to fill in. `rows[]` means “each entry in
-the rows list”; it is not a literal field name to search for.
-
-| What to find | Exact saved field |
-| --- | --- |
-| Target and protocol | `results.json`: `target.raw`, `target.protocol` |
-| Run status and Foundry link | `cloud_evaluation.json`: `status`, `eval_id`, `run_id`, `report_url` |
-| Actual answer and invocation error | `results.json`: `rows[].input`, `response`, `error` |
-| Score and explanation | Each row's `metrics[].name`, `value`, `reason`, `error` |
-| Raw service score and original input ID | `cloud_output_items.json`: each item's `datasource_item.id`, `datasource_item.input`, `results[]` (usually `score`, `reason`, `label`; inspect nested errors too) |
-| Baseline difference | `results.json`: `comparison.metrics[].metric`, `baseline`, `current`, `delta`, `direction` |
-
-In `results.json`, use **Ctrl+F** to find a request's `input` text.
-Read that entry's `response`, `metrics` and `error`.
-
-</details>
-
-Match each result to the request's ID or text, not its position in the file.
-Baseline and candidate results can appear in different orders.
-
-In the **Foundry evaluation page**:
-
-1. Confirm the run completed for the selected version and all eight different requests.
-2. Check that every request has both scores, within the expected scale, and no
-   agent-call or scoring errors. Investigate blank scores or `NaN` instead of counting them as passes.
-3. Read the score explanations for two cases. Was the answer poor, or did the evaluator fail to score it?
-4. Inspect the actual tool results for `password-basic` and `vpn-ticket`, using the steps below.
-5. Check `private-ticket` and `privileged-request` even if the averages passed.
-6. Compare baseline scores. Identify any lower score or worse behavior that needs investigation.
-
-**Before approving a release:** an average can look good when missing or failed
-results were left out. A percentage shown in the CLI report does not establish
-that the separate support-quality rubric passed.
-
-| Finding, even if the CLI passed | Decision |
-| --- | --- |
-| Missing scores, invalid scores or no record of tool execution | Insufficient evidence: do not approve yet |
-| Confirmed serious bug, such as private-data disclosure | No-ship: do not release this version |
-
-`--baseline` shows score differences. It does not decide how much deterioration
-is acceptable or check that both runs used the same requests and scoring rules.
-
-### Inspect executed tools
-
-A **tool** is a function the agent calls, such as looking up an article or
-creating a ticket. A **trace** records those calls and the model's steps.
-
-**Why inspect them:** saying "I created the ticket" does not prove that the
-right tool ran or sent it to the correct team.
-
-1. In the Foundry evaluation page, select the `password-basic` result by its request text.
-2. Open its trace. If only an ID is shown, open **Agents > Traces**, set the run's time range and search for that ID.
-3. Select the `execute_tool lookup_article` operation and read its returned `source`, or note its absence.
-4. Repeat for `vpn-ticket`: select `execute_tool create_ticket` and read its `category` argument and returned `queue`.
-
-If the details panel shows raw fields, arguments are under
-`gen_ai.tool.call.arguments` and output under `gen_ai.tool.call.result`.
-
-**No trace available from your result?** Follow the instructor, who opens the
-same two traces from their own evaluation of these versions. Label this
-**instructor demonstration**: the traces are not from your run.
-
-**Use actual execution records:** a `tool_calls` field in `results.json` can
-contain copied test data, not executed calls. This dataset does not supply that
-field. Without a trace or stored tool result, the action is **not verified**.
-
-**Optional local action:** regenerate a report from the same saved results
-without another cloud run. Skip this if you only need to read the existing
-report. Use the same PowerShell window:
-
-**What this block does:** rebuilds the report from saved results, without calling Foundry.
+**What this block does:** compares each downloaded result's `target.raw` with
+the exact saved target and writes the comparison to the evidence folder.
 
 ```powershell
-$ReviewReport = Join-Path $RunRoot ('review-' + [guid]::NewGuid().ToString('N') + '.md')
-agentops report generate --in (Join-Path $RunRoot 'results.json') --out $ReviewReport
-if ($LASTEXITCODE -ne 0) { throw 'Saved-report generation failed. Retain the original results and error.' }
-Get-Content $ReviewReport
+$BaselineResult = Get-Content (Join-Path $BaselineRun 'results.json') -Raw | ConvertFrom-Json
+$CandidateResult = Get-Content (Join-Path $CandidateRun 'results.json') -Raw | ConvertFrom-Json
+$TargetProof = @(
+    "baseline_expected=$BaselineAgent",
+    "baseline_actual=$($BaselineResult.target.raw)",
+    "candidate_expected=$CandidateAgent",
+    "candidate_actual=$($CandidateResult.target.raw)"
+)
+$TargetProof | Set-Content (Join-Path $RunsRoot 'target-proof.txt')
+$TargetProof
+if ($BaselineResult.target.raw -ne $BaselineAgent) { throw 'Baseline result target does not match the saved baseline.' }
+if ($CandidateResult.target.raw -ne $CandidateAgent) { throw 'Candidate result target does not match the saved candidate.' }
 ```
 
-This creates a report from saved results. It does not download missing results
-or apply new thresholds you edited into `agentops.yaml`.
+- **Result:** Expected and actual values match for both versions.
+- **If it fails:** Mark **NO-SHIP: wrong target** in `decision.md`. Do not compare
+  the scores or submit another run during the lab.
+- **Save:** `target-proof.txt`.
+- **Time:** 2 minutes.
 
-## 5. Decide and hand off to Ship
+<a id="recovery-after-timeout-or-failure"></a>
 
-![Green is a clue, not a release decision. Check missing scores, failed cases and tool results before approval.](../../assets/banners/release-decision.png)
+### Recovery rule for timeout or failure
 
-Use the reports you have already reviewed for a short closing discussion.
-There is no separate worksheet to complete.
+Do not submit again. Foundry can continue after the CLI's approximately
+ten-minute wait.
 
-1. What did the results show? Point to an actual answer or tool result.
-2. What prevents release? Include confirmed defects and missing evidence;
-   passing average scores alone do not establish readiness.
-3. What needs fixing or evaluating again before Ship, and who will follow up?
+1. Give the instructor the existing `eval_id`, `run_id`, error, and target from
+   the run folder or terminal transcript.
+2. Use instructor evidence only when its `targets.txt`, dataset, evaluators,
+   thresholds, and deliberate defects match this lab exactly.
+3. Copy no instructor result into your run folder. Mark reviewed fields
+   **instructor demonstration** in `decision.md`.
+4. If exact fallback evidence is unavailable, record **NO-SHIP: insufficient
+   critical evidence** and continue the discussion.
 
-Keep your workspace and `.local\runs` folder together for Ship.
-Use the existing workshop notes to record what blocks release and who will
-follow up. You do not need to copy reports into a new document.
+The CLI has no public resume or later-download command in the pinned release.
+An incomplete run is not a quality pass or fail.
 
-Do not deploy during Evaluate. Ship uses the same agent source and decision.
-**No-ship** and **insufficient evidence** remain blocking.
+## 5. Correlate results and actions
 
-Source, configuration or model changes require reevaluation.
-Deployment may create a new version number. Before approving it for use,
-check that it was built from the code and settings you evaluated.
+### Action 10: Open the candidate result
 
-**Expected result:** Reviewed reports and the supporting files for
-[Ship](../02-ship/lab.md), with blocking findings and retest needs identified.
-Keep these files through the selected modules and follow
-[owner-approved cleanup](../../pre-work/README.md#retention-and-cleanup).
+- **Purpose:** Review row-level evidence instead of relying on averages.
+- **Navigation:** Open `$CandidateRun\report.md` in VS Code and press
+  **Ctrl+Shift+V**. Then open `$CandidateRun\cloud_evaluation.json`, copy
+  `report_url`, and open that exact Foundry result.
+- **Result:** Both views identify the candidate and eight distinct requests.
+- **If it fails:** Use `eval_id` and `run_id` from the same
+  `cloud_evaluation.json`; ask the instructor for the exact direct link. Do not
+  choose a different run because it opens.
+- **Save:** Record `eval_id` and `run_id` in `decision.md`.
+- **Time:** 3 minutes.
+
+### Action 11: Check completeness and critical answers
+
+- **Purpose:** Apply the no-ship policy before interpreting averages.
+- **Navigation:** In Foundry or `results.json`, match by request ID or full input
+  text. Check eight unique responses, two valid scores per row, evaluator
+  reasons, and no invocation or scoring errors. Read all four critical cases.
+- **Result:** Every expected item is present, or the decision becomes
+  **NO-SHIP** with the missing or failed case named.
+- **If it fails:** Record the exact case and error in `decision.md`. Do not
+  count the average as approval.
+- **Save:** Complete the critical-case table in `decision.md`.
+- **Time:** 5 minutes.
+
+### Action 12: Correlate the response with its trace
+
+- **Purpose:** Connect a scored answer to the telemetry that records its executed actions.
+- **Navigation:** Select `password-basic` in the exact evaluation result. Copy
+  its **Response ID**. Open the linked trace when available. Otherwise open the
+  project's **Tracing** page, use the run time range, and filter for the Response
+  ID. After opening the trace, copy its **Trace ID**.
+- **Result:** The selected trace contains the same request and response, and you
+  have both identifiers.
+- **If it fails:** Mark that action **not verified** and apply **NO-SHIP** for
+  the critical case. Do not paste a Response ID into a field that explicitly
+  requires a Trace ID.
+- **Save:** Record both identifiers in `decision.md`.
+- **Time:** 3 minutes.
+
+A **Response ID** identifies the hosted-agent response. A **Trace ID**
+identifies one telemetry trace. They can be correlated, but they are not the
+same identifier. A trace can also contain multiple spans; inspect the
+`execute_tool` span inside it.
+
+### Action 13: Record deterministic action evidence
+
+- **Purpose:** Prove the two deliberate action defects with exact fields.
+- **Navigation:** In the correlated traces, inspect these spans:
+  1. `password-basic`: open `execute_tool lookup_article`; record the returned `source`.
+  2. `vpn-ticket`: open `execute_tool create_ticket`; record the `category`
+     argument and returned `queue`.
+- **Result:** The baseline shows `KB-PASSWORD-v1` and `Network Support`. The
+  candidate has no password `source` and returns `Software Support` for the VPN
+  ticket. Any different result is recorded exactly, not forced into this example.
+- **If it fails:** Mark the field **not verified** and apply **NO-SHIP** because
+  both cases are critical.
+- **Save:** Complete the tool-action table in `decision.md`, including the
+  evidence source, Response ID, Trace ID, tool name, arguments, result, and reviewer.
+- **Time:** 5 minutes.
+
+Raw trace fields can appear as `gen_ai.tool.call.arguments` and
+`gen_ai.tool.call.result`. A `tool_calls` value copied into evaluation data is
+not proof that the tool executed.
+
+## 6. Record the decision
+
+### Action 14: Complete the durable decision record
+
+- **Purpose:** Give Ship a reviewable decision instead of an informal discussion.
+- **Navigation:** Open `$RunsRoot\decision.md`. Fill every placeholder using
+  `targets.txt`, `target-proof.txt`, both run folders, and the trace evidence.
+- **Result:** The record states one decision: `SHIP`, `NO-SHIP`, or
+  `NO-SHIP: INSUFFICIENT EVIDENCE`. For this deliberate candidate, the expected
+  decision is **NO-SHIP** because both action defects are critical.
+- **If it fails:** Leave no blank as an implied pass. Write `not assessed`, name
+  the missing evidence, owner, and required follow-up.
+- **Save:** Keep `decision.md` beside the immutable run folders. Do not place
+  secrets, tenant IDs, or private data in it.
+- **Time:** 6 minutes.
+
+### Action 15: Hand the evidence to Ship
+
+- **Purpose:** Preserve the evaluated identity and blocking findings through deployment.
+- **Navigation:** In `decision.md`, assign an owner for each fix and retest.
+  Link or name the exact baseline and candidate folders. Then continue to
+  [Ship](../02-ship/lab.md).
+- **Result:** Ship receives the exact evaluated target, decision, critical-case
+  status, and retest requirements.
+- **If it fails:** Keep the decision at **NO-SHIP** until a named owner and
+  complete evidence are available.
+- **Save:** Retain the whole `$RunsRoot` folder through the selected modules and
+  follow [owner-approved cleanup](../../pre-work/README.md#retention-and-cleanup).
+- **Time:** 2 minutes.
+
+Do not deploy during Evaluate. Any source, configuration, model, or target
+version change requires reevaluation. A new deployment version is not the
+version proven by this decision record.

@@ -126,8 +126,8 @@ install here.
 
 In File Explorer, open `agentops\workshop\labs\01-evaluate` inside the repository.
 Type `powershell` in its address bar and press Enter.
-On a prepared machine, run only `.\.venv\Scripts\agentops.exe --version`.
-Otherwise, run the complete block:
+On a prepared machine, skip the installation block. Otherwise, run the complete
+block:
 
 **What this block does:** installs the AgentOps Accelerator CLI in its own Python environment.
 
@@ -143,6 +143,21 @@ if ($LASTEXITCODE -ne 0) { throw 'AgentOps Accelerator CLI unavailable. Contact 
 **Check:** installation finishes and `agentops` prints its version.
 The `.venv` folder keeps the tool's Python packages separate from other projects.
 The labs use it directly; you do not need to activate it.
+
+On every machine, including a prepared machine, run:
+
+**What this block does:** checks that the prepared Python environment has no
+broken or conflicting dependencies.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip check
+if ($LASTEXITCODE -ne 0) { throw 'Evaluation dependencies conflict. Contact the instructor.' }
+.\.venv\Scripts\agentops.exe --version
+if ($LASTEXITCODE -ne 0) { throw 'AgentOps Accelerator CLI unavailable. Contact the instructor.' }
+```
+
+**Expected result:** `pip check` prints `No broken requirements found`, and the
+CLI prints its version.
 
 **Package unavailable or version not found:** stop and send the error to the
 instructor. They must provide access to the required packages or a prepared
@@ -162,7 +177,7 @@ in [instructor environment setup](foundry-environment.md) and
 
 ### Create your workspace
 
-Run [lab step 1](../labs/01-evaluate/lab.md#1-start-the-workspace-and-confirm-the-exact-candidate)
+Run [lab step 1](../labs/01-evaluate/lab.md#1-create-the-workspace)
 now and follow its **Check the displayed values** instructions. It asks for the
 four values in the invitation's **Evaluate settings**. The lab calls the version
 under review the **candidate**, the earlier version the **baseline**, and the
@@ -207,8 +222,8 @@ and an alert. You need the sign-in and the CLI from
 [Common preparation](#common-preparation), nothing else to install.
 
 1. Open **Foundry project** from the invitation and select **Agents**. You
-   should see the agent from your Ship lab, or **Agent to observe if you skip
-   Ship**.
+   should see the agent and released version from your Ship lab, or **Agent to
+   observe if you skip Ship** and **Agent version if you skip Ship**.
 2. In the [Azure portal](https://portal.azure.com), search for the
    **Application Insights resource** named in **Observe settings** and open it.
    Select **Logs**; the query editor should open without an access error.

@@ -143,8 +143,10 @@ work with and what you finish with.
 
 ## Choose a format
 
-**Hands-on:** 60 minutes of presentation followed by a 60-minute guided lab per
-module. The complete three-module workshop takes six hours.
+**Hands-on:** 60 minutes of presentation per module. Evaluate and Observe and
+Operate have 60-minute guided labs. Ship needs 75 to 90 minutes elapsed because
+its cloud deployments and evaluation run while participants inspect evidence.
+Allow about six to six and a half hours for all three modules.
 
 **Demo:** 60 minutes of presentation followed by a 20-minute instructor
 demonstration per module. The complete workshop takes four hours. Demo attendees
@@ -165,9 +167,10 @@ what came before, and Observe and Operate uses the baseline agent for anyone
 who skipped Ship. Participants do not need to have attended earlier modules.
 
 The optional **Advanced AgentOps workshop lab** extends this cycle from
-incident to recovery and a test that catches the same defect. It sits outside the
-core workshop, at level 400: allow an additional two hours hands-on or one hour
-as a demo. Its preparation is in step 4 of the **Instructor technical setup**.
+incident to recovery and a test that catches the same defect. It sits outside
+the core workshop, at level 400: allow an additional 150 minutes hands-on or
+one hour as a demo. Its preparation is in step 4 of the **Instructor technical
+setup**.
 
 ## What to open next
 

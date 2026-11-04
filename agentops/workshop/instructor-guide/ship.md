@@ -2,67 +2,100 @@
 
 [Back to the instructor guide](README.md)
 
-**Participant entry:** [02-ship](../labs/02-ship/lab.md). It follows Evaluate
-in the full workshop; the lab's scenario is enough for participants who did not
-attend Evaluate.
+**Participant entry:** [Ship workshop lab](../labs/02-ship/lab.md).
 
 ## Learning focus
 
-Connect an evaluation decision to a controlled release. Participants build the
-pipeline themselves, so they should leave understanding why a release stops,
-what allows it to proceed, and how to prove that the released version is the
-one they tested.
+Teach participants to connect an evaluation decision to a controlled release.
+Emphasize four actions: deploy the candidate, evaluate its exact version,
+approve the reviewed commit, and invoke the exact released version.
 
-## Before the session
+State the identity limitation accurately. The test and release agents are
+different identities with independently assigned versions. The current
+documented `azd ai agent` commands do not promote one immutable version between
+those identities. The lab records source-and-configuration equivalence in a
+release manifest and does not claim binary artifact identity.
 
-Read the [Ship deck and speaker notes](../decks/ship/agentops-ship-workshop.pptx)
-and the [lab](../labs/02-ship/lab.md). Choose
-[GitHub Actions](../labs/02-ship/github-actions/README.md) or
-[Azure Pipelines](../labs/02-ship/azure-pipelines/README.md): both pipeline tools teach
-the same release process. They are alternatives, not two labs to complete.
+## Prepare the session
 
-All the technical preparation is in [Ship preparation](../pre-work/technical-setup.md#ship).
-You prepare one class repository for the whole class, once. Participants then
-create their own pipeline inside it, on their own branch.
+1. Read the Ship deck and speaker notes.
+2. Read the Ship workshop lab.
+3. Select GitHub Actions or Azure Pipelines.
+4. Complete [Ship preparation](../pre-work/technical-setup.md#ship).
+5. Grant the pipeline identity **Foundry User** and **Contributor** on the
+   existing target Foundry project.
+6. Keep the hosted-agent runtime identity separate. Grant it access to another
+   Azure service only if the agent calls that service.
+7. Create the `dev` and `production` approval environments.
+8. Run the local Ship tests from the class-repository seed.
 
-When you finish, you should have:
+**What this block does:** checks the Ship scripts and manifest behavior without
+calling Azure.
 
-- The class repository with the help desk agent, its Azure sign-in, settings
-  and the `dev` and `production` approval environments.
-- Your own `rehearsal` branch with one rejected run and one released run, to
-  show on screen and to compare against participants' runs.
-- The invitation sent, with the **Ship settings** you tested.
+```powershell
+python -m unittest discover agentops\workshop\labs\02-ship\class-repo\tests -v
+```
+
+9. Rehearse one rejected run and one released run.
+10. Download the evaluation artifact and release manifest from the rehearsal.
+11. Test the invitation with participant-level repository and project access.
+
+Microsoft currently marks the Foundry agents extension and hosted agents as
+preview. The lab pins `azure.ai.agents` `1.0.0-beta.23` and prints
+`azd ai agent version` in the pipeline. Rehearse again before delivery if the
+pinned version is no longer available.
 
 ## Present the module
 
-Allow 60 minutes for the presentation. Connect versioning, automated checks,
-approvals, deployment and recovery. Ask what would stop a release in the
-participants' own projects, beyond passing average evaluation scores.
+Allow 60 minutes for the presentation. Ask participants to distinguish:
 
-## Hands-on lab (60 minutes)
+- the pipeline sign-in identity from the hosted-agent runtime identity;
+- the test agent identity from the release agent identity;
+- source equivalence from immutable artifact promotion; and
+- an evaluation pass from permission to release.
 
-- Steps 1 to 3: participants clone, generate the starting pipeline and adapt
-  it. Walk the room while they read the generated file; most questions are
-  about what each job does.
-- Step 4: while the first run takes 10 to 15 minutes, ask each participant to
-  find the evaluation report and decide whether to approve. The candidate
-  should be rejected.
-- Steps 5 and 6: they fix the routing, release the version they tested and
-  record the release. Close by comparing a rejected and a released run.
+Use the release manifest to connect the commit, candidate version, approval,
+released version and smoke-test evidence.
 
-Participants approve their own runs in the class repository. That keeps the
-lab moving; in their own projects the approver should be someone else.
+## Facilitate the hands-on lab
 
-## Instructor demo (20 minutes)
+Allow 75 to 90 minutes elapsed for the lab. Participants perform about 60
+minutes of work. Cloud deployment and evaluation can consume 10 to 20 minutes
+per run.
 
-Show the pipeline file on your `rehearsal` branch, then its rejected and
-released runs. Point out where the evaluation stopped the release, where the
-approval was recorded and where the smoke test checked the released version.
-If a live run fails, read its log with the group instead of starting new runs
-to fill the time.
+During the first wait:
 
-## Close and connect to Observe and Operate
+1. Ask participants to find the candidate identity and version.
+2. Ask them to download the evaluation artifact.
+3. Ask them to locate the failed VPN tool result.
+4. Ask them to reject the release.
 
-Participants keep their pipeline file and the two runs. Ask what the team would
-monitor after release and who would respond if the agent behaved differently in
-use. That introduces the next module.
+During the second wait:
+
+1. Ask participants to match the evaluated version to the pipeline output.
+2. Ask them to approve only after they see `Network Support`.
+3. Ask them to match the released version to the exact-version smoke test.
+4. Ask them to download and read `release-manifest.json`.
+
+Participants approve their own workshop runs to keep the activity moving.
+Explain that a normal production process uses an independent approver.
+
+## Demonstrate in 20 minutes
+
+1. Open the four-stage pipeline.
+2. Open the rejected run and its VPN trace.
+3. Open the released run and its approval.
+4. Open the exact-version smoke-test log.
+5. Open `release-manifest.json`.
+6. Point to the two agent identities and two versions.
+7. Explain the recovery sequence: restrict, retain evidence, revert, rerun all
+   four stages, approve, and restore access.
+
+If a live run fails, read the first failed task with the group. Do not start
+unplanned runs to fill the time.
+
+## Close
+
+Ask who monitors the released identity, who can restrict its endpoint, and
+which evidence an operator needs before recovery. Use those answers to
+introduce Observe and Operate.

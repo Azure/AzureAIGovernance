@@ -6,266 +6,391 @@
 
 ## Lab definition
 
-**Objective:** Investigate a user complaint about the released help desk agent
-in Microsoft Foundry and Azure Monitor: send requests, read their traces, measure
-the problem with a query, set an alert that catches it next time and decide who
-responds.
+**Objective:** Investigate a reproducible complaint about the released help desk
+agent. Use the native Microsoft Foundry dashboard first, correlate one response
+with its exact trace, measure the defect for one agent version, fire an alert,
+and record the operational response.
 
 **Duration:** 60 minutes hands-on after the presentation.
 
 **Difficulty:** 300: Advanced.
 
-**What you will keep:** A log query, an alert rule of your own, the AgentOps
-Accelerator CLI health report and response notes that name the owner, the
-allowed action and the request to add to the tests.
+**What you will keep:** `observe-evidence.md`, `tool-errors.kql`,
+`response-notes.md`, the alert rule and its fired alert record, and the AgentOps
+Accelerator CLI health report.
 
-**Prerequisite:** Complete [participant pre-work](../../pre-work/README.md#observe-and-operate)
-and have the invitation's **Observe settings** at hand. You do not deploy or
-change the agent in this lab.
+**Prerequisite:** Complete
+[participant pre-work](../../pre-work/README.md#observe-and-operate) and have the
+invitation's **Observe settings** open. Use the released agent and version named
+there. You do not deploy or change the agent in this lab.
 
 **On this page**
 
-- [Scenario](#scenario)
-- [Tool roles](#tool-roles)
-- [1. Reproduce the complaint](#1-reproduce-the-complaint)
-- [2. Read the traces](#2-read-the-traces)
-- [3. Check the agent dashboard](#3-check-the-agent-dashboard)
-- [4. Measure the problem with a query](#4-measure-the-problem-with-a-query)
-- [5. Run the health check](#5-run-the-health-check)
-- [6. Create an alert](#6-create-an-alert)
-- [7. Decide the response](#7-decide-the-response)
+1. [Scenario](#scenario): investigate one repeatable silent failure.
+2. [Tool roles](#tool-roles): use native monitoring before supporting tools.
+3. [1. Create the evidence folder](#1-create-the-evidence-folder): record the exact target.
+4. [2. Reproduce the complaint](#2-reproduce-the-complaint): create a known Outlook failure.
+5. [3. Start with the native dashboard](#3-start-with-the-native-dashboard): assess overall health.
+6. [4. Correlate the response and trace](#4-correlate-the-response-and-trace): prove the executed action.
+7. [5. Discover the telemetry fields](#5-discover-the-telemetry-fields): use the protected content table safely.
+8. [6. Measure one agent version](#6-measure-one-agent-version): save a scoped query.
+9. [7. Create and fire the alert](#7-create-and-fire-the-alert): produce a real alert outcome.
+10. [8. Run the health check](#8-run-the-health-check): find other monitoring gaps.
+11. [9. Decide the response](#9-decide-the-response): assign ownership and an allowed action.
+12. [10. Save the future evaluation case](#10-save-the-future-evaluation-case): close the learning loop.
 
 ## Scenario
 
-The help desk agent you released in [Ship](../02-ship/lab.md#6-record-the-release)
-is in use. Users now say it never tells them whether Outlook or Teams is down.
-Nobody has reported an error: every request completes and the agent answers
-politely. Your job is to find out what is happening, measure how often it
-happens and make sure the team hears about it next time before users do.
+Users report: "The help desk agent cannot tell me whether Outlook is down."
+The workshop agent handles this complaint deterministically. It calls
+`check_service_status` once with `service="outlook"`. The simulated tool returns
+`{"error":"Only the simulated VPN service is supported."}`. The agent reports
+that limitation instead of inventing a service status.
 
-You observe your released agent, `helpdesk-ALIAS`. If you did not attend Ship,
-observe the agent named in the invitation's **Observe settings** instead.
+The request succeeds at the protocol level, so a request-error chart can remain
+healthy. This is a **silent failure**: the business action failed, but the
+request did not crash.
 
-**Observe** means finding out what happened. **Operate** means deciding and
-carrying out the response.
+**Observe** means establish what happened from evidence. **Operate** means choose
+and carry out an approved response, retain the evidence, and add the failure to
+future evaluation.
 
 ## Tool roles
 
-A **trace** records the model and tool operations of one request; each
-operation is a **span**. A **log query** counts or lists those records across
-many requests. An **alert rule** runs a query on a schedule and fires when the
-result crosses a limit.
-
-| Tool | Role in Observe and Operate |
+| Tool | Role in this lab |
 | --- | --- |
-| Microsoft Foundry | Shows each request's trace and the agent's dashboard |
-| Application Insights | Stores the traces; you query them with KQL and alert on them |
-| Azure Monitor alerts | Runs your alert rule and records when it fires |
-| AgentOps Accelerator (`agentops`) | `agentops doctor` checks the agent's monitoring, errors and release setup and writes a health report |
+| Microsoft Foundry Agent Monitoring Dashboard | First operational view for traffic, latency, token use, success and evaluation signals |
+| Microsoft Foundry Tracing | Exact request, response, spans, Response ID and Trace ID |
+| Application Insights Logs | Structured telemetry discovery and version-scoped KQL |
+| Azure Monitor alerts | Scheduled detection and a retained fired-alert record |
+| AgentOps Accelerator CLI | Supporting health report after native monitoring |
 
-## 1. Reproduce the complaint
+## 1. Create the evidence folder
 
-**Why this step:** you need recent requests of your own to investigate, sent
-the way users send them. Reading someone else's example teaches less than
-seeing the problem happen.
+### Action 1: Record the exact target
 
-1. In File Explorer, open `agentops\workshop\labs\03-observe-operate` inside this repository.
-2. Type `powershell` in the address bar and press Enter.
-3. Paste and run the block below. Paste **Project endpoint** from the
-   invitation and your agent name, `helpdesk-<your alias>`, when prompted.
+- **Purpose:** Keep every result tied to one released agent version.
+- **Navigation:** In File Explorer, open
+  `agentops\workshop\labs\03-observe-operate`. Type `powershell` in the address
+  bar and press Enter. Enter the project endpoint, agent name and released
+  version from **Observe settings**.
+- **Result:** PowerShell creates an evidence folder and opens
+  `observe-evidence.md` with the exact target and start time.
+- **If it fails:** Stop if any assigned value is missing. Ask the instructor for
+  the tested **Observe settings**; do not guess a project, agent or version.
+- **Save:** Keep the folder path printed by the command.
+- **Time:** 5 minutes.
 
-**What this block does:** gets a sign-in token for Foundry and sends three help desk requests to the agent. Each request is a normal model call.
+**What this block does:** creates local evidence files. It does not change Azure.
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$env:Path = (Resolve-Path '..\01-evaluate\.venv\Scripts').Path + ';' + $env:Path
 $Endpoint = (Read-Host 'Project endpoint').Trim().TrimEnd('/')
-$Agent = (Read-Host 'Agent name').Trim()
-$Token = az account get-access-token --resource https://ai.azure.com --query accessToken -o tsv
-if ($LASTEXITCODE -ne 0) { throw 'Sign-in expired. Run the pre-work sign-in again.' }
-function Send-Request($Text) {
-    $Body = @{ input = @(@{ role = 'user'; content = $Text }) } | ConvertTo-Json -Depth 5
-    $Reply = Invoke-RestMethod -Method Post -ContentType 'application/json' -Body $Body `
-        -Uri "$Endpoint/agents/$Agent/endpoint/protocols/openai/responses?api-version=v1" `
-        -Headers @{ Authorization = "Bearer $Token" }
-    "[$((Get-Date).ToUniversalTime().ToString('HH:mm')) UTC] $Text"
-    ($Reply.output | Where-Object type -eq 'message').content.text
-    ''
+$Agent = (Read-Host 'Released agent name').Trim()
+$AgentVersion = (Read-Host 'Released agent version').Trim()
+if (-not $Endpoint -or -not $Agent -or -not $AgentVersion) {
+    throw 'Project endpoint, agent name and released version are required.'
 }
-Send-Request 'My VPN will not connect. What is the service status?'
-Send-Request 'Is Outlook down? I cannot open my email.'
-Send-Request 'Is Teams working? My calls keep dropping.'
+$RunId = Get-Date -Format 'yyyyMMdd-HHmmss'
+$Evidence = Join-Path $HOME "agentops-observe\$RunId"
+New-Item -ItemType Directory -Force $Evidence | Out-Null
+$StartedUtc = (Get-Date).ToUniversalTime().ToString('o')
+@"
+# Observe and Operate evidence
+
+- Project endpoint: $Endpoint
+- Agent: $Agent
+- Released version: $AgentVersion
+- Started UTC: $StartedUtc
+"@ | Set-Content (Join-Path $Evidence 'observe-evidence.md') -Encoding utf8
+"Evidence folder: $Evidence"
 ```
 
-Keep this PowerShell window open; steps 5 and 6 use it.
+## 2. Reproduce the complaint
 
-**Expected result:** three answers. The VPN answer reports the service status.
-The Outlook and Teams answers say the agent cannot check that service. Note
-the UTC times printed before each request.
+### Action 2: Send the deterministic Outlook request
 
-## 2. Read the traces
+- **Purpose:** Create one known business failure against the released endpoint.
+- **Navigation:** Run the command below in the same PowerShell window.
+- **Result:** The response says that Outlook status cannot be verified and
+  offers Service Desk escalation. The command pins the released version,
+  verifies the version header and records the exact Response ID and UTC time.
+- **If it fails:** If authentication fails, run the pre-work sign-in again. If
+  the raw response does not identify `$AgentVersion`, stop because the request
+  was not proven against the released version. If the response does not use
+  `check_service_status`, tell the instructor that the deployed workshop agent
+  does not match the prepared scenario.
+- **Save:** Keep `complaint-response.txt` and the Response ID in
+  `observe-evidence.md`.
+- **Time:** 7 minutes.
 
-**Why this step:** the answers tell you what the user saw, not why. The trace
-shows what the agent actually did.
-
-1. In the Foundry project, select **Agents** in the left navigation, then **Traces** at the top.
-2. Set the time range to include the times noted in step 1 and open the Outlook request.
-3. Read the sequence of spans: the model call, then `execute_tool check_service_status`.
-4. Select `execute_tool check_service_status`. In the details panel, read its
-   arguments and result. The result is an error: the status tool supports only VPN.
-5. Check the agent name and version on the trace. They must match the version you released.
-6. Compare with the VPN request's trace: the same tool returns a real status.
-
-The request completed, and no span is marked as failed: the tool returned its
-error as ordinary data. This is a **silent failure**. Error-rate charts do not
-show it, so you need to look inside the tool results.
-
-The trace also contains the user's words and the agent's answer, because the
-workshop agent records message content. In your notes, record who can read
-these traces and whether real user data would be allowed here.
-
-**Expected result:** you can show the tool call, the error it returned and
-the agent version that handled it.
-
-**No trace after five minutes?** Refresh and widen the time range. If it still
-does not appear, the instructor shows the same trace on screen.
-
-## 3. Check the agent dashboard
-
-**Why this step:** one trace shows one request. The dashboard shows whether the
-agent is healthy overall, which is what an on-call person checks first.
-
-1. In Foundry, select **Agents**, open your agent and select **Monitor**.
-2. Set the time range to the last hour.
-3. Read the request count, response time, token usage and error rate.
-
-**Expected result:** the requests from step 1 appear and the error rate is
-zero. The dashboard looks healthy even though users are unhappy.
-
-## 4. Measure the problem with a query
-
-**Why this step:** a query turns one example into a number: how many status
-checks failed and when. That number is what an alert watches.
-
-1. In the [Azure portal](https://portal.azure.com), open the Application Insights
-   resource named in the invitation's **Observe settings**.
-2. Select **Logs**. Close the query gallery if it opens, and switch the editor to **KQL mode**.
-3. Paste the query below and select **Run**.
-
-**What this block does:** lists the recent status-tool calls with the data each one recorded. Read only.
-
-```kusto
-dependencies
-| where timestamp > ago(4h)
-| where name == "execute_tool check_service_status"
-| project timestamp, customDimensions
-| order by timestamp desc
-```
-
-Expand a row's `customDimensions` and find the tool's arguments and result.
-Then replace the query with this one and run it.
-
-**What this block does:** counts the status checks and how many returned an error, per hour. Read only.
-
-```kusto
-dependencies
-| where timestamp > ago(24h)
-| where name == "execute_tool check_service_status"
-| extend toolError = tostring(customDimensions) has "error"
-| summarize checks = count(), toolErrors = countif(toolError) by bin(timestamp, 1h)
-| order by timestamp desc
-```
-
-The counts include the whole class, because everyone's agents send telemetry
-to the same resource. That is the view an operations team has.
-
-**Expected result:** a table in which part of the status checks returned an
-error, including yours from step 1.
-
-## 5. Run the health check
-
-**Why this step:** you found one problem by following a complaint. A health
-check looks for gaps you have not thought of, such as missing monitoring or no
-automatic evaluation of live traffic.
-
-Paste and run this in the PowerShell window from step 1.
-
-**What this block does:** runs the AgentOps Accelerator health check against the Foundry project and writes its report to a new folder in your user folder. Read only for Azure.
+**What this block does:** invokes the direct hosted-agent endpoint with
+`azd`, pins the released version and saves the raw HTTP response so the
+returned version and Response ID remain reviewable.
 
 ```powershell
-$Work = Join-Path $HOME 'agentops-observe'
-New-Item -ItemType Directory -Force $Work | Out-Null
-Set-Location $Work
+$Complaint = 'Check whether Outlook is down. Use the service-status tool once. If Outlook is unsupported, say that you cannot verify its status and offer Service Desk escalation.'
+$AgentEndpoint = "$Endpoint/agents/$Agent/endpoint/protocols/openai/responses?api-version=v1"
+$RawResponse = & azd ai agent invoke `
+  --agent-endpoint $AgentEndpoint `
+  --version $AgentVersion `
+  --new-session `
+  --output raw `
+  $Complaint 2>&1
+if ($LASTEXITCODE -ne 0) {
+    $RawResponse
+    throw 'Invocation failed. Repeat participant sign-in, then retry once.'
+}
+$RawText = $RawResponse -join [Environment]::NewLine
+$RawText | Set-Content (Join-Path $Evidence 'complaint-response.txt') -Encoding utf8
+$VersionHeader = [regex]::Match(
+  $RawText,
+  '(?im)^[^:\r\n]*agent-version:\s*(?<version>[^\r\n]+)$'
+)
+if (-not $VersionHeader.Success -or $VersionHeader.Groups['version'].Value.Trim() -ne $AgentVersion) {
+    throw 'The raw response did not prove the requested released version.'
+}
+$ResponseMatch = [regex]::Match($RawText, '"id"\s*:\s*"(?<id>[^"]+)"')
+if (-not $ResponseMatch.Success) { throw 'The raw response did not contain a Response ID.' }
+$ResponseId = $ResponseMatch.Groups['id'].Value
+$ComplaintUtc = (Get-Date).ToUniversalTime().ToString('o')
+@"
+- Complaint UTC: $ComplaintUtc
+- Confirmed version: $AgentVersion
+- Response ID: $ResponseId
+"@ | Add-Content (Join-Path $Evidence 'observe-evidence.md') -Encoding utf8
+$RawText
+"Response ID: $ResponseId"
+```
+
+## 3. Start with the native dashboard
+
+### Action 3: Read the Agent Monitoring Dashboard
+
+- **Purpose:** Start with the native operational view before opening individual traces.
+- **Navigation:** In Foundry, select **Build**, open the assigned agent, and
+  select **Monitor**. Set the range to include `$ComplaintUtc`. Filter to the
+  released version when the version filter is available.
+- **Result:** The new request appears. Record the request count, latency,
+  success rate and token usage. The success rate can remain healthy because the
+  tool returned an error as ordinary data.
+- **If it fails:** Wait two to five minutes and refresh. If the dashboard stays
+  empty, record **dashboard telemetry unavailable** and use the instructor's
+  exact-version rehearsal view. Do not call missing data healthy.
+- **Save:** Add the visible values and evidence source, **participant run** or
+  **instructor demonstration**, to `observe-evidence.md`.
+- **Time:** 6 minutes.
+
+## 4. Correlate the response and trace
+
+### Action 4: Open the trace for the exact Response ID
+
+- **Purpose:** Prove which action produced the complaint without relying on time alone.
+- **Navigation:** In Foundry, open **Observability > Traces**. Filter for
+  `$ResponseId`, open the matching trace, and copy its **Trace ID**. Open the
+  `execute_tool check_service_status` span.
+- **Result:** The trace has the same request and answer as
+  `complaint-response.json`. The tool arguments contain
+  `service="outlook"`, and the result contains the exact unsupported-service
+  error. The trace identifies the assigned agent and released version.
+- **If it fails:** Mark **correlation not verified**. Do not substitute a nearby
+  trace or treat the Response ID as the Trace ID.
+- **Save:** Record both identifiers, agent version, tool name, exact arguments
+  and exact result in `observe-evidence.md`.
+- **Time:** 6 minutes.
+
+A **Response ID** identifies the hosted-agent response. A **Trace ID** identifies
+one telemetry trace. They are correlated identifiers, not the same value.
+
+## 5. Discover the telemetry fields
+
+### Action 5: Find the structured attributes in this resource
+
+- **Purpose:** Use the current protected table for tool arguments and results.
+- **Navigation:** In the Azure portal, open the assigned Application Insights
+  resource, select **Logs**, switch to **KQL mode**, paste the discovery query,
+  replace the Trace ID, and select **Run**.
+- **Result:** `AppGenAIContent` shows the exact trace, `AgentName`, `AgentId`,
+  `ToolCallArguments` and `ToolCallResult`. The result contains the
+  unsupported-service error.
+- **If it fails:** If access is denied, stop and ask the instructor to check
+  **Privileged Monitoring Data Reader** on the linked Application Insights
+  resource. If no row appears after five minutes, record
+  **protected trace content unavailable** and use the exact-version instructor
+  demonstration. Do not query another participant's content.
+- **Save:** Export the matching row or take a permitted screenshot. Record the
+  exact `AgentName`, `AgentId`, `TraceId`, `SpanId` and content-access source in
+  `observe-evidence.md`.
+- **Time:** 8 minutes.
+
+Tool arguments and results are generative AI content. For telemetry ingested
+after September 30, 2026, Application Insights stores their values in
+`AppGenAIContent`. The older telemetry tables retain pointers, not the content
+values. Access to a protected `AppGenAIContent` table requires
+**Privileged Monitoring Data Reader**.
+
+**What this block does:** reads tool content for the exact Trace ID from the
+current protected table. It does not scan unrelated traces.
+
+```kusto
+let SelectedTraceId = "<paste Trace ID>";
+AppGenAIContent
+| where TimeGenerated > ago(4h)
+| where TraceId == SelectedTraceId
+| project TimeGenerated, TraceId, SpanId, ParentSpanId,
+          AgentName, AgentId, ServiceName, ServiceInstanceId,
+          ToolCallArguments, ToolCallResult, Attributes
+| order by TimeGenerated asc
+```
+
+## 6. Measure one agent version
+
+### Action 6: Save and run the scoped tool-error query
+
+- **Purpose:** Count this business failure for only the assigned agent and version.
+- **Navigation:** Replace the agent name and version below with the exact values
+  from Action 5. Run the query.
+- **Result:** The table includes the Outlook call and excludes other agents and
+  versions. `toolErrors` is at least `1`.
+- **If it fails:** Reopen the correlated row and compare `AgentName`, `AgentId`
+  and `Attributes`. Correct the version expression for the prepared hosting
+  version. Do not remove the agent or version predicates to force a result.
+- **Save:** Save the final text as `tool-errors.kql` and also save the query in
+  Application Insights as `helpdesk-<alias>-released-version-tool-errors`.
+- **Time:** 6 minutes.
+
+**What this block does:** reads the protected tool result and counts only the
+unsupported Outlook error for one agent version.
+
+```kusto
+let SelectedAgent = "<exact AgentName>";
+let SelectedVersion = "<exact released version>";
+AppGenAIContent
+| where TimeGenerated > ago(24h)
+| extend VersionAttr = coalesce(
+    tostring(Attributes["gen_ai.agent.version"]),
+    extract(@":([^:]+)$", 1, AgentId),
+    ServiceInstanceId)
+| where AgentName == SelectedAgent and VersionAttr == SelectedVersion
+| extend ToolArgumentsJson = parse_json(ToolCallArguments)
+| extend ToolResultJson = parse_json(ToolCallResult)
+| where tostring(ToolArgumentsJson.service) =~ "outlook"
+| summarize checks = count(),
+            toolErrors = countif(
+                tostring(ToolResultJson.error) ==
+                "Only the simulated VPN service is supported.")
+            by bin(TimeGenerated, 5m), AgentName, VersionAttr
+| order by TimeGenerated desc
+```
+
+If Action 5 shows the version in another `Attributes` field, replace only the
+`VersionAttr` expression. Keep the exact agent and version predicates.
+
+## 7. Create and fire the alert
+
+### Action 7: Create a version-scoped log alert
+
+- **Purpose:** Detect the same business failure without watching the query.
+- **Navigation:** Run the saved query with the final `summarize` replaced by
+  `where tostring(ToolResultJson.error) == "Only the simulated VPN service is supported." | project TimeGenerated,
+  TraceId, SpanId, AgentName, VersionAttr`. Select
+  **New alert rule**. Use **Table rows**, **Count**, **Greater than 0**, a
+  five-minute evaluation frequency and a five-minute lookback. Name the rule
+  `helpdesk-<alias>-<version>-tool-errors`. Use severity 3. Add no action group
+  unless the workshop organizer approved recipients.
+- **Result:** The rule is enabled and retains the exact agent and version predicates.
+- **If it fails:** If creation is denied, the instructor creates the same
+  exact-version rule on screen. Record the evidence source and rule resource ID.
+- **Save:** Add the rule name, resource ID and creation time to
+  `observe-evidence.md`.
+- **Time:** 5 minutes of active work.
+
+### Action 8: Trigger and inspect the fired alert
+
+- **Purpose:** Prove the rule detects the scenario, not merely that the rule exists.
+- **Navigation:** Rerun Action 2 once. Then open **Azure Monitor > Alerts** and
+  filter by the rule name. Refresh after each five-minute evaluation.
+- **Result:** Within 10 to 15 minutes, an alert instance has monitor condition
+  **Fired**. Open it and match its time, agent and version to the new request.
+  Continue with Action 9 while Azure evaluates the rule.
+- **If it fails:** After 15 minutes, run the alert query over the same lookback.
+  Record whether ingestion was late, the query returned zero rows, or the rule
+  evaluation failed. Do not record the alert test as passed.
+- **Save:** Export or capture the fired alert details as allowed, and record its
+  alert instance ID and fired time in `observe-evidence.md`.
+- **Time:** 5 minutes active work, with up to 15 minutes elapsed in parallel.
+
+## 8. Run the health check
+
+### Action 9: Add the supporting health report
+
+- **Purpose:** Find monitoring gaps beyond the complaint after native evidence is complete.
+- **Navigation:** Run the CLI in the same PowerShell window and open its report.
+- **Result:** The report records its findings without replacing the dashboard,
+  trace, query or fired alert evidence.
+- **If it fails:** Save the CLI error in the evidence folder and continue with
+  the native evidence. Do not treat a missing report as a healthy result.
+- **Save:** Keep `.agentops\agent\report.md` under the evidence folder.
+- **Time:** 4 minutes.
+
+**What this block does:** runs the AgentOps Accelerator health check against the
+assigned project and writes a local report. It reads Azure configuration.
+
+```powershell
+Push-Location $Evidence
 $env:AZURE_AI_FOUNDRY_PROJECT_ENDPOINT = $Endpoint
 agentops doctor --severity-fail none
-notepad .agentops\agent\report.md
+if (Test-Path '.agentops\agent\report.md') {
+    notepad '.agentops\agent\report.md'
+}
+Pop-Location
 ```
 
-Read the report. Each finding has a severity, the evidence behind it and a
-suggested fix. Look for the findings about telemetry, errors and continuous
-evaluation.
+## 9. Decide the response
 
-**Expected result:** a report with at least one finding. Note the ones your
-team would act on and the ones that do not apply to a workshop.
+### Action 10: Record the operational decision
 
-## 6. Create an alert
+- **Purpose:** Turn evidence into an owned and bounded response.
+- **Navigation:** Create `response-notes.md` in the evidence folder. Answer:
+  what happened, affected count, user risk, owner, allowed immediate action,
+  alert owner, and follow-on work.
+- **Result:** The decision names the service-status tool owner. Leave the agent
+  running because it reports the limitation honestly; do not roll back because
+  both workshop versions use the same tool. The product follow-ons are to add
+  Outlook support or an approved status-provider integration, add a user-facing
+  escalation path, add a production-quality signal, and evaluate the case
+  before release.
+- **If it fails:** Record **decision pending** with the missing owner or
+  authority. Do not invent permission to stop, roll back or change the service.
+- **Save:** Keep `response-notes.md` with links or IDs for the response, trace,
+  query and fired alert.
+- **Time:** 5 minutes.
 
-**Why this step:** nobody watches a query all day. An alert rule runs it on a
-schedule and records when the problem comes back.
+## 10. Save the future evaluation case
 
-1. Return to **Logs** in Application Insights and run the query below.
-2. Select **New alert rule**. The query opens as the rule's condition.
-3. Under **Measurement**, choose **Table rows**, aggregation **Count** and granularity **5 minutes**.
-4. Under **Alert logic**, choose **Greater than** and threshold `0`, evaluated every **5 minutes**.
-5. On **Actions**, add nothing: this rule sends no notifications.
-6. On **Details**, choose the workshop resource group, severity **3 - Informational**
-   and the name `helpdesk-<your alias>-tool-errors`. Select **Review + create**, then **Create**.
+### Action 11: Write the exact regression case and retention note
 
-**What this block does:** finds status-tool calls that returned an error. Used as the alert condition.
+- **Purpose:** Make the same failure testable in Evaluate and preserve evidence
+  only for the agreed period.
+- **Navigation:** Add the exact JSON line below to `response-notes.md`. Do not
+  edit the shared dataset during this lab.
+- **Result:** The proposed case has one input, one expected outcome and critical
+  status. Its expected action is `check_service_status(service="outlook")`,
+  followed by an honest limitation and Service Desk escalation.
+- **If it fails:** Mark the case **not ready** if the trace did not prove the
+  action. Do not promote an assumed tool call into an evaluation requirement.
+- **Save:** Retain the evidence folder until the invitation's **Keep your work
+  until** date. Participants delete their local folder after that date.
+  The workshop organizer owns cloud alert, telemetry and resource cleanup.
+- **Time:** 3 minutes.
 
-```kusto
-dependencies
-| where name == "execute_tool check_service_status"
-| where tostring(customDimensions) has "error"
+**What this block does:** provides the exact future `turns.jsonl` case. It does
+not modify the shared dataset or run an evaluation.
+
+```json
+{"id":"outlook-status-unsupported","input":"Check whether Outlook is down. Use the service-status tool once. If Outlook is unsupported, say that you cannot verify its status and offer Service Desk escalation.","expected":"Call check_service_status with service outlook. State that Outlook status cannot be verified. Offer Service Desk escalation. Do not invent an operational status or outage.","expected_behavior":"Use the status tool once, report its unsupported-service result honestly, and offer escalation.","critical":"yes"}
 ```
 
-Send one more Outlook request from PowerShell, so the next evaluation finds it:
-
-**What this block does:** sends one more request that triggers the status-tool error.
-
-```powershell
-Send-Request 'Is Outlook down again? Email will not load.'
-```
-
-After 10 to 15 minutes, open **Monitor > Alerts** in the Azure portal. Continue
-with step 7 while you wait.
-
-**Expected result:** your rule is listed under **Alert rules**, and it fires
-once the new request reaches Application Insights.
-
-**Create is disabled or denied?** Creating alert rules needs extra permission
-on the workshop resource group. The instructor creates one on screen instead;
-keep your query.
-
-## 7. Decide the response
-
-**Why this step:** finding a problem is not the end. Someone must own it, act
-within agreed limits and make sure it cannot return unnoticed.
-
-Answer these in your workshop notes:
-
-1. **What happened:** the status tool supports only VPN, so the agent cannot
-   answer questions about other services. How many requests did it affect?
-2. **Is anyone at risk:** does the agent invent a status, or say honestly that
-   it cannot check? Use the answers from step 1.
-3. **Who owns the fix:** the agent's instructions, or the status tool behind it?
-4. **What is allowed now:** roll back, stop the agent or leave it running while
-   the tool is extended? Rolling back does not help here: every version uses
-   the same tool.
-5. **What to test from now on:** write one request and its expected behavior in
-   the format of `turns.jsonl`, for example an Outlook status question where
-   the agent must say it cannot check and offer Service Desk escalation.
-
-**Expected result:** response notes that name the owner, the allowed action and
-the new test request. [Advanced](../04-advanced/lab.md) adds that request to
-the tests and makes the pipeline stop bad releases on its own.
+Your retained artifact is complete only when it contains the exact agent
+version, Response ID, Trace ID, structured query, fired-alert result,
+operational decision and proposed evaluation case.

@@ -41,12 +41,12 @@ its tools server-side. Accelerator owns submission, polling, downloaded result
 normalization, thresholds, comparison and reporting **through its public CLI**.
 Learners do not know or import implementation modules.
 
-Instructors use `agentops init` to prepare the workspace. Learners receive
-that native workspace and only inspect it with `init show`; `eval analyze` is local
-analysis, not a check of Azure access. `eval run` writes `results.json`, `report.md`,
-`cloud_evaluation.json` and `cloud_output_items.json`. `report generate`
-renders a saved result without a cloud call, importing new evidence or
-recomputing thresholds.
+Participants use `agentops init` to create the local workspace from the four
+assigned values. `init show` displays effective settings and `eval analyze` is
+local analysis, not a check of Azure access. `eval run` writes `results.json`,
+`report.md`, `cloud_evaluation.json` and `cloud_output_items.json`.
+`report generate` renders a saved result without a cloud call; it does not
+import missing evidence or recompute thresholds.
 
 ## Tool roles and scenario design
 
@@ -64,6 +64,12 @@ focused on observable tool defects without real tickets, employee records,
 Search services, Blob knowledge sources or Foundry IQ provisioning.
 The public CLI is the learner interface: no custom lab runner, internal imports,
 result importer, execution backend or unpublished azd evaluation extension.
+
+The native Foundry equivalents remain visible in the lab: the project's
+Evaluation page runs and reviews evaluations, and the Tracing page exposes
+executed tool spans. The CLI provides repeatable submission, local retention,
+threshold reporting and baseline comparison. It does not replace those product
+surfaces or define their contract.
 
 ### Course preparation scope
 
@@ -113,14 +119,15 @@ literal assignments. The public initializer writes the environment file in
 the format its loader expects; course instructions do not require a manual
 encoding-selection step.
 
-The instructor bundle ships only the two allowed non-secret values under
-`workspace/.agentops/.env`, with no `.azure` or root `.env`.
-Startup clears the inherited project, candidate override and both
-judge-deployment variables before invoking the public CLI. `init show` displays
-the project and YAML candidate, but **does not list the judge deployment**;
-the lab separately displays that one allow-listed line from the prepared file.
-No custom dotenv loader, launcher or participant metadata file is required.
-These commands read local settings; they do not prove that Azure will accept an evaluation.
+The workspace keeps only the two allowed non-secret values under
+`workspace/.agentops/.env`, with no `.azure` or root `.env`. Startup clears the
+inherited project, candidate override and both judge-deployment variables before
+invoking the public CLI. It also runs `python -m pip check` before any cloud
+submission. `init show` displays the project and YAML candidate, but **does not
+list the judge deployment**; the lab separately displays that allow-listed
+line. No custom dotenv loader, launcher or participant metadata file is
+required. These commands read local settings; they do not prove that Azure will
+accept an evaluation.
 
 Both judges normally return 1-5 quality scores. Check the actual scores, their
 scale and the evaluator definitions used during rehearsal. Foundry's built-in evaluator
@@ -142,10 +149,13 @@ remains the target; domain/tool correctness also requires interaction review.
   misleadingly healthy aggregates. Verify eight distinct inputs, two valid
   numeric scores per row, no errors, actual tool evidence and critical cases
   outside the CLI gate. Insufficient evidence blocks release approval.
+- The lab applies a strict critical-case rule. A failed or missing critical
+  result, unresolved critical error, or missing executed-action evidence for a
+  critical action case is **NO-SHIP**. Passing means cannot override it.
 - `--baseline` reports score differences. It does not automatically block a
   worse score, check that requests and evaluators match, or confirm which code
   was deployed. Review these in the
-  [closing discussion](lab.md#5-decide-and-hand-off-to-ship) using the saved evidence.
+  [closing discussion](lab.md#6-record-the-decision) using the saved evidence.
 - Exit codes are `0` for passing configured thresholds, `2` for a failed gate
   and `1` for configuration/runtime failure. They are not final release
   approval and do not establish safety coverage.
@@ -154,6 +164,9 @@ remains the target; domain/tool correctness also requires interaction review.
   invocation can incur another billable run. Keep successful rehearsal output.
 - The local JSONL is submitted inline, not registered as a reusable Foundry
   dataset. Keep the exact dataset, row order and configuration used with the results.
+- Validate both exact version URLs before submission and compare each
+  downloaded `target.raw` with its assigned URL afterward. Keep this proof with
+  the durable `decision.md`.
 - This release derives string-typed cloud properties from the first row.
   All eight rows use the same string columns, including `critical` as
   `"yes"`/`"no"` rather than a boolean. Do not add structured conversation or
@@ -245,6 +258,11 @@ The guide requires actual `execute_tool` records from the evaluated requests,
 not copied dataset annotations or separate smoke tests.
 Keep the full native exports; their exact returned nesting still needs a cloud
 rehearsal before adding any field-specific extraction procedure.
+
+The decision record stores both the hosted Response ID and telemetry Trace ID.
+They are correlation values with different scopes, not aliases. The reviewer
+must open the trace, inspect its `execute_tool` span and retain the exact
+arguments and result used for the decision.
 
 The inner `default_options={"store": False}` controls downstream model storage,
 not the hosting server's response persistence or Application Insights.

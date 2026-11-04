@@ -3,57 +3,135 @@
 [Back to the instructor guide](README.md)
 
 **Participant entry:** [03-observe-operate](../labs/03-observe-operate/lab.md).
-It closes the core workshop sequence; [04-advanced](../labs/04-advanced/lab.md)
-is an optional extension, not a required fourth module.
+It closes the core workshop sequence. [04-advanced](../labs/04-advanced/lab.md)
+is an optional extension.
 
 ## Learning focus
 
-Help participants connect runtime information to a useful response.
-**Observe** means understanding what happened. **Operate** means deciding
-and carrying out the response, then improving the agent.
+Help participants connect one runtime complaint to an exact response, trace,
+version-scoped query, fired alert and owned response. Keep the concepts distinct:
+**Observe** establishes what happened. **Operate** chooses and carries out an
+approved response, retains evidence and proposes the next evaluation case.
 
 ## Before the session
 
-Read the [Observe and Operate deck and speaker notes](../decks/observe-operate/agentops-observe-operate-workshop.pptx)
-and the [lab](../labs/03-observe-operate/lab.md). The technical preparation is
-in [module preparation](../pre-work/technical-setup.md#observe-and-operate).
+Read the
+[Observe and Operate deck and speaker notes](../decks/observe-operate/agentops-observe-operate-workshop.pptx),
+the [participant lab](../labs/03-observe-operate/lab.md), and
+[module preparation](../pre-work/technical-setup.md#observe-and-operate).
 
-When you finish, you should have:
+### Action 1: Rehearse the deterministic scenario
 
-- Traces from your own agent visible in Foundry and Application Insights.
-- A decision on who creates the alert in lab step 6: each participant, with
-  Monitoring Contributor, or you, on screen.
-- The invitation sent, with the **Observe settings** you tested.
+- **Purpose:** Give participants a complaint that produces the same tool result.
+- **Navigation:** Send the lab's exact Outlook request to the released workshop
+  version. Open the response and its correlated trace.
+- **Result:** The trace contains one
+  `check_service_status(service="outlook")` call and the exact unsupported-service
+  result. The answer reports the limitation and offers Service Desk escalation.
+- **If it fails:** Redeploy the current shared help desk agent before the
+  workshop. Do not teach this scenario with a version that chooses another action.
+- **Save:** Keep the rehearsal Response ID, Trace ID, agent name, version and UTC time.
+- **Time:** 10 minutes plus telemetry propagation.
 
-Participants who did Ship observe their own released agent. Participants who
-skipped it observe the baseline agent named in the invitation.
+### Action 2: Prove the telemetry mapping
+
+- **Purpose:** Prepare a runnable query without assuming attribute names.
+- **Navigation:** Use the lab's discovery query against the rehearsal Response
+  ID. Record the actual agent identity, version, response, tool name, arguments
+  and result keys exported by the prepared hosting version.
+- **Result:** The final KQL filters one exact agent and version and reads the
+  error from the structured tool-result field.
+- **If it fails:** Repair tracing or use a prepared environment whose telemetry
+  exposes agent identity and version. Do not provide an unscoped class-wide alert.
+- **Save:** Keep the final rehearsal KQL and one exported result.
+- **Time:** 10 minutes.
+
+### Action 3: Test a real alert outcome
+
+- **Purpose:** Ensure the class can inspect a fired alert, not only create a rule.
+- **Navigation:** Create the version-scoped rule, send the Outlook request, and
+  wait through its evaluation window.
+- **Result:** Azure Monitor shows an alert instance with condition **Fired**,
+  and its time and dimensions match the rehearsal request.
+- **If it fails:** Repair the query, lookback, evaluation or permissions before
+  delivery. Keep a retained exact-version rehearsal alert as the demonstration
+  fallback.
+- **Save:** Keep the rule resource ID, alert instance ID, fired time and cleanup owner.
+- **Time:** 10 minutes active, up to 15 minutes elapsed.
+
+### Action 4: Set retention and permissions
+
+- **Purpose:** Make evidence handling and cleanup explicit.
+- **Navigation:** Set the invitation's **Keep your work until** date. Decide
+  whether participants have Monitoring Contributor or whether you create the
+  alert on screen. Use no action group unless recipients agreed.
+- **Result:** Participants can read traces and logs. One named person can create
+  the rule. The workshop organizer owns cloud cleanup after the retention date.
+- **If it fails:** Use instructor demonstration mode for alert creation. Do not
+  ask participants to work around denied access.
+- **Save:** Put the tested agent name, released version, Application Insights
+  resource and retention date in **Observe settings**.
+- **Time:** 5 minutes.
 
 ## Present the module
 
-Allow 60 minutes for the presentation. Connect tracing, quality and performance
-monitoring, continuous evaluation and operational response. Explain how
-runtime findings become tests for the next version.
+Allow 60 minutes for presentation and discussion. Lead with the native
+Microsoft Foundry Agent Monitoring Dashboard, then move from aggregate health
+to one exact trace. Explain why successful requests can still contain failed
+business actions. Show how structured OpenTelemetry attributes support scoped
+queries, alerts and later evaluation.
+
+Present AgentOps Accelerator as a supporting health check after native
+monitoring, not as the product monitoring surface.
 
 ## Hands-on lab (60 minutes)
 
-- Steps 1 and 2: participants send the complaint's requests and read their
-  traces. Ask them to find the tool call that never happened.
-- Steps 3 to 5: they measure the problem with a query and run the health check.
-  Discuss what the data supports and what still needs investigation.
-- Steps 6 and 7: they set the alert and decide the response: who owns it, what
-  action is allowed and which request becomes a test.
+Use the lab's time plan:
 
-Keep Observe and Operate distinct: finding a problem does not by itself
-resolve it. Participants do not change the agent in this lab.
+1. Target and deterministic complaint: 12 minutes.
+2. Native dashboard and exact trace correlation: 12 minutes.
+3. Telemetry discovery and scoped query: 14 minutes.
+4. Alert creation, health report and response work: 17 minutes active while the
+   alert evaluates.
+5. Fired-alert evidence, evaluation case and retention: 5 minutes.
+
+Ask participants to point to exact evidence:
+
+- assigned agent and released version;
+- Response ID and correlated Trace ID;
+- `check_service_status` arguments and structured result;
+- agent and version predicates in KQL;
+- fired alert instance and time;
+- owner, allowed immediate action and product follow-ons; and
+- the exact proposed `outlook-status-unsupported` evaluation row.
+
+At minute 45, participants must continue to response notes while the alert
+evaluates. Do not spend the remaining lab time repeatedly refreshing Azure
+Monitor.
 
 ## Instructor demo (20 minutes)
 
-Send one request to your agent, open its trace, run the query and show the
-alert rule. Finish with the response notes: owner, allowed action and the test
-to add.
+### Action 5: Show the evidence chain
+
+- **Purpose:** Preserve the learning outcome in the shorter delivery mode.
+- **Navigation:** Send the exact Outlook request. Open the native dashboard,
+  correlate its Response ID to the Trace ID, run the prepared scoped query, and
+  open the retained fired alert.
+- **Result:** The group sees one continuous chain from complaint to response,
+  trace, version-scoped signal, alert and operational decision.
+- **If it fails:** Label retained evidence **instructor demonstration** and name
+  the failed live action. Do not claim that a failed live action produced it.
+- **Save:** Finish on the response notes and exact future evaluation case.
+- **Time:** 20 minutes.
 
 ## Close the cycle
 
-Participants keep their query, alert and response notes. Ask how the team would
-evaluate the proposed improvement before releasing it. This returns the
-discussion to Evaluate and Ship, and leads into the optional Advanced lab.
+The immediate workshop decision is to leave the agent running because it states
+the limitation honestly. The tool owner must choose the product follow-on:
+support Outlook directly or integrate an approved status provider, add a clear
+escalation path, and define a production-quality signal. The team then evaluates
+the exact regression case before the next release.
+
+Participants keep local evidence until the invitation's retention date and then
+delete it. The workshop organizer removes workshop alert rules and cloud
+resources under the cleanup plan.
