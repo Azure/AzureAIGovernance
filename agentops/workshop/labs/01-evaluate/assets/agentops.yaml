@@ -1,0 +1,14 @@
+# Copy into .local/workspace after agentops init; replace the assigned URL.
+version: 1
+agent: https://REPLACE_RESOURCE.services.ai.azure.com/api/projects/REPLACE_PROJECT/agents/REPLACE_AGENT/versions/REPLACE_VERSION
+dataset: turns.jsonl
+protocol: responses
+execution: cloud
+dataset_sync:
+  mode: inline
+evaluators:
+  - CoherenceEvaluator
+  - SimilarityEvaluator
+thresholds:
+  coherence: ">=3"
+  similarity: ">=3"

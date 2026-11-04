@@ -1,0 +1,14 @@
+{
+  "password": {
+    "source": "KB-PASSWORD-v1",
+    "text": "Use the employee self-service password reset page. Never send your password or verification code to support. If self-service fails, contact Service Desk."
+  },
+  "vpn": {
+    "source": "KB-VPN-v1",
+    "text": "Check VPN service status first. If operational, reconnect using the approved VPN client and complete the sign-in prompt. If these steps fail, route a ticket to Network Support. No resolution-time guarantee is published."
+  },
+  "software": {
+    "source": "KB-SOFTWARE-v1",
+    "text": "Approved software requests require manager approval and a Software Support ticket. This assistant cannot install software or grant administrator rights."
+  }
+}

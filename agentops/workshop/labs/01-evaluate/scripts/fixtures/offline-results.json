@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "started_at": "OFFLINE FIXTURE - NOT A CLOUD RUN",
+  "finished_at": "OFFLINE FIXTURE - NOT A CLOUD RUN",
+  "duration_seconds": 0,
+  "target": {
+    "kind": "foundry_hosted",
+    "raw": "OFFLINE FIXTURE - NO DEPLOYED TARGET",
+    "protocol": "responses"
+  },
+  "dataset_path": "OFFLINE FIXTURE - NOT THE WORKSHOP DATASET",
+  "evaluators": ["CoherenceEvaluator"],
+  "rows": [
+    {
+      "row_index": 0,
+      "input": "OFFLINE FIXTURE input",
+      "expected": "OFFLINE FIXTURE reference",
+      "response": "OFFLINE FIXTURE response",
+      "metrics": [
+        {"name": "coherence", "value": 4, "reason": "OFFLINE FIXTURE"}
+      ]
+    }
+  ],
+  "aggregate_metrics": {"coherence": 4},
+  "thresholds": [
+    {"metric": "coherence", "criteria": ">=", "expected": ">=3", "actual": "4", "passed": true}
+  ],
+  "summary": {
+    "items_total": 1,
+    "items_passed_all": 1,
+    "items_pass_rate": 1,
+    "thresholds_total": 1,
+    "thresholds_passed": 1,
+    "threshold_pass_rate": 1,
+    "overall_passed": true
+  },
+  "config": {}
+}

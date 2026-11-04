@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+# Deploys the course help desk agent to an existing Foundry project.
+# The baseline and candidate versions run this same code; HELPDESK_VARIANT,
+# set with `azd env set`, selects which behavior the new version gets.
+# Follows the official Responses tools sample:
+# https://github.com/microsoft-foundry/foundry-samples/tree/main/samples/python/hosted-agents/agent-framework/responses/02-tools
+
+requiredVersions:
+    azd: '>=1.27.1'
+name: agentops-helpdesk
+services:
+    ai-project:
+        host: azure.ai.project
+    agentops-helpdesk:
+        project: .
+        host: azure.ai.agent
+        language: python
+        uses:
+            - ai-project
+        env:
+            AZURE_AI_MODEL_DEPLOYMENT_NAME: ${AZURE_AI_MODEL_DEPLOYMENT_NAME}
+            HELPDESK_VARIANT: ${HELPDESK_VARIANT}
+            OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT: "true"
+        codeConfiguration:
+            dependencyResolution: remote_build
+            entryPoint: main.py
+            runtime: python_3_13
+        container:
+            resources:
+                cpu: "0.5"
+                memory: 1Gi
+        description: Course help desk agent for the AgentOps workshop.
+        kind: hosted
+        name: agentops-helpdesk
+        protocols:
+            - protocol: responses
+              version: 2.0.0
+infra:
+    provider: microsoft.foundry

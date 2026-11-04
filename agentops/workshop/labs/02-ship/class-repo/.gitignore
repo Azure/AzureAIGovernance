@@ -1,0 +1,4 @@
+.azure/
+.agentops/results/
+.venv/
+__pycache__/

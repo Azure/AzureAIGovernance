@@ -1,0 +1,7 @@
+.env
+.env.*
+.azure/
+.venv/
+__pycache__/
+azure.yaml
+README.md

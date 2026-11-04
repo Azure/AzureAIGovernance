@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
+  <title id="title">Plan an agent evaluation</title>
+  <desc id="desc">A hand-drawn robot plans an agent evaluation with a ruler and clipboard.</desc>
+  <rect width="1200" height="300" rx="24" fill="#f3f8fc"/>
+  <path d="M30 36 C210 24 400 42 590 31 S950 42 1170 28" fill="none" stroke="#c7e0f4" stroke-width="3"/>
+  <path d="M31 268 C250 280 437 259 640 271 S1000 258 1170 273" fill="none" stroke="#c7e0f4" stroke-width="3"/>
+
+  <g stroke="#172b4d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 78 Q151 54 176 53 L246 53 Q272 55 271 80 L269 151 Q266 173 242 174 L178 174 Q151 171 150 147 Z" fill="#ffffff"/>
+    <circle cx="185" cy="103" r="8" fill="#0078d4"/>
+    <circle cx="236" cy="103" r="8" fill="#0078d4"/>
+    <path d="M185 137 Q210 151 237 136" fill="none"/>
+    <path d="M210 52 L210 34"/>
+    <circle cx="210" cy="27" r="8" fill="#f7630c"/>
+    <path d="M181 174 L174 233 L205 233 L211 185 L219 233 L251 233 L241 174" fill="#cfe4fa"/>
+    <path d="M174 191 L128 210"/>
+    <path d="M243 190 L294 173"/>
+    <path d="M111 191 L155 178 L169 227 L125 240 Z" fill="#fff4ce"/>
+    <path d="M122 204 L148 197 M126 216 L152 209 M130 228 L154 222" stroke-width="3"/>
+    <path d="M286 146 L361 169 L348 196 L278 171 Z" fill="#dff6dd"/>
+    <path d="M300 155 L296 171 M315 159 L311 176 M330 164 L326 180 M345 168 L340 184" stroke-width="3"/>
+  </g>
+
+  <g fill="none" stroke="#172b4d" stroke-width="4" stroke-linecap="round">
+    <circle cx="403" cy="91" r="45" fill="#ffffff"/>
+    <circle cx="403" cy="91" r="29" stroke="#d13438"/>
+    <circle cx="403" cy="91" r="13" fill="#fde7e9" stroke="#d13438"/>
+    <path d="M403 46 L403 136 M358 91 L448 91" stroke="#d13438" stroke-width="3"/>
+
+    <circle cx="479" cy="188" r="36" fill="#ffffff"/>
+    <path d="M455 190 L474 207 L507 164" stroke="#107c10" stroke-width="7"/>
+
+    <path d="M356 221 Q387 199 416 221 T478 221" stroke="#5c2d91"/>
+    <path d="M365 235 Q395 213 425 235 T487 235" stroke="#5c2d91"/>
+  </g>
+
+  <g font-family="'Comic Sans MS','Segoe Print',cursive" fill="#172b4d">
+    <text x="570" y="100" font-size="34" font-weight="700">Before testing everything,</text>
+    <text x="570" y="146" font-size="34" font-weight="700">decide what “good” looks like.</text>
+    <text x="570" y="202" font-size="21">Choose the outcomes, risks, metrics, and tests that matter.</text>
+  </g>
+
+  <g fill="none" stroke="#f7630c" stroke-width="4" stroke-linecap="round">
+    <path d="M542 115 Q525 108 516 93"/>
+    <path d="M518 93 L520 108 M518 93 L532 98"/>
+  </g>
+</svg>

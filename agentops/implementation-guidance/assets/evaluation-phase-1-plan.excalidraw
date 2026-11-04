@@ -1,0 +1,117 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "agentops-vbd",
+  "elements": [
+    {
+      "id": "banner",
+      "type": "rectangle",
+      "x": 0,
+      "y": 0,
+      "width": 1200,
+      "height": 300,
+      "strokeColor": "#0078D4",
+      "backgroundColor": "#F3F8FC",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roundness": {"type": 3}
+    },
+    {
+      "id": "robot-head",
+      "type": "rectangle",
+      "x": 150,
+      "y": 53,
+      "width": 120,
+      "height": 121,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffffff",
+      "fillStyle": "solid",
+      "strokeWidth": 3,
+      "roundness": {"type": 3}
+    },
+    {
+      "id": "robot-body",
+      "type": "rectangle",
+      "x": 174,
+      "y": 174,
+      "width": 77,
+      "height": 59,
+      "strokeColor": "#0078D4",
+      "backgroundColor": "#CFE4FA",
+      "fillStyle": "hachure",
+      "strokeWidth": 3,
+      "roundness": {"type": 3}
+    },
+    {
+      "id": "clipboard",
+      "type": "rectangle",
+      "x": 111,
+      "y": 191,
+      "width": 44,
+      "height": 49,
+      "angle": -0.25,
+      "strokeColor": "#F7630C",
+      "backgroundColor": "#FFF4CE",
+      "fillStyle": "hachure",
+      "strokeWidth": 2,
+      "roundness": {"type": 3}
+    },
+    {
+      "id": "ruler",
+      "type": "rectangle",
+      "x": 282,
+      "y": 151,
+      "width": 78,
+      "height": 27,
+      "angle": 0.3,
+      "strokeColor": "#107C10",
+      "backgroundColor": "#DFF6DD",
+      "fillStyle": "hachure",
+      "strokeWidth": 2,
+      "roundness": {"type": 3}
+    },
+    {
+      "id": "target",
+      "type": "ellipse",
+      "x": 358,
+      "y": 46,
+      "width": 90,
+      "height": 90,
+      "strokeColor": "#D13438",
+      "backgroundColor": "#FDE7E9",
+      "fillStyle": "hachure",
+      "strokeWidth": 3
+    },
+    {
+      "id": "headline",
+      "type": "text",
+      "x": 570,
+      "y": 82,
+      "width": 560,
+      "height": 170,
+      "text": "Before testing everything,\ndecide what “good” looks like.",
+      "fontSize": 34,
+      "fontFamily": 1,
+      "strokeColor": "#000000",
+      "textAlign": "left",
+      "verticalAlign": "top"
+    },
+    {
+      "id": "caption",
+      "type": "text",
+      "x": 570,
+      "y": 184,
+      "width": 560,
+      "height": 58,
+      "text": "Choose the outcomes, risks, metrics, and tests that matter.",
+      "fontSize": 21,
+      "fontFamily": 1,
+      "strokeColor": "#000000",
+      "textAlign": "left",
+      "verticalAlign": "top"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff"
+  }
+}

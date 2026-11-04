@@ -1,0 +1,3 @@
+agentops-accelerator==0.15.0
+azure-ai-projects==2.5.0
+azure-identity>=1.17,<2
